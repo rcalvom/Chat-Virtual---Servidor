@@ -52,6 +52,7 @@
     <Compile Include="GraphicInterface.Designer.cs">
       <DependentUpon>GraphicInterface.cs</DependentUpon>
     </Compile>
+    <Compile Include="OracleDataBase.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="GraphicInterface.resx">

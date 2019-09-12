@@ -12,6 +12,12 @@ namespace Chat_Virtual___Servidor {
     public partial class GraphicInterface : Form {
 
         private bool Connected;
+        private OracleDataBase Oracle;
+        private const string Ip = "localhost";
+        private const string Port = "1521";
+        private const string Server = "orcl";
+        private const string User = "Aplicacion";
+        private const string Password = "123456";
 
         public GraphicInterface(){
             this.Connected = false;
@@ -40,12 +46,20 @@ namespace Chat_Virtual___Servidor {
         }
 
         private void ShutUp(){
-            this.Connected = true;
-            // TODO: Implementar la conexion a la base ded atos y conectar sockets.
+            try{
+                this.Oracle = new OracleDataBase(Ip, Port, Server, User, Password);
+                this.Console.AppendText("Se ha conectado correctamente a la base de datos Oracle, versión: "+Oracle.getConnection().ServerVersion);
+                this.Connected = true;
+                this.Button.Text = "Apagar servidor.";
+            }
+            catch (Exception ex){
+                this.Console.AppendText("No se ha podido conectar a la base de datos Oracle:\n" + ex);
+            }
         }
 
         private void ShutDown(){
-            this.Connected = true;
+            this.Connected = false;
+            this.Button.Text = "Encerder servidor.";
             // TODO: Implementar desconexion a la base de datos y desconectar sockets.
         }
     }

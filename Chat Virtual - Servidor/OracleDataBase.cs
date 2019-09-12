@@ -1,8 +1,9 @@
 ﻿using System;
 using Oracle.ManagedDataAccess.Client;
 
-namespace PruebaConexionOracle {
-    public class OracleDataBase :IDisposable {
+
+namespace Chat_Virtual___Servidor{
+public class OracleDataBase :IDisposable {
 
         private OracleConnection Connection;
         private OracleTransaction Transaction;
@@ -242,7 +243,6 @@ namespace PruebaConexionOracle {
         ~OracleDataBase() {
             Dispose(false);
         }
-
 
     }
 }
