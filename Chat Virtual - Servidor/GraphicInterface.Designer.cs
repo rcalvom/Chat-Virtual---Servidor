@@ -33,7 +33,7 @@
             this.ayudaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.informaciónToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Servidor = new System.Windows.Forms.Label();
-            this.Console = new System.Windows.Forms.RichTextBox();
+            this.LogConsole = new System.Windows.Forms.RichTextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
@@ -82,7 +82,7 @@
             // 
             this.salirToolStripMenuItem.Name = "salirToolStripMenuItem";
             this.salirToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-            this.salirToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.salirToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
             this.salirToolStripMenuItem.Text = "Salir";
             this.salirToolStripMenuItem.Click += new System.EventHandler(this.ExitEvent);
             // 
@@ -98,7 +98,7 @@
             // 
             this.informaciónToolStripMenuItem.Name = "informaciónToolStripMenuItem";
             this.informaciónToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F10;
-            this.informaciónToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.informaciónToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
             this.informaciónToolStripMenuItem.Text = "Información";
             this.informaciónToolStripMenuItem.Click += new System.EventHandler(this.InfoEvent);
             // 
@@ -112,14 +112,14 @@
             this.Servidor.TabIndex = 3;
             this.Servidor.Text = "Servidor Chat Virtual";
             // 
-            // Console
+            // LogConsole
             // 
-            this.Console.Enabled = false;
-            this.Console.Location = new System.Drawing.Point(12, 82);
-            this.Console.Name = "Console";
-            this.Console.Size = new System.Drawing.Size(455, 317);
-            this.Console.TabIndex = 4;
-            this.Console.Text = "";
+            this.LogConsole.Enabled = false;
+            this.LogConsole.Location = new System.Drawing.Point(12, 82);
+            this.LogConsole.Name = "LogConsole";
+            this.LogConsole.Size = new System.Drawing.Size(455, 317);
+            this.LogConsole.TabIndex = 4;
+            this.LogConsole.Text = "";
             // 
             // tabControl1
             // 
@@ -175,7 +175,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.tabControl1);
-            this.Controls.Add(this.Console);
+            this.Controls.Add(this.LogConsole);
             this.Controls.Add(this.Servidor);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.Button);
@@ -203,7 +203,7 @@
         private System.Windows.Forms.ToolStripMenuItem ayudaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem informaciónToolStripMenuItem;
         private System.Windows.Forms.Label Servidor;
-        private System.Windows.Forms.RichTextBox Console;
+        private System.Windows.Forms.RichTextBox LogConsole;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;

@@ -1,31 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+
 
 namespace Chat_Virtual___Servidor {
     public partial class GraphicInterface : Form {
 
-        private bool Connected;
-        private OracleDataBase Oracle;
-        private const string Ip = "localhost";
-        private const string Port = "1521";
-        private const string Server = "orcl";
-        private const string User = "Aplicacion";
-        private const string Password = "123456";
+        public static bool Connected;
+        private readonly DataBaseConnection Oracle;
+        private readonly SocketConnection Socket;
 
         public GraphicInterface(){
-            this.Connected = false;
-            InitializeComponent();
-            this.Console.AppendText("Hola, Bienvenido a Chat server\n"); // Nombre de la app pendiente.
+            this.InitializeComponent();
+            this.Socket = new SocketConnection(this.LogConsole);
+            this.Oracle = new DataBaseConnection(this.LogConsole);
+            Connected = false;
+            this.LogConsole.AppendText("Hola, Bienvenido al servidor de UNtalk\n");
         }
 
         private void ExitEvent(object sender, EventArgs e){
+            this.ShutDown();
             Application.Exit();
         }
 
@@ -39,28 +32,32 @@ namespace Chat_Virtual___Servidor {
 
         private void ButtonEvent(object sender, EventArgs e){
             if (Connected){
-                ShutDown();
+                this.ShutDown();
             }else{
-                ShutUp();
+                this.ShutUp();
             }
         }
 
         private void ShutUp(){
-            try{
-                this.Oracle = new OracleDataBase(Ip, Port, Server, User, Password);
-                this.Console.AppendText("Se ha conectado correctamente a la base de datos Oracle, versión: "+Oracle.getConnection().ServerVersion);
-                this.Connected = true;
-                this.Button.Text = "Apagar servidor.";
-            }
-            catch (Exception ex){
-                this.Console.AppendText("No se ha podido conectar a la base de datos Oracle:\n" + ex);
-            }
+            Connected = true;
+            this.Socket.ConnectSockets();
+            this.Oracle.ConnectDataBase();
+            this.Button.Text = "Apagar Servidor.";
+            
         }
 
         private void ShutDown(){
-            this.Connected = false;
-            this.Button.Text = "Encerder servidor.";
+            Connected = false;
+            this.Socket.DisconnectSockets();
+            this.Button.Text = "Encender servidor.";
             // TODO: Implementar desconexion a la base de datos y desconectar sockets.
         }
+
+
+        private void ListenConnection() {
+
+        }
+
+
     }
 }

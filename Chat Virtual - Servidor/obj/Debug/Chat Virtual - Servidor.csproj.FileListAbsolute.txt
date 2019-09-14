@@ -18,3 +18,5 @@ C:\Users\ricar\OneDrive\Documentos\GitHub\Chat-Virtual---Servidor\Chat Virtual -
 C:\Users\ricar\OneDrive\Documentos\GitHub\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat Virtual - Servidor.csproj.CoreCompileInputs.cache
 C:\Users\ricar\OneDrive\Documentos\GitHub\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat Virtual - Servidor.exe
 C:\Users\ricar\OneDrive\Documentos\GitHub\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat Virtual - Servidor.pdb
+C:\Users\ricar\OneDrive\Documentos\GitHub\Chat-Virtual---Servidor\Chat Virtual - Servidor\bin\Debug\Oracle.ManagedDataAccess.dll
+C:\Users\ricar\OneDrive\Documentos\GitHub\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat Virtual - Servidor.csproj.CopyComplete
