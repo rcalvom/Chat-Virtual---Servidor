@@ -30,19 +30,22 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.archivoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.salirToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.configuraciónToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.socketsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.oracleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ayudaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.informaciónToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Servidor = new System.Windows.Forms.Label();
             this.LogConsole = new System.Windows.Forms.RichTextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.UsersTable = new System.Windows.Forms.DataGridView();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.dataGridView2 = new System.Windows.Forms.DataGridView();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.UsersTable)).BeginInit();
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
             this.SuspendLayout();
@@ -61,6 +64,7 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.archivoToolStripMenuItem,
+            this.configuraciónToolStripMenuItem,
             this.ayudaToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -85,6 +89,31 @@
             this.salirToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
             this.salirToolStripMenuItem.Text = "Salir";
             this.salirToolStripMenuItem.Click += new System.EventHandler(this.ExitEvent);
+            // 
+            // configuraciónToolStripMenuItem
+            // 
+            this.configuraciónToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.socketsToolStripMenuItem,
+            this.oracleToolStripMenuItem});
+            this.configuraciónToolStripMenuItem.Name = "configuraciónToolStripMenuItem";
+            this.configuraciónToolStripMenuItem.Size = new System.Drawing.Size(95, 20);
+            this.configuraciónToolStripMenuItem.Text = "Configuración";
+            // 
+            // socketsToolStripMenuItem
+            // 
+            this.socketsToolStripMenuItem.Name = "socketsToolStripMenuItem";
+            this.socketsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
+            this.socketsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.socketsToolStripMenuItem.Text = "Sockets";
+            this.socketsToolStripMenuItem.Click += new System.EventHandler(this.SocketsToolStripMenuItem_Click);
+            // 
+            // oracleToolStripMenuItem
+            // 
+            this.oracleToolStripMenuItem.Name = "oracleToolStripMenuItem";
+            this.oracleToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F7;
+            this.oracleToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.oracleToolStripMenuItem.Text = "Oracle";
+            this.oracleToolStripMenuItem.Click += new System.EventHandler(this.OracleToolStripMenuItem_Click);
             // 
             // ayudaToolStripMenuItem
             // 
@@ -114,9 +143,10 @@
             // 
             // LogConsole
             // 
-            this.LogConsole.Enabled = false;
             this.LogConsole.Location = new System.Drawing.Point(12, 82);
             this.LogConsole.Name = "LogConsole";
+            this.LogConsole.ReadOnly = true;
+            this.LogConsole.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
             this.LogConsole.Size = new System.Drawing.Size(455, 317);
             this.LogConsole.TabIndex = 4;
             this.LogConsole.Text = "";
@@ -133,7 +163,7 @@
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.dataGridView1);
+            this.tabPage1.Controls.Add(this.UsersTable);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
@@ -142,13 +172,13 @@
             this.tabPage1.Text = "Clientes Conectados";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // dataGridView1
+            // UsersTable
             // 
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(6, 6);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(279, 279);
-            this.dataGridView1.TabIndex = 0;
+            this.UsersTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.UsersTable.Location = new System.Drawing.Point(6, 6);
+            this.UsersTable.Name = "UsersTable";
+            this.UsersTable.Size = new System.Drawing.Size(279, 279);
+            this.UsersTable.TabIndex = 0;
             // 
             // tabPage2
             // 
@@ -186,7 +216,7 @@
             this.menuStrip1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.UsersTable)).EndInit();
             this.tabPage2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).EndInit();
             this.ResumeLayout(false);
@@ -207,8 +237,11 @@
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.DataGridView UsersTable;
         private System.Windows.Forms.DataGridView dataGridView2;
+        private System.Windows.Forms.ToolStripMenuItem configuraciónToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem socketsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem oracleToolStripMenuItem;
     }
 }
 

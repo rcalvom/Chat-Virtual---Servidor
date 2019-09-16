@@ -84,18 +84,18 @@ public class OracleDataBase :IDisposable {
             return flag;
         }
 
-        private bool Disconnect() {
+        public bool Disconnect() {
             bool flag = false;
             try {
-                if (Connection != null) {
-                    if (Connection.State != System.Data.ConnectionState.Closed) {
-                        Connection.Close();
+                if (this.Connection != null) {
+                    if (this.Connection.State != System.Data.ConnectionState.Closed) {
+                        this.Connection.Close();
                     }
                 }
-                Connection.Dispose();
+                this.Connection.Dispose();
                 flag = true;
             } catch (Exception ex) {
-                AssignError(ref ex);
+                this.AssignError(ref ex);
                 flag = false;
             }
             return flag;
@@ -225,17 +225,17 @@ public class OracleDataBase :IDisposable {
             if (disposing) {
             }
             try {
-                if (DataReader != null) {
-                    DataReader.Close();
-                    DataReader.Dispose();
+                if (this.DataReader != null) {
+                    this.DataReader.Close();
+                    this.DataReader.Dispose();
                 }
-                if (!Disconnect()) {
+                if (!this.Disconnect()) {
                     // Guardar Log de Error.
                     //TODO: log error.
                 }
 
             } catch (Exception ex) {
-                AssignError(ref ex);
+                this.AssignError(ref ex);
             }
 
         }

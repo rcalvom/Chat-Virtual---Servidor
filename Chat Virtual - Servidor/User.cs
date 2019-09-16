@@ -17,12 +17,20 @@ namespace Chat_Virtual___Servidor {
             this.Stream = Stream;
         }
 
+        public NetworkStream GetStream() {
+            return this.Stream;
+        }
+
         public void SetWriter(StreamWriter Writer) {
             this.Writer = Writer;
         }
 
         public void SetReader(StreamReader Reader) {
             this.Reader = Reader;
+        }
+
+        public StreamReader GetReader() {
+            return this.Reader;
         }
 
         public void SetName(string Name) {

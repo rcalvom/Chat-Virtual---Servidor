@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Windows.Forms;
 
 
@@ -8,13 +9,14 @@ namespace Chat_Virtual___Servidor {
         public static bool Connected;
         private readonly DataBaseConnection Oracle;
         private readonly SocketConnection Socket;
+        private delegate void LogConsoleAppend(string text);
 
         public GraphicInterface(){
             this.InitializeComponent();
             this.Socket = new SocketConnection(this.LogConsole);
             this.Oracle = new DataBaseConnection(this.LogConsole);
             Connected = false;
-            this.LogConsole.AppendText("Hola, Bienvenido al servidor de UNtalk\n");
+            this.ConsoleAppend("Hola, Bienvenido al servidor de UNtalk\n");
         }
 
         private void ExitEvent(object sender, EventArgs e){
@@ -39,18 +41,39 @@ namespace Chat_Virtual___Servidor {
         }
 
         private void ShutUp(){
+            try {
+                this.Socket.ConnectSockets();
+            } catch(Exception ex) {
+                this.ConsoleAppend("No se ha conseguido inicializar el servidor correctamente: \n" + ex+"/n");
+                this.ConsoleAppend("Servidor no inicializado.");
+                return;
+            }
+            try {
+                //this.Oracle.ConnectDataBase();
+            } catch(Exception ex) {
+                this.ConsoleAppend("No se ha podido conectar a la base de datos: \n " + ex+"\n");
+                this.ConsoleAppend("Servidor no inicializado.\n");
+                this.Socket.DisconnectSockets();
+                return;
+            }
             Connected = true;
-            this.Socket.ConnectSockets();
-            this.Oracle.ConnectDataBase();
+            this.ConsoleAppend("Servidor inicializado correctamente.\n");
             this.Button.Text = "Apagar Servidor.";
-            
         }
 
         private void ShutDown(){
+            try {
+                this.Socket.DisconnectSockets();
+            } catch(Exception ex) {
+                this.ConsoleAppend("No se ha podido desconectar la conexión de los sockets: \n " + ex);
+            }
+            try {
+                this.Oracle.DisconnectDataBase();
+            } catch(Exception ex) {
+                this.ConsoleAppend("No se ha podido desconectar la base de datos: \n " + ex);
+            }
             Connected = false;
-            this.Socket.DisconnectSockets();
             this.Button.Text = "Encender servidor.";
-            // TODO: Implementar desconexion a la base de datos y desconectar sockets.
         }
 
 
@@ -58,6 +81,22 @@ namespace Chat_Virtual___Servidor {
 
         }
 
+        private void SocketsToolStripMenuItem_Click(object sender, EventArgs e) {
+
+        }
+
+        private void OracleToolStripMenuItem_Click(object sender, EventArgs e) {
+
+        }
+
+        private void ConsoleAppend(string text) {
+            if(this.LogConsole.InvokeRequired) {
+                var d = new LogConsoleAppend(this.ConsoleAppend);
+                this.LogConsole.Invoke(d, new object[] { text });
+            } else {
+                this.LogConsole.AppendText("["+DateTime.Now.ToString(new CultureInfo("en-GB")) + "] "+ text + "\n");
+            }
+        }
 
     }
 }
