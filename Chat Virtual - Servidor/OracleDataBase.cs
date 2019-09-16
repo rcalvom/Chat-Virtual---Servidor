@@ -203,7 +203,7 @@ public class OracleDataBase :IDisposable {
                 }
 
             } catch (Exception ex) {
-                Transaction.Rollback();
+                this.Transaction.Rollback();
                 AssignError(ref ex);
                 flag = false;
             } finally {
@@ -241,7 +241,7 @@ public class OracleDataBase :IDisposable {
         }
 
         ~OracleDataBase() {
-            Dispose(false);
+            this.Dispose(false);
         }
 
     }

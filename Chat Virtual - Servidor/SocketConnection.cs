@@ -61,9 +61,7 @@ namespace Chat_Virtual___Servidor {
             do {
                 try {
                     this.Client = this.Server.AcceptTcpClient();
-                } catch(Exception) {
-
-                }
+                } catch(Exception) {}
                 if(!(this.Client is null)) {
                     User user = new User();
                     user.SetStream(this.Client.GetStream());
@@ -75,7 +73,7 @@ namespace Chat_Virtual___Servidor {
                     this.Users.Add(user);
                     this.ConsoleAppend("El usuario [" + user.GetName() + "|" + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                 }
-            } while(this.Users.Count<=this.Settings.MaxUsers);
+            } while(GraphicInterface.Connected && this.Users.Count<=this.Settings.MaxUsers);
         }
 
         public void DisconnectSockets() {
