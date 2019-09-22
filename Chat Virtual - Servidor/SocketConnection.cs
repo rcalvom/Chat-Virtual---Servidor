@@ -71,7 +71,7 @@ namespace Chat_Virtual___Servidor {
                     //TODO: comprobar contraseña correcta o nuevo usuario.
                     // La coleccion Users es la que se mostrará en la interfaz como usuarios activos.
                     this.Users.Add(user);
-                    this.ConsoleAppend("El usuario [" + user.GetName() + "|" + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
+                    this.ConsoleAppend("El usuario [" + user.GetName() + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                 }
             } while(GraphicInterface.Connected && this.Users.Count<=this.Settings.MaxUsers);
         }

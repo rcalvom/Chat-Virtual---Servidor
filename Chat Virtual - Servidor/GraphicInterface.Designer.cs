@@ -103,7 +103,7 @@
             // 
             this.socketsToolStripMenuItem.Name = "socketsToolStripMenuItem";
             this.socketsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
-            this.socketsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.socketsToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.socketsToolStripMenuItem.Text = "Sockets";
             this.socketsToolStripMenuItem.Click += new System.EventHandler(this.SocketsToolStripMenuItem_Click);
             // 
@@ -111,7 +111,7 @@
             // 
             this.oracleToolStripMenuItem.Name = "oracleToolStripMenuItem";
             this.oracleToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F7;
-            this.oracleToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.oracleToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.oracleToolStripMenuItem.Text = "Oracle";
             this.oracleToolStripMenuItem.Click += new System.EventHandler(this.OracleToolStripMenuItem_Click);
             // 
@@ -212,6 +212,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "GraphicInterface";
             this.Text = "Chat Virtual - Servidor";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.tabControl1.ResumeLayout(false);

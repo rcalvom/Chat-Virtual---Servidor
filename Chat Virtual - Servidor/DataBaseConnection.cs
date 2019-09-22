@@ -31,10 +31,10 @@ namespace Chat_Virtual___Servidor {
                 this.Settings = (ConnectionSettings)formatter.Deserialize(stream);
                 stream.Close();
             } else {
-                this.Settings.Ip = "localhost";
+                this.Settings.Ip = "25.7.220.122";
                 this.Settings.Port = "1521";
                 this.Settings.Service = "orcl";
-                this.Settings.User = "UNtalk";
+                this.Settings.User = "Sadiri";
                 this.Settings.Password = "123456";
 
                 /*

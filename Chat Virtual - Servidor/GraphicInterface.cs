@@ -49,7 +49,7 @@ namespace Chat_Virtual___Servidor {
                 return;
             }
             try {
-                //this.Oracle.ConnectDataBase();
+                this.Oracle.ConnectDataBase();
             } catch(Exception ex) {
                 this.ConsoleAppend("No se ha podido conectar a la base de datos: \n " + ex+"\n");
                 this.ConsoleAppend("Servidor no inicializado.\n");
