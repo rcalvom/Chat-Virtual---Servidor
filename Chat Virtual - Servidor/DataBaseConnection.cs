@@ -9,7 +9,7 @@ namespace Chat_Virtual___Servidor {
 
     public class DataBaseConnection {
 
-        private readonly RichTextBox LogConsole;
+        private readonly GraphicInterface GraphicInterface;
         private OracleDataBase Oracle;
         private readonly ConnectionSettings Settings;
         private delegate void LogConsoleAppend(string text);
@@ -23,15 +23,15 @@ namespace Chat_Virtual___Servidor {
             public string Password;
         }
 
-        public DataBaseConnection(RichTextBox Console) {
-            this.LogConsole = Console;
+        public DataBaseConnection(GraphicInterface GraphicInterface) {
+            this.GraphicInterface = GraphicInterface;
             if(File.Exists("OracleSettings.config")) {
                 IFormatter formatter = new BinaryFormatter();
                 Stream stream = new FileStream("OracleSettings.config", FileMode.Open, FileAccess.Read);
                 this.Settings = (ConnectionSettings)formatter.Deserialize(stream);
                 stream.Close();
             } else {
-                this.Settings.Ip = "25.7.220.122";
+                this.Settings.Ip = "localhost";
                 this.Settings.Port = "1521";
                 this.Settings.Service = "orcl";
                 this.Settings.User = "Sadiri";
@@ -61,11 +61,11 @@ namespace Chat_Virtual___Servidor {
         }
 
         private void ConsoleAppend(string text) {
-            if(this.LogConsole.InvokeRequired) {
+            if(this.GraphicInterface.LogConsole.InvokeRequired) {
                 var d = new LogConsoleAppend(this.ConsoleAppend);
-                this.LogConsole.Invoke(d, new object[] { text });
+                this.GraphicInterface.LogConsole.Invoke(d, new object[] { text });
             } else {
-                this.LogConsole.AppendText("[" + DateTime.Now.ToString(new CultureInfo("en-GB")) + "] " + text + "\n");
+                this.GraphicInterface.LogConsole.AppendText("[" + DateTime.Now.ToString(new CultureInfo("en-GB")) + "] " + text + "\n");
             }
         }
 

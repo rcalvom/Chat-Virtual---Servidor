@@ -105,7 +105,6 @@
             this.socketsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
             this.socketsToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.socketsToolStripMenuItem.Text = "Sockets";
-            this.socketsToolStripMenuItem.Click += new System.EventHandler(this.SocketsToolStripMenuItem_Click);
             // 
             // oracleToolStripMenuItem
             // 
@@ -113,7 +112,6 @@
             this.oracleToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F7;
             this.oracleToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.oracleToolStripMenuItem.Text = "Oracle";
-            this.oracleToolStripMenuItem.Click += new System.EventHandler(this.OracleToolStripMenuItem_Click);
             // 
             // ayudaToolStripMenuItem
             // 
@@ -212,7 +210,6 @@
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "GraphicInterface";
             this.Text = "Chat Virtual - Servidor";
-            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
@@ -226,15 +223,12 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.Button Button;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem archivoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem salirToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ayudaToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem informaciónToolStripMenuItem;
         private System.Windows.Forms.Label Servidor;
-        private System.Windows.Forms.RichTextBox LogConsole;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
@@ -243,6 +237,8 @@
         private System.Windows.Forms.ToolStripMenuItem configuraciónToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem socketsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem oracleToolStripMenuItem;
+        public System.Windows.Forms.RichTextBox LogConsole;
+        public System.Windows.Forms.Button Button;
     }
 }
 

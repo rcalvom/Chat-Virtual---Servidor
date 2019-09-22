@@ -54,6 +54,7 @@
     <Compile Include="OracleInterface.Designer.cs">
       <DependentUpon>OracleInterface.cs</DependentUpon>
     </Compile>
+    <Compile Include="ServerConnection.cs" />
     <Compile Include="SocketInterface.cs">
       <SubType>Form</SubType>
     </Compile>

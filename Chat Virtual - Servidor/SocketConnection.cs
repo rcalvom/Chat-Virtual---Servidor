@@ -16,6 +16,7 @@ namespace Chat_Virtual___Servidor {
     public class SocketConnection {
 
         private static RichTextBox LogConsole;
+        private OracleDataBase Oracle;
         private TcpListener Server;
         private readonly IPEndPoint IP;
         private TcpClient Client;
@@ -29,7 +30,7 @@ namespace Chat_Virtual___Servidor {
             public int MaxUsers;
         }
 
-        public SocketConnection(RichTextBox LogConsole) {
+        public SocketConnection(RichTextBox LogConsole, GraphicInterface GI) {
             SocketConnection.LogConsole = LogConsole;
 
             if(File.Exists("SocketSettings.config")) {
@@ -67,8 +68,17 @@ namespace Chat_Virtual___Servidor {
                     user.SetStream(this.Client.GetStream());
                     user.SetWriter(new StreamWriter(this.Client.GetStream()));
                     user.SetReader(new StreamReader(this.Client.GetStream()));
-                    user.SetName(user.GetReader().ReadLine());
+
+                    string temp = user.GetReader().ReadLine();
+                    if (temp.Equals("InicioSesion")){
+                        user.SetName(user.GetReader().ReadLine());
+                        this.Oracle.ExecuteSQL("INSERT INTO USUARIOS VALUES('" + user.GetName() + "','123')");
+                    }
+                    else if (temp.Equals("Registro")){
+                        Oracle.ExecuteSQL("INSERT INTO USUARIOS VALUES('" + user.GetName() + "','123')");
+                    }
                     //TODO: comprobar contraseña correcta o nuevo usuario.
+                    
                     // La coleccion Users es la que se mostrará en la interfaz como usuarios activos.
                     this.Users.Add(user);
                     this.ConsoleAppend("El usuario [" + user.GetName() + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
