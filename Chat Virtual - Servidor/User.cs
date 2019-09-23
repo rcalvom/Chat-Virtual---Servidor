@@ -25,6 +25,10 @@ namespace Chat_Virtual___Servidor {
             this.Writer = Writer;
         }
 
+        public StreamWriter GetWriter() {
+            return this.Writer;
+        }
+
         public void SetReader(StreamReader Reader) {
             this.Reader = Reader;
         }

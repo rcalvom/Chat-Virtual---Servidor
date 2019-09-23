@@ -121,14 +121,26 @@ namespace Chat_Virtual___Servidor{
                     string pass = user.GetReader().ReadLine();
                     switch (temp) {
                         case "InicioSesion":
-                            /*if (this.oracle.GetOracleDataBase().ExecuteSQL("SELECT USUARIO,CONTRASENA FROM USUARIOS;")) {
-                                while (this.oracle.GetOracleDataBase().getDataReader().Read()) {
-                                    if (this.oracle.GetOracleDataBase().getDataReader()["Usuario"].Equals(user.GetName()) && this.oracle.GetOracleDataBase().getDataReader()["CONTRASENA"].Equals(pass)) {
-                                        this.ConsoleAppend("Existe");
-                                    }
+                            bool flag = false;
+                            this.oracle.GetOracleDataBase().ExecuteSQL("SELECT USUARIO,CONTRASENA FROM USUARIOS");
+                            while (this.oracle.GetOracleDataBase().getDataReader().Read()) {
+                                if (this.oracle.GetOracleDataBase().getDataReader()["USUARIO"].Equals(user.GetName()) && this.oracle.GetOracleDataBase().getDataReader()["CONTRASENA"].Equals(pass)) {
+                                    this.ConsoleAppend("Existe");
+                                    flag = true;
                                 }
-                                this.ConsoleAppend("No Existe");
-                            }*/
+                            }
+                            if (flag) {
+                                user.GetWriter().WriteLine("SI");
+                                user.GetWriter().Flush();
+                            } else {
+                                user.GetWriter().WriteLine("NO");
+                                user.GetWriter().Flush();
+                                Client.Close();
+                            }
+
+                            
+
+                            this.ConsoleAppend("No Existe");
                             break;
                         case "Registro":
                             this.oracle.GetOracleDataBase().ExecuteSQL("INSERT INTO USUARIOS VALUES('" + user.GetName() + "','" + pass + "',DEFAULT)");
@@ -139,6 +151,9 @@ namespace Chat_Virtual___Servidor{
 
                     this.Users.Add(user);
                     this.ConsoleAppend("El usuario [" + user.GetName() + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
+                    /*while (true) {
+                        this.ConsoleAppend(user.GetReader().ReadLine());
+                    }*/
                 }
                 
             } while (/*this.Connected && this.Users.Count()<this.settings.maxUsers*/true);
