@@ -83,7 +83,7 @@ namespace Chat_Virtual___Servidor {
                     this.Users.Add(user);
                     this.ConsoleAppend("El usuario [" + user.GetName() + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                 }
-            } while(GraphicInterface.Connected && this.Users.Count<=this.Settings.MaxUsers);
+            } while(this.Users.Count<=this.Settings.MaxUsers);
         }
 
         public void DisconnectSockets() {

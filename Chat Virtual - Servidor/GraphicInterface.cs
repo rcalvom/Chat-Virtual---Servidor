@@ -30,11 +30,11 @@ namespace Chat_Virtual___Servidor {
         }
 
         private void ButtonEvent(object sender, EventArgs e){
-            /*if (this.Server.Connected) {
+            if (this.Server.Connected) {
                 this.Server.ShutDown();
             } else {
                 this.Server.ShutUp();
-            }*/
+            }
         }
 
         private void ConsoleAppend(string text) {

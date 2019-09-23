@@ -53,13 +53,15 @@ namespace Chat_Virtual___Servidor{
         }
 
         public void ShutUp() {
-            /*new Thread(this.Connect) {
+            new Thread(this.Connect) {
                 
-            }.Start();*/
-            this.Connect();
+            }.Start();
+            //this.Connect();
         }
 
         public void Connect() {
+            
+
             this.ButtonEnable(false);
             try {
                 this.ConnectSockets();
@@ -91,24 +93,24 @@ namespace Chat_Virtual___Servidor{
         }
 
         public void ConnectSockets() {
+            
             this.ConsoleAppend("Iniciando conexión de los sockets.\n");
             this.Server = new TcpListener(this.Ip);
             this.Server.Start();
             this.ConsoleAppend("El servidor se a inicializado correctamente.");
             Thread t = new Thread(this.ListenConnection) {
                 IsBackground = true,
-                Name = "hilito"
             };
             t.Start();
             this.ConsoleAppend("Se han comenzado a escuchar solicitudes de conexión entrantes.\n");
         }
 
         private void ListenConnection() {
+            
             do {
-                if (this.Server.Pending()) {
                 
+                if (this.Server.Pending()) {
                     this.Client = this.Server.AcceptTcpClient();
-                this.ConsoleAppend("Prueba:V");
                     User user = new User();
                     user.SetStream(this.Client.GetStream());
                     user.SetWriter(new StreamWriter(this.Client.GetStream()));
@@ -116,14 +118,20 @@ namespace Chat_Virtual___Servidor{
 
                     string temp = user.GetReader().ReadLine();
                     user.SetName(user.GetReader().ReadLine());
-
+                    string pass = user.GetReader().ReadLine();
                     switch (temp) {
                         case "InicioSesion":
-                            /*user.SetName("");*/
-                            this.oracle.GetOracleDataBase().ExecuteSQL("INSERT INTO USUARIOS VALUES('" + user.GetName() + "','" + user.GetReader().ReadLine() + "')");
+                            /*if (this.oracle.GetOracleDataBase().ExecuteSQL("SELECT USUARIO,CONTRASENA FROM USUARIOS;")) {
+                                while (this.oracle.GetOracleDataBase().getDataReader().Read()) {
+                                    if (this.oracle.GetOracleDataBase().getDataReader()["Usuario"].Equals(user.GetName()) && this.oracle.GetOracleDataBase().getDataReader()["CONTRASENA"].Equals(pass)) {
+                                        this.ConsoleAppend("Existe");
+                                    }
+                                }
+                                this.ConsoleAppend("No Existe");
+                            }*/
                             break;
                         case "Registro":
-                            this.oracle.GetOracleDataBase().ExecuteSQL("INSERT INTO USUARIOS VALUES('"+user.GetName()+"','"+user.GetReader().ReadLine()+"')");
+                            this.oracle.GetOracleDataBase().ExecuteSQL("INSERT INTO USUARIOS VALUES('" + user.GetName() + "','" + pass + "',DEFAULT)");
                             break;
                         default:
                             break;
@@ -133,7 +141,7 @@ namespace Chat_Virtual___Servidor{
                     this.ConsoleAppend("El usuario [" + user.GetName() + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                 }
                 
-            } while (this.Connected && this.Users.Count()<this.settings.maxUsers);
+            } while (/*this.Connected && this.Users.Count()<this.settings.maxUsers*/true);
         }
 
         public void ShutDown() {
