@@ -7,10 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace Chat_Virtual___Servidor{
     public class ServerConnection{
@@ -98,65 +95,80 @@ namespace Chat_Virtual___Servidor{
             this.Server = new TcpListener(this.Ip);
             this.Server.Start();
             this.ConsoleAppend("El servidor se a inicializado correctamente.");
-            Thread t = new Thread(this.ListenConnection) {
-                IsBackground = true,
-            };
-            t.Start();
+            new Thread(this.ListenConnection) {
+                IsBackground = true
+            }.Start();
             this.ConsoleAppend("Se han comenzado a escuchar solicitudes de conexión entrantes.\n");
+            new Thread(this.ListenUsers) {
+                IsBackground = true
+            }.Start();
+        }
+
+        private void ListenUsers() {
+            do {
+                foreach(User u in this.Users) {
+                    if(!(u.GetReader().ReadLine() is null)) {
+
+                    }
+                }
+                //TODO: Queue. 
+            } while(this.Connected);
         }
 
         private void ListenConnection() {
-            
             do {
-                
                 if (this.Server.Pending()) {
                     this.Client = this.Server.AcceptTcpClient();
                     User user = new User();
                     user.SetStream(this.Client.GetStream());
                     user.SetWriter(new StreamWriter(this.Client.GetStream()));
                     user.SetReader(new StreamReader(this.Client.GetStream()));
-
                     string temp = user.GetReader().ReadLine();
                     user.SetName(user.GetReader().ReadLine());
                     string pass = user.GetReader().ReadLine();
                     switch (temp) {
                         case "InicioSesion":
-                            bool flag = false;
+                            bool exist = false;
                             this.oracle.GetOracleDataBase().ExecuteSQL("SELECT USUARIO,CONTRASENA FROM USUARIOS");
                             while (this.oracle.GetOracleDataBase().getDataReader().Read()) {
-                                if (this.oracle.GetOracleDataBase().getDataReader()["USUARIO"].Equals(user.GetName()) && this.oracle.GetOracleDataBase().getDataReader()["CONTRASENA"].Equals(pass)) {
-                                    this.ConsoleAppend("Existe");
-                                    flag = true;
+                                if (this.oracle.GetOracleDataBase().getDataReader()["USUARIO"].Equals(user.GetName()) && this.oracle.GetOracleDataBase().getDataReader()["CONTRASENA"].Equals(pass)) {                                    
+                                    exist = true;
                                 }
                             }
-                            if (flag) {
+                            if (exist) {
                                 user.GetWriter().WriteLine("SI");
                                 user.GetWriter().Flush();
+                                this.Users.Add(user);
+                                this.ConsoleAppend("El usuario [" + user.GetName() + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
+                                // TODO: Actualizar tabla.
                             } else {
                                 user.GetWriter().WriteLine("NO");
                                 user.GetWriter().Flush();
-                                Client.Close();
+                                this.ConsoleAppend("Se ha intentado conectar el remoto ["+this.Client.Client.RemoteEndPoint.ToString() + "] con información de inicio de sesión incorrecta.");
+                                this.Client.Close();
                             }
-
-                            
-
-                            this.ConsoleAppend("No Existe");
                             break;
                         case "Registro":
-                            this.oracle.GetOracleDataBase().ExecuteSQL("INSERT INTO USUARIOS VALUES('" + user.GetName() + "','" + pass + "',DEFAULT)");
+                            if(this.oracle.GetOracleDataBase().ExecuteSQL("INSERT INTO USUARIOS VALUES('" + user.GetName() + "','" + pass + "',DEFAULT)")) {
+                                user.GetWriter().WriteLine("SI");
+                                user.GetWriter().Flush();
+                                this.ConsoleAppend("Se ha registrado el usuario [" +user.GetName()+" | "+ this.Client.Client.RemoteEndPoint.ToString() + "] correctamente.");
+                                this.Users.Add(user);
+                                this.ConsoleAppend("El usuario [" + user.GetName() + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
+                                // TODO: Actualizar Tabla.
+                            } else {
+                                user.GetWriter().WriteLine("NO");
+                                user.GetWriter().Flush();
+                                this.ConsoleAppend("Se ha intentado registrar el remoto [" + this.Client.Client.RemoteEndPoint.ToString()+"] con un nombre de usuario ya existente.");                                
+                                this.Client.Close();
+                            }
                             break;
                         default:
                             break;
-                    }
-
-                    this.Users.Add(user);
-                    this.ConsoleAppend("El usuario [" + user.GetName() + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
-                    /*while (true) {
-                        this.ConsoleAppend(user.GetReader().ReadLine());
-                    }*/
+                    }                             
                 }
                 
-            } while (/*this.Connected && this.Users.Count()<this.settings.maxUsers*/true);
+            } while (this.Connected && this.Users.Count()<this.settings.maxUsers);
         }
 
         public void ShutDown() {
@@ -166,12 +178,10 @@ namespace Chat_Virtual___Servidor{
                 this.ConsoleAppend("No se ha podido desconectar la conexión de los sockets: \n " + ex);
             }
             try {
-                this.oracle.DisconnectDataBase(); //TODO Revisar Oracle
+                this.oracle.DisconnectDataBase();
             } catch(Exception ex) {
                 this.ConsoleAppend("No se ha podido desconectar la base de datos: \n " + ex);
             }
-
-
             this.Connected = false;
             this.ButtonText("Encender Servidor");
         }

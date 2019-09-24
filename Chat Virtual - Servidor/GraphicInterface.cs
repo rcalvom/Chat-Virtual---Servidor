@@ -8,7 +8,7 @@ namespace Chat_Virtual___Servidor {
 
         private readonly DataBaseConnection Oracle;
         private ServerConnection Server;
-        private readonly SocketConnection Socket;
+        //private readonly SocketConnection Socket;
         private delegate void LogConsoleAppend(string text);
 
         public GraphicInterface(){
