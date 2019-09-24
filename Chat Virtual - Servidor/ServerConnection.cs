@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace Chat_Virtual___Servidor{
         private delegate void DLogConsoleAppend(string text);
         private delegate void DButtonText(string text);
         private delegate void DButtonEnable(bool flag);
+        private delegate void DDataGridViewRow(string name, string ip);
         public bool Connected { get; set; }
         public TcpListener Server { get; set; }
         public GraphicInterface GraphicInterface { get; set; }
@@ -95,13 +97,15 @@ namespace Chat_Virtual___Servidor{
             this.Server = new TcpListener(this.Ip);
             this.Server.Start();
             this.ConsoleAppend("El servidor se a inicializado correctamente.");
-            new Thread(this.ListenConnection) {
+            Thread t1 = new Thread(this.ListenConnection) {
                 IsBackground = true
-            }.Start();
+            };
+            t1.Start();
             this.ConsoleAppend("Se han comenzado a escuchar solicitudes de conexión entrantes.\n");
-            new Thread(this.ListenUsers) {
+            Thread t = new Thread(this.ListenUsers) {
                 IsBackground = true
-            }.Start();
+            };
+            t.Start();
         }
 
         private void ListenUsers() {
@@ -133,6 +137,7 @@ namespace Chat_Virtual___Servidor{
                             while (this.oracle.GetOracleDataBase().getDataReader().Read()) {
                                 if (this.oracle.GetOracleDataBase().getDataReader()["USUARIO"].Equals(user.GetName()) && this.oracle.GetOracleDataBase().getDataReader()["CONTRASENA"].Equals(pass)) {                                    
                                     exist = true;
+                                    // TODO: Emplear Colas o alguna estructura de dato.
                                 }
                             }
                             if (exist) {
@@ -140,11 +145,13 @@ namespace Chat_Virtual___Servidor{
                                 user.GetWriter().Flush();
                                 this.Users.Add(user);
                                 this.ConsoleAppend("El usuario [" + user.GetName() + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
-                                // TODO: Actualizar tabla.
+                                this.InsertTable(user.GetName(), this.Client.Client.RemoteEndPoint.ToString());
+                                //this.GraphicInterface.UsersTable.Rows.Add(user.GetName(),this.Client.Client.RemoteEndPoint.ToString());
                             } else {
                                 user.GetWriter().WriteLine("NO");
                                 user.GetWriter().Flush();
                                 this.ConsoleAppend("Se ha intentado conectar el remoto ["+this.Client.Client.RemoteEndPoint.ToString() + "] con información de inicio de sesión incorrecta.");
+                                this.Client.Client.Close();
                                 this.Client.Close();
                             }
                             break;
@@ -168,7 +175,7 @@ namespace Chat_Virtual___Servidor{
                     }                             
                 }
                 
-            } while (this.Connected && this.Users.Count()<this.settings.maxUsers);
+            } while (/*this.Connected && this.Users.Count()<this.settings.maxUsers*/true);
         }
 
         public void ShutDown() {
@@ -210,6 +217,15 @@ namespace Chat_Virtual___Servidor{
                 this.GraphicInterface.Button.Invoke(d, new object[] { flag });
             } else {
                 this.GraphicInterface.Button.Enabled = flag;
+            }
+        }
+
+        private void InsertTable(string name, string ip) {
+            if (this.GraphicInterface.UsersTable.InvokeRequired) {
+                var d = new DDataGridViewRow(this.InsertTable);
+                this.GraphicInterface.Button.Invoke(d, new object[] { name, ip });
+            } else {
+                this.GraphicInterface.UsersTable.Rows.Add(name, ip);
             }
         }
 

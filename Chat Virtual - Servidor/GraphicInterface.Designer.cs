@@ -42,6 +42,8 @@
             this.UsersTable = new System.Windows.Forms.DataGridView();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.dataGridView2 = new System.Windows.Forms.DataGridView();
+            this.Usuario = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Ip = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -173,8 +175,12 @@
             // UsersTable
             // 
             this.UsersTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.UsersTable.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Usuario,
+            this.Ip});
             this.UsersTable.Location = new System.Drawing.Point(6, 6);
             this.UsersTable.Name = "UsersTable";
+            this.UsersTable.ReadOnly = true;
             this.UsersTable.Size = new System.Drawing.Size(279, 279);
             this.UsersTable.TabIndex = 0;
             // 
@@ -196,6 +202,20 @@
             this.dataGridView2.Name = "dataGridView2";
             this.dataGridView2.Size = new System.Drawing.Size(279, 279);
             this.dataGridView2.TabIndex = 0;
+            // 
+            // Usuario
+            // 
+            this.Usuario.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Usuario.HeaderText = "Usuario";
+            this.Usuario.Name = "Usuario";
+            this.Usuario.ReadOnly = true;
+            // 
+            // Ip
+            // 
+            this.Ip.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Ip.HeaderText = "Dirección Ip";
+            this.Ip.Name = "Ip";
+            this.Ip.ReadOnly = true;
             // 
             // GraphicInterface
             // 
@@ -234,13 +254,15 @@
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.DataGridView UsersTable;
         private System.Windows.Forms.DataGridView dataGridView2;
         private System.Windows.Forms.ToolStripMenuItem configuraciónToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem socketsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem oracleToolStripMenuItem;
         public System.Windows.Forms.RichTextBox LogConsole;
         public System.Windows.Forms.Button Button;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Usuario;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Ip;
+        public System.Windows.Forms.DataGridView UsersTable;
     }
 }
 

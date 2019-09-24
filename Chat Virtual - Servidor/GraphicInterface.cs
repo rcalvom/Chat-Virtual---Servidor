@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Globalization;
 using System.Windows.Forms;
 
@@ -6,13 +7,14 @@ using System.Windows.Forms;
 namespace Chat_Virtual___Servidor {
     public partial class GraphicInterface : Form {
 
-        private readonly DataBaseConnection Oracle;
-        private ServerConnection Server;
-        //private readonly SocketConnection Socket;
+        private readonly ServerConnection Server;
+        private readonly DataTable UserTable;
+
         private delegate void LogConsoleAppend(string text);
 
         public GraphicInterface(){
             this.InitializeComponent();
+            this.UserTable = new DataTable();
             this.Server = new ServerConnection(this);
             this.ConsoleAppend("Hola, Bienvenido al servidor de SADIRI.\n");
         }
