@@ -120,8 +120,9 @@ namespace Chat_Virtual___Servidor{
                     node = this.Users.First;
                 }
 
-                if (node.Value.GetReader().BaseStream.Length>0) {
+                if (node.Value.GetStream().DataAvailable) {
                     this.Messages.AddLast(node.Value.GetName()+": "+node.Value.GetReader().ReadLine());
+                    this.ConsoleAppend(this.Messages.Last.Value);
                     //TODO: POSIBLES SOLUCITUDES DIFERENTES A MENSAJES.
                 }
                 if (node.Next == null) {
@@ -133,7 +134,7 @@ namespace Chat_Virtual___Servidor{
         }
 
         private void WriteUsers() {
-            LinkedListNode<User> node = null;
+            LinkedListNode<User> node;
             string s;
             do {
                 if (this.Messages.Count == 0) {
@@ -143,18 +144,15 @@ namespace Chat_Virtual___Servidor{
                     s = this.Messages.First.Value;
                     this.Messages.RemoveFirst();
                 }
-
                 do {
-                    node.Value.GetWriter().WriteLine(s);
-                    node.Value.GetWriter().Flush();
-                    if (node.Next == null) {
-                        node = this.Users.First;
-                    } else {
-                        node = node.Next;
+                    try {
+                        node.Value.GetWriter().WriteLine(s);
+                        node.Value.GetWriter().Flush();
+                    } catch {
+                        //TODO: Se ha desconectado.
                     }
-                } while (node.Next!=null);
-
-                
+                    node = node.Next;
+                } while (node!=null);
 
             } while (true);
         }
