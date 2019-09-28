@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization;
@@ -14,19 +12,22 @@ namespace Chat_Virtual___Servidor{
     public class ServerConnection{
 
 
-        private DataBaseConnection oracle;
+        private readonly DataBaseConnection Oracle;
         private ConnectionSettings settings;
+
+        public bool Connected { get; set; }
+        public TcpListener Server { get; set; }
+        public GraphicInterface GraphicInterface { get; set; }
+        public LinkedList<User> Users { get; set; }
+        public LinkedList<Group> Groups { get; set; }
+        public LinkedList<string> Messages { get; set; }
+        public TcpClient Client { get; set; }
+        public IPEndPoint Ip { get; }
 
         private delegate void DLogConsoleAppend(string text);
         private delegate void DButtonText(string text);
         private delegate void DButtonEnable(bool flag);
         private delegate void DDataGridViewRow(string name, string ip);
-        public bool Connected { get; set; }
-        public TcpListener Server { get; set; }
-        public GraphicInterface GraphicInterface { get; set; }
-        public List<User> Users { get; set; }
-        public TcpClient Client { get; set; }
-        public IPEndPoint Ip { get; }
 
         [Serializable]
         private struct ConnectionSettings {
@@ -37,7 +38,7 @@ namespace Chat_Virtual___Servidor{
         public ServerConnection(GraphicInterface GraphicInterface) {
             this.Connected = false;
             this.GraphicInterface = GraphicInterface;
-            this.oracle = new DataBaseConnection(this.GraphicInterface);
+            this.Oracle = new DataBaseConnection(this.GraphicInterface);
             if (File.Exists("SocketSettings.config")) {
                 IFormatter formatter = new BinaryFormatter();
                 Stream stream = new FileStream("SocketSettings.config", FileMode.Open, FileAccess.Read);
@@ -48,19 +49,18 @@ namespace Chat_Virtual___Servidor{
                 this.settings.maxUsers = 30;
             }
             this.Ip = new IPEndPoint(IPAddress.Any, this.settings.port);
-            this.Users = new List<User>();
+            this.Users = new LinkedList<User>();
+            this.Groups = new LinkedList<Group>();
+            this.Messages = new LinkedList<string>();
         }
 
         public void ShutUp() {
             new Thread(this.Connect) {
-                
+                IsBackground = true
             }.Start();
-            //this.Connect();
         }
 
         public void Connect() {
-            
-
             this.ButtonEnable(false);
             try {
                 this.ConnectSockets();
@@ -71,7 +71,7 @@ namespace Chat_Virtual___Servidor{
                 return;
             }
             try {
-                this.oracle.ConnectDataBase();
+                this.Oracle.ConnectDataBase();
             } catch (Exception ex) {
                 this.ConsoleAppend("No se ha podido conectar a la base de datos: \n " + ex + "\n");
                 this.ConsoleAppend("Servidor no inicializado.\n");
@@ -92,7 +92,6 @@ namespace Chat_Virtual___Servidor{
         }
 
         public void ConnectSockets() {
-            
             this.ConsoleAppend("Iniciando conexión de los sockets.\n");
             this.Server = new TcpListener(this.Ip);
             this.Server.Start();
@@ -102,21 +101,62 @@ namespace Chat_Virtual___Servidor{
             };
             t1.Start();
             this.ConsoleAppend("Se han comenzado a escuchar solicitudes de conexión entrantes.\n");
-            Thread t = new Thread(this.ListenUsers) {
+            Thread t2 = new Thread(this.ListenUsers) {
                 IsBackground = true
             };
-            t.Start();
+            t2.Start();
+            Thread t3 = new Thread(this.WriteUsers) {
+
+            };
+            t3.Start();
         }
 
         private void ListenUsers() {
+            LinkedListNode<User> node = null;
             do {
-                foreach(User u in this.Users) {
-                    if(!(u.GetReader().ReadLine() is null)) {
-
-                    }
+                if (this.Users.Count==0) {
+                    continue;
+                }else if (node == null) {
+                    node = this.Users.First;
                 }
-                //TODO: Queue. 
-            } while(this.Connected);
+
+                if (node.Value.GetReader().BaseStream.Length>0) {
+                    this.Messages.AddLast(node.Value.GetName()+": "+node.Value.GetReader().ReadLine());
+                    //TODO: POSIBLES SOLUCITUDES DIFERENTES A MENSAJES.
+                }
+                if (node.Next == null) {
+                    node = this.Users.First;
+                } else {
+                    node = node.Next;
+                }
+            } while (true);
+        }
+
+        private void WriteUsers() {
+            LinkedListNode<User> node = null;
+            string s;
+            do {
+                if (this.Messages.Count == 0) {
+                    continue;
+                } else {
+                    node = this.Users.First;
+                    s = this.Messages.First.Value;
+                    this.Messages.RemoveFirst();
+                }
+
+                do {
+                    node.Value.GetWriter().WriteLine(s);
+                    node.Value.GetWriter().Flush();
+                    if (node.Next == null) {
+                        node = this.Users.First;
+                    } else {
+                        node = node.Next;
+                    }
+                } while (node.Next!=null);
+
+                
+
+            } while (true);
         }
 
         private void ListenConnection() {
@@ -133,20 +173,20 @@ namespace Chat_Virtual___Servidor{
                     switch (temp) {
                         case "InicioSesion":
                             bool exist = false;
-                            this.oracle.GetOracleDataBase().ExecuteSQL("SELECT USUARIO,CONTRASENA FROM USUARIOS");
-                            while (this.oracle.GetOracleDataBase().getDataReader().Read()) {
-                                if (this.oracle.GetOracleDataBase().getDataReader()["USUARIO"].Equals(user.GetName()) && this.oracle.GetOracleDataBase().getDataReader()["CONTRASENA"].Equals(pass)) {                                    
+                            this.Oracle.GetOracleDataBase().ExecuteSQL("SELECT USUARIO,CONTRASENA FROM USUARIOS");
+                            while (this.Oracle.GetOracleDataBase().getDataReader().Read()) {
+                                if (this.Oracle.GetOracleDataBase().getDataReader()["USUARIO"].Equals(user.GetName()) && this.Oracle.GetOracleDataBase().getDataReader()["CONTRASENA"].Equals(pass)) {                                    
                                     exist = true;
-                                    // TODO: Emplear Colas o alguna estructura de dato.
+                                    break;
+                                    // TODO: Emplear Colas o alguna estructura de datos.
                                 }
                             }
                             if (exist) {
                                 user.GetWriter().WriteLine("SI");
                                 user.GetWriter().Flush();
-                                this.Users.Add(user);
+                                this.Users.AddLast(user);
                                 this.ConsoleAppend("El usuario [" + user.GetName() + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                                 this.InsertTable(user.GetName(), this.Client.Client.RemoteEndPoint.ToString());
-                                //this.GraphicInterface.UsersTable.Rows.Add(user.GetName(),this.Client.Client.RemoteEndPoint.ToString());
                             } else {
                                 user.GetWriter().WriteLine("NO");
                                 user.GetWriter().Flush();
@@ -156,11 +196,11 @@ namespace Chat_Virtual___Servidor{
                             }
                             break;
                         case "Registro":
-                            if(this.oracle.GetOracleDataBase().ExecuteSQL("INSERT INTO USUARIOS VALUES('" + user.GetName() + "','" + pass + "',DEFAULT)")) {
+                            if(this.Oracle.GetOracleDataBase().ExecuteSQL("INSERT INTO USUARIOS VALUES('" + user.GetName() + "','" + pass + "',DEFAULT)")) {
                                 user.GetWriter().WriteLine("SI");
                                 user.GetWriter().Flush();
                                 this.ConsoleAppend("Se ha registrado el usuario [" +user.GetName()+" | "+ this.Client.Client.RemoteEndPoint.ToString() + "] correctamente.");
-                                this.Users.Add(user);
+                                this.Users.AddLast(user);
                                 this.ConsoleAppend("El usuario [" + user.GetName() + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                                 // TODO: Actualizar Tabla.
                             } else {
@@ -185,7 +225,7 @@ namespace Chat_Virtual___Servidor{
                 this.ConsoleAppend("No se ha podido desconectar la conexión de los sockets: \n " + ex);
             }
             try {
-                this.oracle.DisconnectDataBase();
+                this.Oracle.DisconnectDataBase();
             } catch(Exception ex) {
                 this.ConsoleAppend("No se ha podido desconectar la base de datos: \n " + ex);
             }
