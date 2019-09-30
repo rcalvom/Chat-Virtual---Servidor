@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -6,7 +7,6 @@ using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
-using DataStructures;
 
 namespace Chat_Virtual___Servidor{
     public class ServerConnection{
@@ -18,9 +18,9 @@ namespace Chat_Virtual___Servidor{
         public bool Connected { get; set; }
         public TcpListener Server { get; set; }
         public GraphicInterface GraphicInterface { get; set; }
-        public Chain<User> Users { get; set; }
-        public Chain<Group> Groups { get; set; }
-        public LinkedQueue<string> Messages { get; set; }
+        public LinkedList<User> Users { get; set; }
+        public LinkedList<Group> Groups { get; set; }
+        public LinkedList<string> Messages { get; set; }
         public TcpClient Client { get; set; }
         public IPEndPoint Ip { get; }
 
@@ -49,9 +49,9 @@ namespace Chat_Virtual___Servidor{
                 this.settings.maxUsers = 30;
             }
             this.Ip = new IPEndPoint(IPAddress.Any, this.settings.port);
-            this.Users = new Chain<User>();
-            this.Groups = new Chain<Group>();
-            this.Messages = new LinkedQueue<string>();
+            this.Users = new LinkedList<User>();
+            this.Groups = new LinkedList<Group>();
+            this.Messages = new LinkedList<string>();
         }
 
         public void ShutUp() {
@@ -112,47 +112,46 @@ namespace Chat_Virtual___Servidor{
         }
 
         private void ListenUsers() {
-            ChainNode<User> node = null;
+            LinkedListNode<User> node = null;
             do {
-                if (this.Users.IsEmpty()) {
+                if (this.Users.Count==0) {
                     continue;
                 }else if (node == null) {
-                    node = this.Users.GetNode(0);
+                    node = this.Users.First;
                 }
 
-                if (node.element.GetStream().DataAvailable) {
-                    this.Messages.Put(node.element.GetName()+": "+node.element.GetReader().ReadLine());
-                    this.ConsoleAppend(this.Messages.GetFrontElement());
+                if (node.Value.GetStream().DataAvailable) {
+                    this.Messages.AddLast(node.Value.GetName()+": "+node.Value.GetReader().ReadLine());
+                    this.ConsoleAppend(this.Messages.Last.Value);
                     //TODO: POSIBLES SOLUCITUDES DIFERENTES A MENSAJES.
-                }/*
-                if (node.next == null) {
-                    node = this.Users.GetNode(0);
+                }
+                if (node.Next == null) {
+                    node = this.Users.First;
                 } else {
-                    node = node.ext;
-                }*/
-                node = node.next;
+                    node = node.Next;
+                }
             } while (true);
         }
 
         private void WriteUsers() {
-            ChainNode<User> node;
+            LinkedListNode<User> node;
             string s;
             do {
-                if (this.Messages.IsEmpty()) {
+                if (this.Messages.Count == 0) {
                     continue;
                 } else {
-                    node = this.Users.GetNode(0);
-                    s = this.Messages.GetFrontElement();
-                    //remover el primero
+                    node = this.Users.First;
+                    s = this.Messages.First.Value;
+                    this.Messages.RemoveFirst();
                 }
                 do {
                     try {
-                        node.element.GetWriter().WriteLine(s);
-                        node.element.GetWriter().Flush();
+                        node.Value.GetWriter().WriteLine(s);
+                        node.Value.GetWriter().Flush();
                     } catch {
                         //TODO: Se ha desconectado.
                     }
-                    node = node.next;
+                    node = node.Next;
                 } while (node!=null);
 
             } while (true);
@@ -183,7 +182,7 @@ namespace Chat_Virtual___Servidor{
                             if (exist) {
                                 user.GetWriter().WriteLine("SI");
                                 user.GetWriter().Flush();
-                                this.Users.Add(user);
+                                this.Users.AddLast(user);
                                 this.ConsoleAppend("El usuario [" + user.GetName() + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                                 this.InsertTable(user.GetName(), this.Client.Client.RemoteEndPoint.ToString());
                             } else {
@@ -199,7 +198,7 @@ namespace Chat_Virtual___Servidor{
                                 user.GetWriter().WriteLine("SI");
                                 user.GetWriter().Flush();
                                 this.ConsoleAppend("Se ha registrado el usuario [" +user.GetName()+" | "+ this.Client.Client.RemoteEndPoint.ToString() + "] correctamente.");
-                                this.Users.Add(user);
+                                this.Users.AddLast(user);
                                 this.ConsoleAppend("El usuario [" + user.GetName() + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                                 // TODO: Actualizar Tabla.
                             } else {
