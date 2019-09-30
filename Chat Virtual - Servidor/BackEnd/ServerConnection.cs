@@ -7,7 +7,6 @@ using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
-using DataStructures;
 
 namespace Chat_Virtual___Servidor{
     public class ServerConnection{
@@ -20,8 +19,8 @@ namespace Chat_Virtual___Servidor{
         public TcpListener Server { get; set; }
         public GraphicInterface GraphicInterface { get; set; }
         public LinkedList<User> Users { get; set; }
-        public Chain<Group> Groups { get; set; }
-        public LinkedQueue<string> Messages { get; set; }
+        public LinkedList<Group> Groups { get; set; }
+        public LinkedList<string> Messages { get; set; }
         public TcpClient Client { get; set; }
         public IPEndPoint Ip { get; }
 
@@ -51,8 +50,8 @@ namespace Chat_Virtual___Servidor{
             }
             this.Ip = new IPEndPoint(IPAddress.Any, this.settings.port);
             this.Users = new LinkedList<User>();
-            this.Groups = new Chain<Group>();
-            this.Messages = new LinkedQueue<string>();
+            this.Groups = new LinkedList<Group>();
+            this.Messages = new LinkedList<string>();
         }
 
         public void ShutUp() {
@@ -122,8 +121,8 @@ namespace Chat_Virtual___Servidor{
                 }
 
                 if (node.Value.GetStream().DataAvailable) {
-                    this.Messages.Put(node.Value.GetName()+": "+node.Value.GetReader().ReadLine());
-                    this.ConsoleAppend(this.Messages.GetFrontElement());
+                    this.Messages.AddLast(node.Value.GetName()+": "+node.Value.GetReader().ReadLine());
+                    this.ConsoleAppend(this.Messages.First.Value);
                     //TODO: POSIBLES SOLUCITUDES DIFERENTES A MENSAJES.
                 }/*
                 if (node.next == null) {
@@ -139,11 +138,11 @@ namespace Chat_Virtual___Servidor{
             LinkedListNode<User> node;
             string s;
             do {
-                if (this.Messages.IsEmpty()) {
+                if (this.Messages.Count == 0) {
                     continue;
                 } else {
                     node = this.Users.First;
-                    s = this.Messages.GetFrontElement();
+                    s = this.Messages.First.Value;
                     //remover el primero
                 }
                 do {
