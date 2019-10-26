@@ -58,6 +58,12 @@
     <Compile Include="OracleInterface.Designer.cs">
       <DependentUpon>OracleInterface.cs</DependentUpon>
     </Compile>
+    <Compile Include="PetitionTypes\GroupMessage.cs" />
+    <Compile Include="PetitionTypes\PersonalMessage.cs" />
+    <Compile Include="PetitionTypes\Petition.cs" />
+    <Compile Include="PetitionTypes\SignIn.cs" />
+    <Compile Include="PetitionTypes\SignUp.cs" />
+    <Compile Include="Serializer.cs" />
     <Compile Include="ServerConnection.cs" />
     <Compile Include="SocketInterface.cs">
       <SubType>Form</SubType>
