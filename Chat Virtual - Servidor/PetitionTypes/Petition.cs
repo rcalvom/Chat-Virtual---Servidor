@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace Chat_Virtual___Servidor.PetitionTypes {
-    [Serializable]
+﻿namespace Chat_Virtual___Servidor.PetitionTypes {
     public class Petition {
         public byte[] Data { get; set; }
+     
     }
 }

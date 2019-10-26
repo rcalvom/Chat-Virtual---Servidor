@@ -1,58 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Chat_Virtual___Servidor {
     public class User {
-        private NetworkStream Stream;
-        private StreamWriter Writer;
-        private StreamReader Reader;
-        private string Name;
+        public string Name { get; set; }
+        public NetworkStream Stream { get; set; }
+        public BinaryReader Reader { get; set; }
+        public BinaryWriter Writer { get; set; }
 
-        public void SetStream(NetworkStream Stream) {
-            this.Stream = Stream;
-        }
-
-        public NetworkStream GetStream() {
-            return this.Stream;
-        }
-
-        public void SetWriter(StreamWriter Writer) {
-            this.Writer = Writer;
-        }
-
-        public StreamWriter GetWriter() {
-            return this.Writer;
-        }
-
-        public void SetReader(StreamReader Reader) {
-            this.Reader = Reader;
-        }
-
-        public StreamReader GetReader() {
-            return this.Reader;
-        }
-
-        public void SetName(string Name) {
+        public User(string Name, NetworkStream Stream, BinaryWriter Writer, BinaryReader Reader) {
             this.Name = Name;
-        }
-
-        public string GetName() {
-            return this.Name;
-        }
-
-        public User(NetworkStream Stream, StreamWriter Writer, StreamReader Reader) {
             this.Stream = Stream;
             this.Writer = Writer;
             this.Reader = Reader;
         }
 
-        public User() {
+        public User(string Name, NetworkStream Stream) {
+            this.Name = Name;
+            this.Stream = Stream;
+            this.Writer = new BinaryWriter(Stream);
+            this.Reader = new BinaryReader(Stream);
+        }
 
+        public User(NetworkStream Stream) {
+            this.Stream = Stream;
+            this.Writer = new BinaryWriter(Stream);
+            this.Reader = new BinaryReader(Stream);
         }
 
     }

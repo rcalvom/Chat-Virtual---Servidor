@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Chat_Virtual___Servidor.PetitionTypes;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -11,10 +12,8 @@ using System.Threading;
 namespace Chat_Virtual___Servidor{
     public class ServerConnection{
 
-
         private readonly DataBaseConnection Oracle;
         private ConnectionSettings settings;
-
         public bool Connected { get; set; }
         public TcpListener Server { get; set; }
         public GraphicInterface GraphicInterface { get; set; }
@@ -34,7 +33,6 @@ namespace Chat_Virtual___Servidor{
             public int port;
             public int maxUsers;
         }
-
         public ServerConnection(GraphicInterface GraphicInterface) {
             this.Connected = false;
             this.GraphicInterface = GraphicInterface;
@@ -101,16 +99,38 @@ namespace Chat_Virtual___Servidor{
             };
             t1.Start();
             this.ConsoleAppend("Se han comenzado a escuchar solicitudes de conexión entrantes.\n");
-            Thread t2 = new Thread(this.ListenUsers) {
+            /*Thread t2 = new Thread(this.ListenUsers) {
                 IsBackground = true
             };
             t2.Start();
             Thread t3 = new Thread(this.WriteUsers) {
 
             };
-            t3.Start();
+            t3.Start();*/
         }
 
+        private void ListenPetitions() {
+            LinkedListNode<User> node = null;
+            do {
+                if (this.Users.Count == 0) {
+                    continue;
+                } else if (node == null) {
+                    node = this.Users.First;
+                }
+
+                while(node.Value.Stream.DataAvailable) {
+                    
+                }
+                if (node.Next == null) {
+                    node = this.Users.First;
+                } else {
+                    node = node.Next;
+                }
+            } while (true);
+        }
+
+
+        // Este Hilo se va a eliminar para cambiar lo de serializacion.
         private void ListenUsers() {
             LinkedListNode<User> node = null;
             do {
@@ -120,8 +140,8 @@ namespace Chat_Virtual___Servidor{
                     node = this.Users.First;
                 }
 
-                if (node.Value.GetStream().DataAvailable) {
-                    this.Messages.AddLast(node.Value.GetName()+": "+node.Value.GetReader().ReadLine());
+                if (node.Value.Stream.DataAvailable) {
+                    //this.Messages.AddLast(node.Value.Name+": "+node.Value.Reader.ReadLine());
                     this.ConsoleAppend(this.Messages.Last.Value);
                     //TODO: POSIBLES SOLUCITUDES DIFERENTES A MENSAJES.
                 }
@@ -133,6 +153,7 @@ namespace Chat_Virtual___Servidor{
             } while (true);
         }
 
+        // Este Hilo se va a eliminar para cambiar lo de serializacion.
         private void WriteUsers() {
             LinkedListNode<User> node;
             string s;
@@ -146,8 +167,8 @@ namespace Chat_Virtual___Servidor{
                 }
                 do {
                     try {
-                        node.Value.GetWriter().WriteLine(s);
-                        node.Value.GetWriter().Flush();
+                        //node.Value.Writer.WriteLine(s);
+                        node.Value.Writer.Flush();
                     } catch {
                         //TODO: Se ha desconectado.
                     }
@@ -161,58 +182,48 @@ namespace Chat_Virtual___Servidor{
             do {
                 if (this.Server.Pending()) {
                     this.Client = this.Server.AcceptTcpClient();
-                    User user = new User();
-                    user.SetStream(this.Client.GetStream());
-                    user.SetWriter(new StreamWriter(this.Client.GetStream()));
-                    user.SetReader(new StreamReader(this.Client.GetStream()));
-                    string temp = user.GetReader().ReadLine();
-                    user.SetName(user.GetReader().ReadLine());
-                    string pass = user.GetReader().ReadLine();
-                    switch (temp) {
-                        case "InicioSesion":
-                            bool exist = false;
-                            this.Oracle.GetOracleDataBase().ExecuteSQL("SELECT USUARIO,CONTRASENA FROM USUARIOS");
-                            while (this.Oracle.GetOracleDataBase().getDataReader().Read()) {
-                                if (this.Oracle.GetOracleDataBase().getDataReader()["USUARIO"].Equals(user.GetName()) && this.Oracle.GetOracleDataBase().getDataReader()["CONTRASENA"].Equals(pass)) {                                    
-                                    exist = true;
-                                    break;
-                                    // TODO: Emplear Colas o alguna estructura de datos.
-                                }
+                    User user = new User(this.Client.GetStream());
+                    int size = user.Reader.ReadInt32();
+                    object obj = Serializer.Deserialize(user.Reader.ReadBytes(size));
+                    if (obj is SignIn si) {
+                        bool exist = false;
+                        this.Oracle.GetOracleDataBase().ExecuteSQL("SELECT USERNAME,CONTRASENA FROM USUARIO;");
+                        while (this.Oracle.GetOracleDataBase().getDataReader().Read()) {
+                            if (this.Oracle.GetOracleDataBase().getDataReader()["USERNAME"].Equals(si.Name) && this.Oracle.GetOracleDataBase().getDataReader()["CONTRASENA"].Equals(si.Password)) {
+                                exist = true;
+                                break;
                             }
-                            if (exist) {
-                                user.GetWriter().WriteLine("SI");
-                                user.GetWriter().Flush();
-                                this.Users.AddLast(user);
-                                this.ConsoleAppend("El usuario [" + user.GetName() + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
-                                this.InsertTable(user.GetName(), this.Client.Client.RemoteEndPoint.ToString());
-                            } else {
-                                user.GetWriter().WriteLine("NO");
-                                user.GetWriter().Flush();
-                                this.ConsoleAppend("Se ha intentado conectar el remoto ["+this.Client.Client.RemoteEndPoint.ToString() + "] con información de inicio de sesión incorrecta.");
-                                this.Client.Client.Close();
-                                this.Client.Close();
-                            }
-                            break;
-                        case "Registro":
-                            if(this.Oracle.GetOracleDataBase().ExecuteSQL("INSERT INTO USUARIOS VALUES('" + user.GetName() + "','" + pass + "',DEFAULT)")) {
-                                user.GetWriter().WriteLine("SI");
-                                user.GetWriter().Flush();
-                                this.ConsoleAppend("Se ha registrado el usuario [" +user.GetName()+" | "+ this.Client.Client.RemoteEndPoint.ToString() + "] correctamente.");
-                                this.Users.AddLast(user);
-                                this.ConsoleAppend("El usuario [" + user.GetName() + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
-                                // TODO: Actualizar Tabla.
-                            } else {
-                                user.GetWriter().WriteLine("NO");
-                                user.GetWriter().Flush();
-                                this.ConsoleAppend("Se ha intentado registrar el remoto [" + this.Client.Client.RemoteEndPoint.ToString()+"] con un nombre de usuario ya existente.");                                
-                                this.Client.Close();
-                            }
-                            break;
-                        default:
-                            break;
-                    }                             
-                }
-                
+                        }
+                        if (exist) {
+                            user.Name = si.Name;
+                            user.Writer.Write(true);
+                            user.Writer.Flush();
+                            this.Users.AddLast(user); //TODO: Cambiar Implementación.
+                            this.ConsoleAppend("El usuario [" + user.Name + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
+                            this.InsertTable(user.Name, this.Client.Client.RemoteEndPoint.ToString());
+                        } else {
+                            user.Writer.Write(false);
+                            user.Writer.Flush();
+                            this.ConsoleAppend("Se ha intentado conectar el remoto [" + this.Client.Client.RemoteEndPoint.ToString() + "] con información de inicio de sesión incorrecta.");
+                            this.Client.Client.Close();
+                            this.Client.Close();
+                        }
+                    } else if (obj is SignUp su) {
+                        if (this.Oracle.GetOracleDataBase().ExecuteSQL("INSERT INTO USUARIOS VALUES('" + su.Name + "','" + su.Password + "',DEFAULT)")) {
+                            user.Writer.Write(true);
+                            user.Writer.Flush();
+                            this.ConsoleAppend("Se ha registrado el usuario [" + user.Name + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] correctamente.");
+                            this.Users.AddLast(user);
+                            this.ConsoleAppend("El usuario [" + user.Name + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
+                            // TODO: Actualizar Tabla.
+                        } else {
+                            user.Writer.Write(false);
+                            user.Writer.Flush();
+                            this.ConsoleAppend("Se ha intentado registrar el remoto [" + this.Client.Client.RemoteEndPoint.ToString() + "] con un nombre de usuario ya existente.");
+                            this.Client.Close();
+                        }
+                    }
+                } 
             } while (/*this.Connected && this.Users.Count()<this.settings.maxUsers*/true);
         }
 

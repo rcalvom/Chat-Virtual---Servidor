@@ -35,3 +35,4 @@ C:\Users\ricar\Documents\Sadiri\Chat-Virtual---Servidor\Chat Virtual - Servidor\
 C:\Users\ricar\Documents\Sadiri\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat Virtual - Servidor.exe
 C:\Users\ricar\Documents\Sadiri\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat Virtual - Servidor.pdb
 C:\Users\ricar\Documents\Sadiri\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat Virtual - Servidor.csproj.CopyComplete
+C:\Users\ricar\Documents\Sadiri\Chat-Virtual---Servidor\Chat Virtual - Servidor\bin\Debug\DataStructures.dll
