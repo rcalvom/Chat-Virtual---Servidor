@@ -1,5 +1,4 @@
-﻿using ShippingData;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -8,6 +7,7 @@ using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
+using ShippingData;
 
 namespace Chat_Virtual___Servidor{
     public class ServerConnection{
@@ -186,7 +186,7 @@ namespace Chat_Virtual___Servidor{
                             User user = new User(this.Client.GetStream());
                             int size = user.Reader.ReadInt32();
                             object obj = Serializer.Deserialize(user.Reader.ReadBytes(size));
-                            if (obj is SingIn si) {
+                            if (obj is SignIn si) {
                                 bool exist = false;
                                 this.Oracle.GetOracleDataBase().ExecuteSQL("SELECT USERNAME,CONTRASENA FROM USUARIO");
                                 while (this.Oracle.GetOracleDataBase().getDataReader().Read()) {
@@ -209,7 +209,7 @@ namespace Chat_Virtual___Servidor{
                                     this.Client.Client.Close();
                                     this.Client.Close();
                                 }
-                            } else if (obj is SingUp su) {
+                            } else if (obj is SignUp su) {
                                 if (this.Oracle.GetOracleDataBase().ExecuteSQL("INSERT INTO USUARIOS VALUES('" + /*su*/"a" + "','" + /*su.Name*/"b" +"','" + /*su.Password*/"c" + "',SYSDATE)")) {
                                     user.Writer.Write(true);
                                     user.Writer.Flush();
