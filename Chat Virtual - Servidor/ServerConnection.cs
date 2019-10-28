@@ -211,7 +211,8 @@ namespace Chat_Virtual___Servidor{
                                 }
                             } else if (obj is SignUp su) {
                                 if (this.Oracle.GetOracleDataBase().ExecuteSQL("INSERT INTO USUARIOS VALUES('" + /*su*/"a" + "','" + /*su.Name*/"b" +"','" + /*su.Password*/"c" + "',SYSDATE)")) {
-                                    user.Writer.Write(true);
+                                    //Usar los elemento de RequestAnswer y RequestError
+                                    //user.Writer.Write(true);
                                     user.Writer.Flush();
                                     this.ConsoleAppend("Se ha registrado el usuario [" + user.Name + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] correctamente.");
                                     this.Users.AddLast(user);
