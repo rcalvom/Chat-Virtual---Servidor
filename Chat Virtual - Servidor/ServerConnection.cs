@@ -1,4 +1,4 @@
-﻿using Chat_Virtual___Servidor.PetitionTypes;
+﻿using ShippingData;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -186,17 +186,17 @@ namespace Chat_Virtual___Servidor{
                             User user = new User(this.Client.GetStream());
                             int size = user.Reader.ReadInt32();
                             object obj = Serializer.Deserialize(user.Reader.ReadBytes(size));
-                            if (obj is SignIn si) {
+                            if (obj is SingIn si) {
                                 bool exist = false;
-                                this.Oracle.GetOracleDataBase().ExecuteSQL("SELECT USERNAME,CONTRASENA FROM USUARIO;");
+                                this.Oracle.GetOracleDataBase().ExecuteSQL("SELECT USERNAME,CONTRASENA FROM USUARIO");
                                 while (this.Oracle.GetOracleDataBase().getDataReader().Read()) {
-                                    if (this.Oracle.GetOracleDataBase().getDataReader()["USERNAME"].Equals(si.Name) && this.Oracle.GetOracleDataBase().getDataReader()["CONTRASENA"].Equals(si.Password)) {
+                                    if (this.Oracle.GetOracleDataBase().getDataReader()["USERNAME"].Equals(si.user) && this.Oracle.GetOracleDataBase().getDataReader()["CONTRASENA"].Equals(si.password)) {
                                         exist = true;
                                         break;
                                     }
                                 }
                                 if (exist) {
-                                    user.Name = si.Name;
+                                    user.Name = si.user;
                                     user.Writer.Write(true);
                                     user.Writer.Flush();
                                     this.Users.AddLast(user); //TODO: Cambiar Implementación.
@@ -209,8 +209,8 @@ namespace Chat_Virtual___Servidor{
                                     this.Client.Client.Close();
                                     this.Client.Close();
                                 }
-                            } else if (obj is SignUp su) {
-                                if (this.Oracle.GetOracleDataBase().ExecuteSQL("INSERT INTO USUARIOS VALUES('" + su.Username + "','" + su.Name +"','" + su.Password + "',SYSDATE)")) {
+                            } else if (obj is SingUp su) {
+                                if (this.Oracle.GetOracleDataBase().ExecuteSQL("INSERT INTO USUARIOS VALUES('" + /*su*/"a" + "','" + /*su.Name*/"b" +"','" + /*su.Password*/"c" + "',SYSDATE)")) {
                                     user.Writer.Write(true);
                                     user.Writer.Flush();
                                     this.ConsoleAppend("Se ha registrado el usuario [" + user.Name + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] correctamente.");

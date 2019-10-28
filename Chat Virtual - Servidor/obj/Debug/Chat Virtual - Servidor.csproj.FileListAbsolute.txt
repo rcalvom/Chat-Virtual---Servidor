@@ -37,3 +37,4 @@ C:\Users\ricar\Documents\Sadiri\Chat-Virtual---Servidor\Chat Virtual - Servidor\
 C:\Users\ricar\Documents\Sadiri\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat Virtual - Servidor.csproj.CopyComplete
 C:\Users\ricar\Documents\Sadiri\Chat-Virtual---Servidor\Chat Virtual - Servidor\bin\Debug\DataStructures.dll
 C:\Users\ricar\OneDrive\Documentos\GitHub\Chat-Virtual---Servidor\Chat Virtual - Servidor\bin\Debug\DataStructures.dll
+C:\Users\ricar\Documents\Sadiri\Chat-Virtual---Servidor\Chat Virtual - Servidor\bin\Debug\ShippingData.dll
