@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;   
 
 namespace Chat_Virtual___Servidor {
+
     public static class Serializer {
         public static byte[] Serialize(object o) {
             using (var memoryStream = new MemoryStream()) {
