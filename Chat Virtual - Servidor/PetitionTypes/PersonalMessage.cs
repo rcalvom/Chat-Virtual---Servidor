@@ -3,6 +3,7 @@
 namespace Chat_Virtual___Servidor.PetitionTypes {
 
     [Serializable]
-    public class PersonalMessage{
+    public class PersonalMessage : Petition{
+
     }
 }
