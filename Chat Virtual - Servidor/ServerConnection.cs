@@ -180,7 +180,7 @@ namespace Chat_Virtual___Servidor{
 
         private void ListenConnection() {
             do {
-                if (this.Server.Pending()) {
+                //if (this.Server.Pending()) {
                     this.Client = this.Server.AcceptTcpClient();
                     User user = new User(this.Client.GetStream());
                     int size = user.Reader.ReadInt32();
@@ -223,7 +223,7 @@ namespace Chat_Virtual___Servidor{
                             this.Client.Close();
                         }
                     }
-                } 
+                //} 
             } while (/*this.Connected && this.Users.Count()<this.settings.maxUsers*/true);
         }
 
