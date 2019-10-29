@@ -179,58 +179,68 @@ namespace Chat_Virtual___Servidor{
         }
 
         private void ListenConnection() {          
-                do {
-                    //try { 
-                        if (this.Server.Pending()) {
-                            this.Client = this.Server.AcceptTcpClient();
-                            User user = new User(this.Client.GetStream());
-                            int size = user.Reader.ReadInt32();
-                            object obj = Serializer.Deserialize(user.Reader.ReadBytes(size));
-                            if (obj is SignIn si) {
-                                bool exist = false;
-                                this.Oracle.GetOracleDataBase().ExecuteSQL("SELECT USERNAME,CONTRASENA FROM USUARIO");
-                                while (this.Oracle.GetOracleDataBase().getDataReader().Read()) {
-                                    if (this.Oracle.GetOracleDataBase().getDataReader()["USERNAME"].Equals(si.user) && this.Oracle.GetOracleDataBase().getDataReader()["CONTRASENA"].Equals(si.password)) {
-                                        exist = true;
-                                        break;
-                                    }
-                                }
-                                if (exist) {
-                                    user.Name = si.user;
-                                    user.Writer.Write(true);
-                                    user.Writer.Flush();
-                                    this.Users.AddLast(user); //TODO: Cambiar Implementación.
-                                    this.ConsoleAppend("El usuario [" + user.Name + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
-                                    this.InsertTable(user.Name, this.Client.Client.RemoteEndPoint.ToString());
-                                } else {
-                                    user.Writer.Write(false);
-                                    user.Writer.Flush();
-                                    this.ConsoleAppend("Se ha intentado conectar el remoto [" + this.Client.Client.RemoteEndPoint.ToString() + "] con información de inicio de sesión incorrecta.");
-                                    this.Client.Client.Close();
-                                    this.Client.Close();
-                                }
-                            } else if (obj is SignUp su) {
-                                if (this.Oracle.GetOracleDataBase().ExecuteSQL("INSERT INTO USUARIOS VALUES('" + /*su*/"a" + "','" + /*su.Name*/"b" +"','" + /*su.Password*/"c" + "',SYSDATE)")) {
-                                    //Usar los elemento de RequestAnswer y RequestError
-                                    //user.Writer.Write(true);
-                                    user.Writer.Flush();
-                                    this.ConsoleAppend("Se ha registrado el usuario [" + user.Name + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] correctamente.");
-                                    this.Users.AddLast(user);
-                                    this.ConsoleAppend("El usuario [" + user.Name + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
-                                    // TODO: Actualizar Tabla.
-                                } else {
-                                    user.Writer.Write(false);
-                                    user.Writer.Flush();
-                                    this.ConsoleAppend("Se ha intentado registrar el remoto [" + this.Client.Client.RemoteEndPoint.ToString() + "] con un nombre de usuario ya existente.");
-                                    this.Client.Close();
-                                }
-                            } else {
-                                this.ConsoleAppend("No corresponde a ninguna clase conocida.");
+            do {
+                //try { 
+                if (this.Server.Pending()) {
+                    this.Client = this.Server.AcceptTcpClient();
+                    User user = new User(this.Client.GetStream());
+                    int size = user.Reader.ReadInt32();
+                    object obj = Serializer.Deserialize(user.Reader.ReadBytes(size));
+                    if (obj is SignIn si) {
+                        bool exist = false;
+                        this.Oracle.GetOracleDataBase().ExecuteSQL("SELECT USERNAME,CONTRASENA FROM USUARIO");
+                        while (this.Oracle.GetOracleDataBase().getDataReader().Read()) {
+                            if (this.Oracle.GetOracleDataBase().getDataReader()["USERNAME"].Equals(si.user) && this.Oracle.GetOracleDataBase().getDataReader()["CONTRASENA"].Equals(si.password)) {
+                                exist = true;
+                                break;
                             }
                         }
-                /*} catch (Exception) {
+                        if (exist) {
+                            user.Name = si.user;
+                            user.Writer.Write(true);
+                            user.Writer.Flush();
+                            this.Users.AddLast(user); //TODO: Cambiar Implementación.
+                            this.ConsoleAppend("El usuario [" + user.Name + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
+                            this.InsertTable(user.Name, this.Client.Client.RemoteEndPoint.ToString());
+                        } else {
+                            user.Writer.Write(false);
+                            user.Writer.Flush();
+                            this.ConsoleAppend("Se ha intentado conectar el remoto [" + this.Client.Client.RemoteEndPoint.ToString() + "] con información de inicio de sesión incorrecta.");
+                            this.Client.Client.Close();
+                            this.Client.Close();
+                        }
+                    } else if (obj is SignUp su) {
+                        RequestAnswer answer;
+                        LinkedList<Data> toSend = new LinkedList<Data>();
+                        if (this.Oracle.GetOracleDataBase().ExecuteSQL("INSERT INTO USUARIOS VALUES('" + su.name + "','" + /*su.Name*/"b" +"','" + /*su.Password*/"c" + "',SYSDATE)")) {
+                            answer = new RequestAnswer(true);
+                            toSend.AddLast(answer);
+                            user.Writer.Flush();
+                            this.ConsoleAppend("Se ha registrado el usuario [" + user.Name + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] correctamente.");
+                            this.Users.AddLast(user);
+                            this.ConsoleAppend("El usuario [" + user.Name + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
+                            // TODO: Actualizar Tabla.
+                        } else {
+                            answer = new RequestAnswer(false);
+                            toSend.AddFirst(answer);
+                            toSend.AddLast(new RequestError(0));
+                            user.Writer.Flush();
+                            this.ConsoleAppend("Se ha intentado registrar el remoto [" + this.Client.Client.RemoteEndPoint.ToString() + "] con un nombre de usuario ya existente.");
+                            this.Client.Close();
+                        }
+                        while (toSend.Count != 0) {
+                            byte[] op = Serializer.Serialize(toSend.First);
+                            user.Writer.Write(op.Length);
+                            user.Writer.Write(op);
+                            toSend.RemoveFirst();
+                        }
+                    } else {
+                        this.ConsoleAppend("No corresponde a ninguna clase conocida.");
+                    }
+                }
+            /*} catch (Exception) {
 
-                }*/
+            }*/
             } while (true);
         }
 
