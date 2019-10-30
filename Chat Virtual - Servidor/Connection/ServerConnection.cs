@@ -10,14 +10,17 @@ using ShippingData;
 using DataStructures;
 
 namespace Chat_Virtual___Servidor{
+
     public class ServerConnection{
 
         private readonly DataBaseConnection Oracle;
         private ConnectionSettings settings;
         public bool Connected { get; set; }
+        private bool threads;
         public TcpListener Server { get; set; }
         public GraphicInterface GraphicInterface { get; set; }
         public LinkedList<User> Users { get; set; }
+        public LinkedList<User> toInitialize { get; set; }
         public LinkedList<Group> Groups { get; set; }
         public IPEndPoint Ip { get; }
 
@@ -46,7 +49,9 @@ namespace Chat_Virtual___Servidor{
             }
             this.Ip = new IPEndPoint(IPAddress.Any, this.settings.port);
             this.Users = new LinkedList<User>();
+            this.toInitialize = new LinkedList<User>();
             this.Groups = new LinkedList<Group>();
+            threads = false;
         }
 
         public void ShutUp() {
@@ -81,6 +86,7 @@ namespace Chat_Virtual___Servidor{
         }
 
         private void DisconnectSockets() {
+            threads = false;
             this.Server.Stop();
             this.ConsoleAppend("Se ha detenido el servidor correctamente.");
             this.ConsoleAppend("Se han dejado de escuchar solicitudes de conexión entrantes.");
@@ -96,30 +102,34 @@ namespace Chat_Virtual___Servidor{
             };
             t1.Start();
             this.ConsoleAppend("Se han comenzado a escuchar solicitudes de conexión entrantes.\n");
-            Thread t2 = new Thread(this.ListenUsers);
-            t2.Start();
-            Thread t3 = new Thread(this.WriteUsers);
-            t3.Start();
+            threads = true;
+            Thread request = new Thread(this.ExecuteRequest);
+            request.Start();
+            Thread listenUsers = new Thread(this.ListenUsers);
+            listenUsers.Start();
+            Thread writeTo = new Thread(this.WriteUsers);
+            writeTo.Start();
         }
 
-        private void ListenPetitions() {
-            ChainNode<User> node = null;
+        /// <summary>
+        /// Redirige los mensaje y responde a las peticiones de los usuarios
+        /// </summary>
+        private void ExecuteRequest() {
+            ChainNode<User> Node = null;
             do {
-                if (this.Users.IsEmpty()) {
-                    continue;
-                } else if (node == null) {
-                    node = this.Users.GetNode(0);
+                if (this.Users.IsEmpty()) {                     //Verifica que la lista de ususarios no está vacia
+                    continue;                                   //En caso de que lo está continúa con la ejecucion
+                } else if (Node == null) {                      //Verifia si el nodo que tengo es un apuntador nulo
+                    Node = this.Users.GetNode(0);               //En ese caso obtiene el primer nodo de la lista
                 }
 
-                while(node.element.Stream.DataAvailable) {
-                    
+                object data = Node.element.toRead.Dequeue();
+                if (data is ChatMessage ms) {
+                    //mirar el ususario que recibe para reenviarselo y hacer un insert en la tabla
                 }
-                if (node.next == null) {
-                    node = this.Users.GetNode(0);
-                } else {
-                    node = node.next;
-                }
-            } while (true);
+
+                Node = Node.next;
+            } while (threads);
         }
 
 
@@ -135,7 +145,7 @@ namespace Chat_Virtual___Servidor{
 
                 Read(Node.element, false);                      //Intenta leer los datos que estén pendientes para ese usuario
                 Node = Node.next;                               //Avanza al siguiente nodo
-            } while (true);
+            } while (threads);
         }
 
         // Hilo listo con la serializacion implementada
@@ -150,7 +160,7 @@ namespace Chat_Virtual___Servidor{
 
                 Write(Node.element, false);                     //Intenta escribir los datos que estén pendientes para ese usuario
                 Node = Node.next;                               //Avanza al siguiente nodo
-            } while (true);
+            } while (threads);
         }
 
         private void ListenConnection() {          
@@ -175,7 +185,9 @@ namespace Chat_Virtual___Servidor{
                                 newUser.Name = si.user;                                 //Inicializa el nombre de ususario
                                 newUser.toWrite.Enqueue(new RequestAnswer(true));       //Agrega la respuesta a la cola de envío
                                 Write(newUser, true);                                   //Envía la respuesta
-                                this.Users.AddLast(newUser);                            //Agrega el ususario a la lista
+                                this.toInitialize.AddLast(newUser);                     //Agrega el ususario a la de inicialización
+                                Thread initialize = new Thread(initializeUser);
+                                initialize.Start();
                                 this.ConsoleAppend("El usuario [" + newUser.Name + " | " + newUser.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                                 this.InsertTable(newUser.Name, newUser.Client.Client.RemoteEndPoint.ToString());
                             } else {
@@ -184,13 +196,13 @@ namespace Chat_Virtual___Servidor{
                                 Write(newUser, true);                                    //Envía la respuesta
                                 this.ConsoleAppend("Se ha intentado conectar el remoto [" + newUser.Client.Client.RemoteEndPoint.ToString() + "] con información de inicio de sesión incorrecta.");
                                 newUser.Client.Close();
-                                newUser.Client.Close();
                             }
                         } else if (obj is SignUp su) {
                             RequestAnswer answer;
                             if (this.Oracle.GetOracleDataBase().ExecuteSQL("INSERT INTO USUARIOS VALUES('" + su.name + "','" + /*su.Name*/"b" +"','" + /*su.Password*/"c" + "',SYSDATE)")) {
                                 answer = new RequestAnswer(true);
                                 newUser.toWrite.Enqueue(answer);
+                                Write(newUser, true);
                                 this.ConsoleAppend("Se ha registrado el usuario [" + newUser.Name + " | " + newUser.Client.Client.RemoteEndPoint.ToString() + "] correctamente.");
                                 this.Users.AddLast(newUser);
                                 this.ConsoleAppend("El usuario [" + newUser.Name + " | " + newUser.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
@@ -199,10 +211,10 @@ namespace Chat_Virtual___Servidor{
                                 answer = new RequestAnswer(false);
                                 newUser.toWrite.Enqueue(answer);
                                 newUser.toWrite.Enqueue(new RequestError(0));
+                                Write(newUser, true);
                                 this.ConsoleAppend("Se ha intentado registrar el remoto [" + newUser.Client.Client.RemoteEndPoint.ToString() + "] con un nombre de usuario ya existente.");
                                 newUser.Client.Close();
                             }
-                            Write(newUser, true);
                         } else {
                             this.ConsoleAppend("No corresponde a ninguna clase conocida.");
                         }
@@ -211,6 +223,25 @@ namespace Chat_Virtual___Servidor{
                     Console.WriteLine("Con tanto que pudo haber salido mal... pues algo salió mal");
                 }
             } while (true);
+        }
+
+        private void initializeUser() {
+            while (!toInitialize.IsEmpty()) {
+                User user = toInitialize.Remove(0);
+                this.Oracle.GetOracleDataBase().ExecuteSQL("SELECT USERNAME,DESTINATARIO FROM MENSAJE_CHAT");
+                while (this.Oracle.GetOracleDataBase().getDataReader().Read()) {
+                    if (this.Oracle.GetOracleDataBase().getDataReader()["USERNAME"].Equals(user.Name) || this.Oracle.GetOracleDataBase().getDataReader()["DESTINATARIO"].Equals(user.Name)) {
+                        ChatMessage ms = new ChatMessage();
+                        ms.Sender = (string)this.Oracle.GetOracleDataBase().getDataReader()["USERNAME"];
+                        ms.Receiver = (string)this.Oracle.GetOracleDataBase().getDataReader()["DESTINATARIO"];
+                        ms.Content = (string)this.Oracle.GetOracleDataBase().getDataReader()["MENSAJE"];
+                        //falta mirar cosikas de cosikas para que no cargue todos los mensajes alv
+                        user.toWrite.Enqueue(ms);
+                    }
+                }
+
+                Write(user, true);
+            }
         }
 
         public void ShutDown() {
