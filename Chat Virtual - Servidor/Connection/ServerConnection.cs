@@ -125,7 +125,14 @@ namespace Chat_Virtual___Servidor{
 
                 object data = Node.element.toRead.Dequeue();
                 if (data is ChatMessage ms) {
-                    //mirar el ususario que recibe para reenviarselo y hacer un insert en la tabla
+                    ChainNode<User> receiver = Users.GetNode(0);
+                    while (!(receiver.element.Name.Equals(ms.Receiver) || receiver.next == null))
+                        receiver = receiver.next;
+                    if (receiver.element.Name.Equals(ms.Receiver))
+                        receiver.element.toWrite.Enqueue(ms);
+                    //falta hacer el insert a la tabla
+                } else if (data is ChatGroup chatGroup) {
+                    //hay que mirar en la tabla y ver que usuarios están en el grupo para enviarles el mensaje
                 }
 
                 Node = Node.next;
