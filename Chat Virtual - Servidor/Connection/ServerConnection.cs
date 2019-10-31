@@ -185,9 +185,9 @@ namespace Chat_Virtual___Servidor{
                                 newUser.Name = si.user;                                 //Inicializa el nombre de ususario
                                 newUser.toWrite.Enqueue(new RequestAnswer(true));       //Agrega la respuesta a la cola de envío
                                 Write(newUser, true);                                   //Envía la respuesta
-                                this.toInitialize.AddLast(newUser);                     //Agrega el ususario a la de inicialización
-                                Thread initialize = new Thread(initializeUser);
-                                initialize.Start();
+                                this.Users.AddLast(newUser);                            //Agrega el ususario a la de inicialización
+                                /*Thread initialize = new Thread(InitializeUser);
+                                initialize.Start();*/
                                 this.ConsoleAppend("El usuario [" + newUser.Name + " | " + newUser.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                                 this.InsertTable(newUser.Name, newUser.Client.Client.RemoteEndPoint.ToString());
                             } else {
@@ -225,24 +225,36 @@ namespace Chat_Virtual___Servidor{
             } while (true);
         }
 
-        private void initializeUser() {
+        /// <summary>
+        /// Esta funcion se usa para que cuando un usuario inicie sesión el servidor le envíe unas mensajes, chats y publicaciones para mostrarlos en la interfaz
+        /// </summary>
+        /*private void InitializeUser() {
             while (!toInitialize.IsEmpty()) {
                 User user = toInitialize.Remove(0);
-                this.Oracle.GetOracleDataBase().ExecuteSQL("SELECT USERNAME,DESTINATARIO FROM MENSAJE_CHAT");
+                this.Oracle.GetOracleDataBase().ExecuteSQL("SELECT * FROM MENSAJE_CHAT WHERE USERNAME = " + user.Name + " OR DESTINATARIO = " + user.Name);
                 while (this.Oracle.GetOracleDataBase().getDataReader().Read()) {
-                    if (this.Oracle.GetOracleDataBase().getDataReader()["USERNAME"].Equals(user.Name) || this.Oracle.GetOracleDataBase().getDataReader()["DESTINATARIO"].Equals(user.Name)) {
-                        ChatMessage ms = new ChatMessage();
-                        ms.Sender = (string)this.Oracle.GetOracleDataBase().getDataReader()["USERNAME"];
-                        ms.Receiver = (string)this.Oracle.GetOracleDataBase().getDataReader()["DESTINATARIO"];
-                        ms.Content = (string)this.Oracle.GetOracleDataBase().getDataReader()["MENSAJE"];
-                        //falta mirar cosikas de cosikas para que no cargue todos los mensajes alv
-                        user.toWrite.Enqueue(ms);
+                    ChatMessage ms = new ChatMessage();
+                    ms.Sender = (string)this.Oracle.GetOracleDataBase().getDataReader()["USERNAME"];
+                    ms.Receiver = (string)this.Oracle.GetOracleDataBase().getDataReader()["DESTINATARIO"];
+                    ms.Content = (string)this.Oracle.GetOracleDataBase().getDataReader()["MENSAJE"];
+                    //falta mirar cosikas de cosikas para que no cargue todos los mensajes alv
+                    user.toWrite.Enqueue(ms);
+                }
+                this.Oracle.GetOracleDataBase().ExecuteSQL("SELECT ID_GRUPO FROM PERTENENCIA_GRUPO WHERE USERNAME = " + user.Name);
+                LinkedList<int> idGroups = new LinkedList<int>();
+                while (this.Oracle.GetOracleDataBase().getDataReader().Read()) {
+                    idGroups.Add((int)this.Oracle.GetOracleDataBase().getDataReader()["ID_GRUPO"]);             //Selecciona y añade a la lista todos los id de los grupos a los que pertenezca el usuario
+                }
+                while (!idGroups.IsEmpty()) {
+                    this.Oracle.GetOracleDataBase().ExecuteSQL("SELECT GROUPNAME FROM GRUPO WHERE ID_GRUPO = " + idGroups.Remove(0));
+                    while (this.Oracle.GetOracleDataBase().getDataReader().Read()) {
+
                     }
                 }
 
                 Write(user, true);
             }
-        }
+        }*/
 
         public void ShutDown() {
             try {
