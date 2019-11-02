@@ -10,30 +10,28 @@ namespace Chat_Virtual___Servidor {
         public NetworkStream Stream { get; set; }
         public BinaryReader Reader { get; set; }
         public BinaryWriter Writer { get; set; }
-        public LinkedQueue<Data> toWrite { get; set; }
-        public LinkedQueue<Data> toRead { get; set; }
+        public LinkedQueue<Data> WritingQueue { get; set; }
+        public LinkedQueue<Data> ReadingQueue { get; set; }
 
         public User() {
             this.Client = new TcpClient();
-            toRead = new LinkedQueue<Data>();
-            toWrite = new LinkedQueue<Data>();
+            this.ReadingQueue = new LinkedQueue<Data>();
+            this.WritingQueue = new LinkedQueue<Data>();
         }
         public User(string Name) {
             this.Name = Name;
             this.Client = new TcpClient();
-            toRead = new LinkedQueue<Data>();
-            toWrite = new LinkedQueue<Data>();
+            this.ReadingQueue = new LinkedQueue<Data>();
+            this.WritingQueue = new LinkedQueue<Data>();
         }
 
-        /// <summary>
-        /// Inicializa el stream el Writer y el reader en base al cliente que ya se tenga conectado
-        /// </summary>
-        public void SetStreams() {
+        public User(TcpClient Client) {
+            this.Client = Client;
             this.Stream = Client.GetStream();
-            Writer = new BinaryWriter(Stream);
-            Reader = new BinaryReader(Stream);
-            toRead = new LinkedQueue<Data>();
-            toWrite = new LinkedQueue<Data>();
+            this.Writer = new BinaryWriter(this.Stream);
+            this.Reader = new BinaryReader(this.Stream);
+            this.ReadingQueue = new LinkedQueue<Data>();
+            this.WritingQueue = new LinkedQueue<Data>();
         }
     }
 }

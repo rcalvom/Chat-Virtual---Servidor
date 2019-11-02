@@ -1,5 +1,5 @@
 ﻿namespace Chat_Virtual___Servidor {
-    partial class OracleInterface {
+    partial class OracleConfigInterface {
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -40,26 +40,29 @@
             // 
             // BCancel
             // 
+            this.BCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.BCancel.Location = new System.Drawing.Point(12, 215);
             this.BCancel.Name = "BCancel";
             this.BCancel.Size = new System.Drawing.Size(75, 23);
             this.BCancel.TabIndex = 0;
-            this.BCancel.Text = "Cancelar.";
+            this.BCancel.Text = "Cancelar";
             this.BCancel.UseVisualStyleBackColor = true;
+            this.BCancel.Click += new System.EventHandler(this.Cancel_Click);
             // 
             // LTitle
             // 
             this.LTitle.AutoSize = true;
-            this.LTitle.Location = new System.Drawing.Point(70, 25);
+            this.LTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LTitle.Location = new System.Drawing.Point(35, 29);
             this.LTitle.Name = "LTitle";
-            this.LTitle.Size = new System.Drawing.Size(171, 13);
+            this.LTitle.Size = new System.Drawing.Size(250, 16);
             this.LTitle.TabIndex = 1;
             this.LTitle.Text = "Configuración de la base de datos.";
             // 
             // LIp
             // 
             this.LIp.AutoSize = true;
-            this.LIp.Location = new System.Drawing.Point(33, 70);
+            this.LIp.Location = new System.Drawing.Point(18, 70);
             this.LIp.Name = "LIp";
             this.LIp.Size = new System.Drawing.Size(19, 13);
             this.LIp.TabIndex = 2;
@@ -68,7 +71,7 @@
             // LPort
             // 
             this.LPort.AutoSize = true;
-            this.LPort.Location = new System.Drawing.Point(33, 95);
+            this.LPort.Location = new System.Drawing.Point(18, 95);
             this.LPort.Name = "LPort";
             this.LPort.Size = new System.Drawing.Size(41, 13);
             this.LPort.TabIndex = 3;
@@ -77,7 +80,7 @@
             // LService
             // 
             this.LService.AutoSize = true;
-            this.LService.Location = new System.Drawing.Point(33, 119);
+            this.LService.Location = new System.Drawing.Point(18, 119);
             this.LService.Name = "LService";
             this.LService.Size = new System.Drawing.Size(48, 13);
             this.LService.TabIndex = 4;
@@ -89,13 +92,14 @@
             this.BSave.Name = "BSave";
             this.BSave.Size = new System.Drawing.Size(75, 23);
             this.BSave.TabIndex = 5;
-            this.BSave.Text = "Guardar.";
+            this.BSave.Text = "Guardar";
             this.BSave.UseVisualStyleBackColor = true;
+            this.BSave.Click += new System.EventHandler(this.Save_Click);
             // 
             // LUser
             // 
             this.LUser.AutoSize = true;
-            this.LUser.Location = new System.Drawing.Point(33, 143);
+            this.LUser.Location = new System.Drawing.Point(18, 143);
             this.LUser.Name = "LUser";
             this.LUser.Size = new System.Drawing.Size(46, 13);
             this.LUser.TabIndex = 6;
@@ -104,7 +108,7 @@
             // LPassword
             // 
             this.LPassword.AutoSize = true;
-            this.LPassword.Location = new System.Drawing.Point(33, 170);
+            this.LPassword.Location = new System.Drawing.Point(18, 170);
             this.LPassword.Name = "LPassword";
             this.LPassword.Size = new System.Drawing.Size(64, 13);
             this.LPassword.TabIndex = 7;
@@ -112,44 +116,48 @@
             // 
             // TBIp
             // 
-            this.TBIp.Location = new System.Drawing.Point(200, 67);
+            this.TBIp.Location = new System.Drawing.Point(185, 67);
             this.TBIp.Name = "TBIp";
             this.TBIp.Size = new System.Drawing.Size(100, 20);
             this.TBIp.TabIndex = 8;
             // 
             // TBPort
             // 
-            this.TBPort.Location = new System.Drawing.Point(200, 95);
+            this.TBPort.Location = new System.Drawing.Point(185, 95);
             this.TBPort.Name = "TBPort";
             this.TBPort.Size = new System.Drawing.Size(100, 20);
             this.TBPort.TabIndex = 9;
             // 
             // TBService
             // 
-            this.TBService.Location = new System.Drawing.Point(200, 121);
+            this.TBService.Location = new System.Drawing.Point(185, 121);
             this.TBService.Name = "TBService";
             this.TBService.Size = new System.Drawing.Size(100, 20);
             this.TBService.TabIndex = 10;
             // 
             // TBUser
             // 
-            this.TBUser.Location = new System.Drawing.Point(200, 147);
+            this.TBUser.Location = new System.Drawing.Point(185, 147);
             this.TBUser.Name = "TBUser";
             this.TBUser.Size = new System.Drawing.Size(100, 20);
             this.TBUser.TabIndex = 11;
             // 
             // TBPassword
             // 
-            this.TBPassword.Location = new System.Drawing.Point(200, 173);
+            this.TBPassword.Location = new System.Drawing.Point(185, 173);
             this.TBPassword.Name = "TBPassword";
+            this.TBPassword.PasswordChar = '*';
             this.TBPassword.Size = new System.Drawing.Size(100, 20);
             this.TBPassword.TabIndex = 12;
             this.TBPassword.UseSystemPasswordChar = true;
             // 
-            // OracleInterface
+            // OracleConfigInterface
             // 
+            this.AcceptButton = this.BSave;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.CancelButton = this.BCancel;
             this.ClientSize = new System.Drawing.Size(312, 250);
             this.Controls.Add(this.TBPassword);
             this.Controls.Add(this.TBUser);
@@ -164,7 +172,9 @@
             this.Controls.Add(this.LIp);
             this.Controls.Add(this.LTitle);
             this.Controls.Add(this.BCancel);
-            this.Name = "OracleInterface";
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+            this.Name = "OracleConfigInterface";
             this.Text = "Configuración de la Base de datos.";
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -181,10 +191,10 @@
         private System.Windows.Forms.Button BSave;
         private System.Windows.Forms.Label LUser;
         private System.Windows.Forms.Label LPassword;
-        private System.Windows.Forms.TextBox TBIp;
-        private System.Windows.Forms.TextBox TBPort;
-        private System.Windows.Forms.TextBox TBService;
-        private System.Windows.Forms.TextBox TBUser;
-        private System.Windows.Forms.TextBox TBPassword;
+        public System.Windows.Forms.TextBox TBIp;
+        public System.Windows.Forms.TextBox TBPort;
+        public System.Windows.Forms.TextBox TBService;
+        public System.Windows.Forms.TextBox TBUser;
+        public System.Windows.Forms.TextBox TBPassword;
     }
 }

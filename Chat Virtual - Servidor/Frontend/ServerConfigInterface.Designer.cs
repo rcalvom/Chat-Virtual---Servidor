@@ -1,5 +1,5 @@
 ﻿namespace Chat_Virtual___Servidor {
-    partial class SocketInterface {
+    partial class ServerConfigInterface {
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -35,11 +35,12 @@
             // LTitle
             // 
             this.LTitle.AutoSize = true;
-            this.LTitle.Location = new System.Drawing.Point(62, 25);
+            this.LTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LTitle.Location = new System.Drawing.Point(44, 28);
             this.LTitle.Name = "LTitle";
-            this.LTitle.Size = new System.Drawing.Size(143, 13);
+            this.LTitle.Size = new System.Drawing.Size(196, 16);
             this.LTitle.TabIndex = 0;
-            this.LTitle.Text = "Configuracion de los sockets";
+            this.LTitle.Text = "Configuracion del Servidor.";
             // 
             // LMaxUsers
             // 
@@ -63,7 +64,7 @@
             // 
             this.TBPort.Location = new System.Drawing.Point(19, 100);
             this.TBPort.Name = "TBPort";
-            this.TBPort.Size = new System.Drawing.Size(100, 20);
+            this.TBPort.Size = new System.Drawing.Size(89, 20);
             this.TBPort.TabIndex = 3;
             // 
             // TBMaxUsers
@@ -81,20 +82,26 @@
             this.BSave.TabIndex = 5;
             this.BSave.Text = "Guardar.";
             this.BSave.UseVisualStyleBackColor = true;
+            this.BSave.Click += new System.EventHandler(this.Save_Click);
             // 
             // BCancel
             // 
+            this.BCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.BCancel.Location = new System.Drawing.Point(19, 150);
             this.BCancel.Name = "BCancel";
             this.BCancel.Size = new System.Drawing.Size(75, 23);
             this.BCancel.TabIndex = 6;
             this.BCancel.Text = "Cancelar.";
             this.BCancel.UseVisualStyleBackColor = true;
+            this.BCancel.Click += new System.EventHandler(this.Cancel_Click);
             // 
-            // SocketInterface
+            // ServerConfigInterface
             // 
+            this.AcceptButton = this.BSave;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.CancelButton = this.BCancel;
             this.ClientSize = new System.Drawing.Size(268, 185);
             this.Controls.Add(this.BCancel);
             this.Controls.Add(this.BSave);
@@ -103,8 +110,10 @@
             this.Controls.Add(this.LPort);
             this.Controls.Add(this.LMaxUsers);
             this.Controls.Add(this.LTitle);
-            this.Name = "SocketInterface";
-            this.Text = "Configuración de los sockets";
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+            this.Name = "ServerConfigInterface";
+            this.Text = "Configuración del servidor";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -115,9 +124,9 @@
         private System.Windows.Forms.Label LTitle;
         private System.Windows.Forms.Label LMaxUsers;
         private System.Windows.Forms.Label LPort;
-        private System.Windows.Forms.TextBox TBPort;
-        private System.Windows.Forms.TextBox TBMaxUsers;
         private System.Windows.Forms.Button BSave;
         private System.Windows.Forms.Button BCancel;
+        public System.Windows.Forms.TextBox TBPort;
+        public System.Windows.Forms.TextBox TBMaxUsers;
     }
 }

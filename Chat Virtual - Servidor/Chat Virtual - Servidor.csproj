@@ -53,20 +53,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Frontend\InformationInterface.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Frontend\InformationInterface.Designer.cs">
+      <DependentUpon>InformationInterface.cs</DependentUpon>
+    </Compile>
     <Compile Include="Group.cs" />
     <Compile Include="Connection\DataBaseConnection.cs" />
-    <Compile Include="Frontend\OracleInterface.cs">
+    <Compile Include="Frontend\OracleConfigInterface.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Frontend\OracleInterface.Designer.cs">
-      <DependentUpon>OracleInterface.cs</DependentUpon>
+    <Compile Include="Frontend\OracleConfigInterface.Designer.cs">
+      <DependentUpon>OracleConfigInterface.cs</DependentUpon>
     </Compile>
     <Compile Include="Connection\ServerConnection.cs" />
-    <Compile Include="Frontend\SocketInterface.cs">
+    <Compile Include="Frontend\ServerConfigInterface.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Frontend\SocketInterface.Designer.cs">
-      <DependentUpon>SocketInterface.cs</DependentUpon>
+    <Compile Include="Frontend\ServerConfigInterface.Designer.cs">
+      <DependentUpon>ServerConfigInterface.cs</DependentUpon>
     </Compile>
     <Compile Include="Frontend\GraphicInterface.cs">
       <SubType>Form</SubType>
@@ -81,8 +87,11 @@
     <EmbeddedResource Include="Frontend\GraphicInterface.resx">
       <DependentUpon>GraphicInterface.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Frontend\OracleInterface.resx">
-      <DependentUpon>OracleInterface.cs</DependentUpon>
+    <EmbeddedResource Include="Frontend\InformationInterface.resx">
+      <DependentUpon>InformationInterface.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Frontend\OracleConfigInterface.resx">
+      <DependentUpon>OracleConfigInterface.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -93,8 +102,8 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="Frontend\SocketInterface.resx">
-      <DependentUpon>SocketInterface.cs</DependentUpon>
+    <EmbeddedResource Include="Frontend\ServerConfigInterface.resx">
+      <DependentUpon>ServerConfigInterface.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

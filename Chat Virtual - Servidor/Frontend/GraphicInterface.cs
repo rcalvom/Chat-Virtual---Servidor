@@ -1,5 +1,5 @@
-﻿using System;
-using System.Data;
+﻿using Chat_Virtual___Servidor.Frontend;
+using System;
 using System.Globalization;
 using System.Windows.Forms;
 
@@ -8,27 +8,21 @@ namespace Chat_Virtual___Servidor {
     public partial class GraphicInterface : Form {
 
         private readonly ServerConnection Server;
-        private readonly DataTable UserTable;
-
-        private delegate void LogConsoleAppend(string text);
+        private delegate void DLogConsoleAppend(string text);
 
         public GraphicInterface(){
             this.InitializeComponent();
-            this.UserTable = new DataTable();
             this.Server = new ServerConnection(this);
             this.ConsoleAppend("Hola, Bienvenido al servidor de SADIRI.\n");
         }
 
         private void ExitEvent(object sender, EventArgs e){
+            this.Server.ShutDown();
             Application.Exit();
         }
 
         private void InfoEvent(object sender, EventArgs e){
-            MessageBox.Show("Aplicación creada por\n\n" +
-                "Ricardo Andrés Calvo\n" +
-                "Samuel González Nisperuza\n" +
-                "Juan Diego Preciado\n");
-            //TODO: Mejorar Cuadro Emergente
+            new InformationInterface().ShowDialog();
         }
 
         private void ButtonEvent(object sender, EventArgs e){
@@ -41,12 +35,19 @@ namespace Chat_Virtual___Servidor {
 
         private void ConsoleAppend(string text) {
             if(this.LogConsole.InvokeRequired) {
-                var d = new LogConsoleAppend(this.ConsoleAppend);
+                DLogConsoleAppend d = new DLogConsoleAppend(this.ConsoleAppend);
                 this.LogConsole.Invoke(d, new object[] { text });
             } else {
                 this.LogConsole.AppendText("["+DateTime.Now.ToString(new CultureInfo("en-GB")) + "] "+ text + "\n");
             }
         }
 
+        private void ServerConfig_Click(object sender, EventArgs e) {
+            new ServerConfigInterface().ShowDialog();
+        }
+
+        private void OracleConfig_Click(object sender, EventArgs e) {
+            new OracleConfigInterface().ShowDialog();
+        }
     }
 }

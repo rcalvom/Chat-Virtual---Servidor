@@ -27,11 +27,11 @@
         private void InitializeComponent()
         {
             this.Button = new System.Windows.Forms.Button();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.MenuBar = new System.Windows.Forms.MenuStrip();
             this.archivoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.salirToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.configuraciónToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.socketsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.serverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.oracleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ayudaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.informaciónToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -40,11 +40,11 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.UsersTable = new System.Windows.Forms.DataGridView();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.dataGridView2 = new System.Windows.Forms.DataGridView();
             this.Usuario = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Ip = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.menuStrip1.SuspendLayout();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.dataGridView2 = new System.Windows.Forms.DataGridView();
+            this.MenuBar.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.UsersTable)).BeginInit();
@@ -62,17 +62,17 @@
             this.Button.UseVisualStyleBackColor = true;
             this.Button.Click += new System.EventHandler(this.ButtonEvent);
             // 
-            // menuStrip1
+            // MenuBar
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.archivoToolStripMenuItem,
             this.configuraciónToolStripMenuItem,
             this.ayudaToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(800, 24);
-            this.menuStrip1.TabIndex = 2;
-            this.menuStrip1.Text = "menuStrip1";
+            this.MenuBar.Location = new System.Drawing.Point(0, 0);
+            this.MenuBar.Name = "MenuBar";
+            this.MenuBar.Size = new System.Drawing.Size(800, 24);
+            this.MenuBar.TabIndex = 2;
+            this.MenuBar.Text = "menuStrip1";
             // 
             // archivoToolStripMenuItem
             // 
@@ -95,25 +95,27 @@
             // configuraciónToolStripMenuItem
             // 
             this.configuraciónToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.socketsToolStripMenuItem,
+            this.serverToolStripMenuItem,
             this.oracleToolStripMenuItem});
             this.configuraciónToolStripMenuItem.Name = "configuraciónToolStripMenuItem";
             this.configuraciónToolStripMenuItem.Size = new System.Drawing.Size(95, 20);
             this.configuraciónToolStripMenuItem.Text = "Configuración";
             // 
-            // socketsToolStripMenuItem
+            // serverToolStripMenuItem
             // 
-            this.socketsToolStripMenuItem.Name = "socketsToolStripMenuItem";
-            this.socketsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
-            this.socketsToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
-            this.socketsToolStripMenuItem.Text = "Sockets";
+            this.serverToolStripMenuItem.Name = "serverToolStripMenuItem";
+            this.serverToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
+            this.serverToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.serverToolStripMenuItem.Text = "Servidor";
+            this.serverToolStripMenuItem.Click += new System.EventHandler(this.ServerConfig_Click);
             // 
             // oracleToolStripMenuItem
             // 
             this.oracleToolStripMenuItem.Name = "oracleToolStripMenuItem";
             this.oracleToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F7;
-            this.oracleToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.oracleToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.oracleToolStripMenuItem.Text = "Oracle";
+            this.oracleToolStripMenuItem.Click += new System.EventHandler(this.OracleConfig_Click);
             // 
             // ayudaToolStripMenuItem
             // 
@@ -184,6 +186,20 @@
             this.UsersTable.Size = new System.Drawing.Size(279, 279);
             this.UsersTable.TabIndex = 0;
             // 
+            // Usuario
+            // 
+            this.Usuario.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Usuario.HeaderText = "Usuario";
+            this.Usuario.Name = "Usuario";
+            this.Usuario.ReadOnly = true;
+            // 
+            // Ip
+            // 
+            this.Ip.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Ip.HeaderText = "Dirección Ip";
+            this.Ip.Name = "Ip";
+            this.Ip.ReadOnly = true;
+            // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.dataGridView2);
@@ -203,20 +219,6 @@
             this.dataGridView2.Size = new System.Drawing.Size(279, 279);
             this.dataGridView2.TabIndex = 0;
             // 
-            // Usuario
-            // 
-            this.Usuario.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.Usuario.HeaderText = "Usuario";
-            this.Usuario.Name = "Usuario";
-            this.Usuario.ReadOnly = true;
-            // 
-            // Ip
-            // 
-            this.Ip.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.Ip.HeaderText = "Dirección Ip";
-            this.Ip.Name = "Ip";
-            this.Ip.ReadOnly = true;
-            // 
             // GraphicInterface
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -226,14 +228,14 @@
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.LogConsole);
             this.Controls.Add(this.Servidor);
-            this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.MenuBar);
             this.Controls.Add(this.Button);
-            this.MainMenuStrip = this.menuStrip1;
+            this.MainMenuStrip = this.MenuBar;
             this.MaximizeBox = false;
             this.Name = "GraphicInterface";
             this.Text = "Chat Virtual - Servidor";
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
+            this.MenuBar.ResumeLayout(false);
+            this.MenuBar.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.UsersTable)).EndInit();
@@ -245,7 +247,6 @@
         }
 
         #endregion
-        private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem archivoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem salirToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ayudaToolStripMenuItem;
@@ -255,14 +256,15 @@
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.DataGridView dataGridView2;
-        private System.Windows.Forms.ToolStripMenuItem configuraciónToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem socketsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem serverToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem oracleToolStripMenuItem;
         public System.Windows.Forms.RichTextBox LogConsole;
         public System.Windows.Forms.Button Button;
         private System.Windows.Forms.DataGridViewTextBoxColumn Usuario;
         private System.Windows.Forms.DataGridViewTextBoxColumn Ip;
         public System.Windows.Forms.DataGridView UsersTable;
+        public System.Windows.Forms.ToolStripMenuItem configuraciónToolStripMenuItem;
+        public System.Windows.Forms.MenuStrip MenuBar;
     }
 }
 
