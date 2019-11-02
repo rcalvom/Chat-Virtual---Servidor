@@ -18,16 +18,13 @@ namespace Chat_Virtual___Servidor {
             public string Password;
         }
 
-        public OracleConfigInterface() {
-            this.InitializeComponent();
+        public static void InitSettings() {
             if (File.Exists("OracleSettings.config")) {
                 IFormatter formatter = new BinaryFormatter();
                 Stream stream = new FileStream("OracleSettings.config", FileMode.Open, FileAccess.Read);
                 try {
                     Settings = (ConnectionSettings)formatter.Deserialize(stream);
-                } catch (Exception) {
-
-                }
+                } catch (Exception) { }
                 stream.Close();
             } else {
                 Settings.Ip = "localhost";
@@ -36,6 +33,10 @@ namespace Chat_Virtual___Servidor {
                 Settings.User = "Sadiri";
                 Settings.Password = "123456";
             }
+        }
+
+        public OracleConfigInterface() {
+            this.InitializeComponent();
             this.TBIp.Text = Settings.Ip;
             this.TBPort.Text = Settings.Port;
             this.TBService.Text = Settings.Service;

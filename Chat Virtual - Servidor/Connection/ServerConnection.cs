@@ -1,13 +1,10 @@
-﻿using System;
+﻿using DataStructures;
+using ShippingData;
+using System;
 using System.Globalization;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
-using ShippingData;
-using DataStructures;
 
 namespace Chat_Virtual___Servidor {
 
@@ -29,12 +26,15 @@ namespace Chat_Virtual___Servidor {
         private delegate void DDataGridViewPush(string name, string ip);
         private delegate void DDataGridViewPop(string name);
         private delegate void DMenuEnable(bool flag);
+        private delegate void DAlterTable(string name, string ip);
 
         /// <summary>
         /// Constructor. Inicializa la instancia para poder ser posteriormente utilizada como servidor.
         /// </summary>
         /// <param name="GraphicInterface">Referencia al a interfaz gráfica.</param>
         public ServerConnection(GraphicInterface GraphicInterface) {
+            OracleConfigInterface.InitSettings();
+            ServerConfigInterface.InitSettings();
             this.Connected = false;
             this.GraphicInterface = GraphicInterface;
             this.Oracle = new DataBaseConnection(this.GraphicInterface);
@@ -77,6 +77,7 @@ namespace Chat_Virtual___Servidor {
         private void Connect() {
             this.MenuEnable(false);
             this.ButtonEnable(false);
+            this.Connected = true;
             try {
                 this.ConnectListener();
             } catch (Exception ex) {
@@ -84,6 +85,7 @@ namespace Chat_Virtual___Servidor {
                 this.ConsoleAppend("Servidor no inicializado.");
                 this.ButtonEnable(true);
                 this.MenuEnable(true);
+                this.Connected = false;
                 return;
             }
             try {
@@ -94,9 +96,9 @@ namespace Chat_Virtual___Servidor {
                 this.DisconnectListener();
                 this.ButtonEnable(true);
                 this.MenuEnable(true);
+                this.Connected = false;
                 return;
             }
-            this.Connected = true;
             this.ConsoleAppend("Servidor inicializado correctamente.\n");
             this.ButtonText("Apagar Servidor");
             this.ButtonEnable(true);
@@ -162,6 +164,10 @@ namespace Chat_Virtual___Servidor {
                     // TODO: falta hacer el insert a la tabla
                 } /*else if (data is ChatGroup chatGroup) {
                     //hay que mirar en la tabla y ver que usuarios están en el grupo para enviarles el mensaje
+                }else if (data is DisconnectRequest dr) {
+                    this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha desconectado del servidor.");
+                    this.Users.Remove(Node);
+                    this.DeleteTable(Node.element.Name);
                 }*/
                 Node = Node.next;
             } while (this.Connected);
@@ -194,7 +200,7 @@ namespace Chat_Virtual___Servidor {
                 } else if (Node == null) {                      //Verifia si el nodo que tengo es un apuntador nulo
                     Node = this.Users.GetNode(0);               //En ese caso obtiene el primer nodo de la lista
                 }
-                this.Write(Node.element);                            //Intenta escribir los datos que estén pendientes para ese usuario
+                this.Write(Node.element);                       //Intenta escribir los datos que estén pendientes para ese usuario
                 Node = Node.next;                               //Avanza al siguiente nodo
             } while (this.Connected);
         }
@@ -212,8 +218,8 @@ namespace Chat_Virtual___Servidor {
                         if (obj is SignIn si) {
                             bool exist = false;
                             this.Oracle.Oracle.ExecuteSQL("SELECT USERNAME,CONTRASENA FROM USUARIO");
-                            while (this.Oracle.Oracle.getDataReader().Read()) {
-                                if (this.Oracle.Oracle.getDataReader()["USERNAME"].Equals(si.user) && this.Oracle.Oracle.getDataReader()["CONTRASENA"].Equals(si.password)) {
+                            while (this.Oracle.Oracle.DataReader.Read()) {
+                                if (this.Oracle.Oracle.DataReader["USERNAME"].Equals(si.user) && this.Oracle.Oracle.DataReader["CONTRASENA"].Equals(si.password)) {
                                     exist = true;
                                     break;
                                 }
@@ -222,7 +228,7 @@ namespace Chat_Virtual___Servidor {
                                 U.Name = si.user;                                       //Inicializa el nombre de ususario
                                 U.WritingQueue.Enqueue(new RequestAnswer(true));        //Agrega la respuesta a la cola de envío
                                 this.Write(U);                                         //Envía la respuesta
-                                this.Users.AddLast(U);                                  //Agrega el ususario a la de inicialización
+                                this.Users.Add(U);                                  //Agrega el ususario a la de inicialización
                                 this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                                 this.InsertTable(U.Name, U.Client.Client.RemoteEndPoint.ToString());
                             } else {
@@ -234,12 +240,12 @@ namespace Chat_Virtual___Servidor {
                             }
                         } else if (obj is SignUp su) {
                             RequestAnswer answer;
-                            if (this.Oracle.Oracle.ExecuteSQL("INSERT INTO USUARIOS VALUES('" /*+ su.username*/ + "','" /*+ su.Name*/ + "','" /*+ su.password*/ + "',SYSDATE)")) {
+                            if (this.Oracle.Oracle.ExecuteSQL("INSERT INTO USUARIOS VALUES('" + su.userName + "','" + su.name + "','" + su.password + "',SYSDATE)")) {
                                 answer = new RequestAnswer(true);
                                 U.WritingQueue.Enqueue(answer);
                                 this.Write(U);
                                 this.ConsoleAppend("Se ha registrado el usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] correctamente.");
-                                this.Users.AddLast(U);
+                                this.Users.Add(U);
                                 this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                                 this.InsertTable(U.Name, U.Client.Client.RemoteEndPoint.ToString());
                             } else {
@@ -250,7 +256,21 @@ namespace Chat_Virtual___Servidor {
                                 this.ConsoleAppend("Se ha intentado registrar el remoto [" + U.Client.Client.RemoteEndPoint.ToString() + "] con un nombre de usuario ya existente.");
                                 U.Client.Close();
                             }
-                        } else {
+                        } /*else if (obj is ConnectionTest ct) {
+                            // ¿Se va a devolver algo?
+                        } else if (obj is ReconnectRequest rr) {
+                            ChainNode<User> temp = this.Users.Get(0);
+                            while (temp.next != null) {
+                                if (U.Name.Equals(temp.element.Name)) {
+                                    // Sustutuir nodo
+                                    // Actualizar tabla de usuarios.
+                                    this.ConsoleAppend("Reconectado correctamente con el usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "].");
+
+                                    break;
+                                }
+                                temp = temp.next;
+                            }
+                        }*/ else {
                             this.ConsoleAppend("La información de la nueva conexión no pudo ser interpretada correctamente.");
                         }
                     }
@@ -262,7 +282,6 @@ namespace Chat_Virtual___Servidor {
         /// Escribe los datos que esten pendientes en la cola toWrite de un ususario
         /// </summary>
         /// <param name="user">El ususario del que se van a intentar escribir los datos</param>
-        /// <param name="sendAll">Verdadero si se quiere que se envíen todos los datos en la cola</param>
         /// <returns>Verdadero si los datos fueron enviados, falso si almenos uno falló</returns>
         private bool Write(User user) {
             try {
@@ -274,6 +293,7 @@ namespace Chat_Virtual___Servidor {
                 }
                 return true;
             } catch (Exception) {
+                this.ConsoleAppend("Se ha perdido la conexión con el usuario [" + user.Name + "] Intentando reconectar.");
                 return false;
             }
         }
@@ -282,7 +302,6 @@ namespace Chat_Virtual___Servidor {
         /// Lee los datos que estén pendientes para un usuario y los guarda en la cola toRead del mismo
         /// </summary>
         /// <param name="user">EL ususario del que se van a intentar leer datos</param>
-        /// <param name="sendAll">Verdadero si se quiere que se lean todos los datos disponibles</param>
         /// <returns>Verdadero si le leyeron todos los datos, falso si uno de ellos no pudo ser leido</returns>
         private bool Read(User user) {
             try {
@@ -295,6 +314,7 @@ namespace Chat_Virtual___Servidor {
                 }
                 return true;
             } catch (Exception) {
+                this.ConsoleAppend("Se ha perdido la conexión con el usuario [" + user.Name + "] Intentando reconectar.");
                 return false;
             }
         }
@@ -368,14 +388,32 @@ namespace Chat_Virtual___Servidor {
                         break;
                     }
                 }
-                
+            }
+        }
+
+        /// <summary>
+        /// Metodo para hilo. Agrega el un usuario conectado a la tabla de la interfaz.
+        /// </summary>
+        /// <param name="name">Nombre del usuario que se va a conectar.</param>
+        private void AlterIpTable(string name, string ip) {
+            if (this.GraphicInterface.UsersTable.InvokeRequired) {
+                DAlterTable d = new DAlterTable(this.AlterIpTable);
+                this.GraphicInterface.Button.Invoke(d, new object[] { name, ip });
+            } else {
+                int size = this.GraphicInterface.UsersTable.Rows.Count;
+                for (int i = 0; i < size; i++) {
+                    if (this.GraphicInterface.UsersTable.Rows[i].Cells[0].Value.Equals(name)) {
+                        this.GraphicInterface.UsersTable.Rows[i].Cells[1].Value = ip;
+                        break;
+                    }
+                }
             }
         }
 
         /// <summary>
         /// Metodo para hilo. Habilita o deshabilita el menú.
         /// </summary>
-        /// <param name="name">Verdadero si se quiere habilitar.</param>
+        /// <param name="flag">Verdadero si se quiere habilitar.</param>
         private void MenuEnable(bool flag) {
             if (this.GraphicInterface.MenuBar.InvokeRequired) {
                 DMenuEnable d = new DMenuEnable(this.MenuEnable);

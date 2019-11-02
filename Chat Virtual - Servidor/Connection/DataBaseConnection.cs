@@ -15,7 +15,7 @@ namespace Chat_Virtual___Servidor {
 
         public void ConnectDataBase() {
             this.Oracle = new OracleDataBase(OracleConfigInterface.Settings.Ip, OracleConfigInterface.Settings.Port, OracleConfigInterface.Settings.Service, OracleConfigInterface.Settings.User, OracleConfigInterface.Settings.Password);
-            this.ConsoleAppend("Se ha conectado correctamente a la base de datos Oracle, versión: "+ this.Oracle.getConnection().ServerVersion);
+            this.ConsoleAppend("Se ha conectado correctamente a la base de datos Oracle, versión: "+ this.Oracle.Connection.ServerVersion);
         }
 
         public void DisconnectDataBase() {

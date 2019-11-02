@@ -15,21 +15,22 @@ namespace Chat_Virtual___Servidor {
             public int maxUsers;
         }
 
-        public ServerConfigInterface() {
-            this.InitializeComponent();
+        public static void InitSettings() {
             if (File.Exists("ServerSettings.config")) {
                 IFormatter formatter = new BinaryFormatter();
                 Stream stream = new FileStream("SocketSettings.config", FileMode.Open, FileAccess.Read);
                 try {
                     Settings = (ConnectionSettings)formatter.Deserialize(stream);
-                } catch (Exception) {
-
-                }
+                } catch (Exception) { }
                 stream.Close();
             } else {
                 Settings.port = 7777;
                 Settings.maxUsers = 30;
             }
+        }
+
+        public ServerConfigInterface() {
+            this.InitializeComponent();
             this.TBPort.Text = Settings.port.ToString();
             this.TBMaxUsers.Text = Settings.maxUsers.ToString();
         }

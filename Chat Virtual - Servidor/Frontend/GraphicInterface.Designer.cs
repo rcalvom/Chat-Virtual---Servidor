@@ -105,7 +105,7 @@
             // 
             this.serverToolStripMenuItem.Name = "serverToolStripMenuItem";
             this.serverToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
-            this.serverToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.serverToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.serverToolStripMenuItem.Text = "Servidor";
             this.serverToolStripMenuItem.Click += new System.EventHandler(this.ServerConfig_Click);
             // 
@@ -113,7 +113,7 @@
             // 
             this.oracleToolStripMenuItem.Name = "oracleToolStripMenuItem";
             this.oracleToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F7;
-            this.oracleToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.oracleToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.oracleToolStripMenuItem.Text = "Oracle";
             this.oracleToolStripMenuItem.Click += new System.EventHandler(this.OracleConfig_Click);
             // 
@@ -148,7 +148,7 @@
             this.LogConsole.Location = new System.Drawing.Point(12, 82);
             this.LogConsole.Name = "LogConsole";
             this.LogConsole.ReadOnly = true;
-            this.LogConsole.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+            this.LogConsole.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedVertical;
             this.LogConsole.Size = new System.Drawing.Size(455, 317);
             this.LogConsole.TabIndex = 4;
             this.LogConsole.Text = "";

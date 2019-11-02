@@ -5,30 +5,11 @@ using Oracle.ManagedDataAccess.Client;
 namespace Chat_Virtual___Servidor{
 public class OracleDataBase :IDisposable {
 
-        private OracleConnection Connection;
-        private OracleTransaction Transaction;
-        private OracleDataReader DataReader;
-        public byte Intentos = 0;
+        public OracleConnection Connection { set; get; }
+        public OracleTransaction Transaction { set; get; }
+        public OracleDataReader DataReader { set; get; }
 
-        //Getters y Setters Primitivos
-
-        public OracleConnection getConnection() {
-            return this.Connection;
-        }
-
-        public void setConnection(OracleConnection Connection) {
-            this.Connection = Connection;
-        }
-
-        public OracleDataReader getDataReader() {
-            return this.DataReader;
-        }
-
-        public void getDataReader(OracleDataReader DataReader) {
-            this.DataReader = DataReader;
-        }
-
-        //TODO: Getters y Setters con get; y set;
+        private EstadoConexion ConnectionState;
 
         private struct EstadoConexion {
             public string ConnectionString;
@@ -36,32 +17,30 @@ public class OracleDataBase :IDisposable {
             public int ErrorNumber;
         }
 
-        private EstadoConexion ConnectionState;
-
         public string ErrorDescription {
             get { return this.ConnectionState.ErrorDescription; }
         }
 
         public string ErrorNumber {
-            get { return ConnectionState.ErrorNumber.ToString(); }
+            get { return this.ConnectionState.ErrorNumber.ToString(); }
         }
 
         public OracleDataBase(string Server, string Port, string Service, string User, string Password) {
-            ConnectionState.ConnectionString = "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(Host=" +
+            this.ConnectionState.ConnectionString = "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(Host=" +
                     Server + ")(Port=" + Port + ")))(CONNECT_DATA=(SERVICE_NAME=" +
                     Service + "))); User Id=" + User + ";Password=" + Password + "; ";
-            Connection = new OracleConnection();
-            Connect();
+            this.Connection = new OracleConnection();
+            this.Connect();
 
         }
 
         private void AssignError(ref Exception ex) {
             if (ex is OracleException) {
-                ConnectionState.ErrorNumber = ((OracleException)ex).Number;
-                ConnectionState.ErrorDescription = ex.Message;
+                this.ConnectionState.ErrorNumber = ((OracleException)ex).Number;
+                this.ConnectionState.ErrorDescription = ex.Message;
             } else {
-                ConnectionState.ErrorNumber = 0;
-                ConnectionState.ErrorDescription = ex.Message;
+                this.ConnectionState.ErrorNumber = 0;
+                this.ConnectionState.ErrorDescription = ex.Message;
             }
             // Guardar Log de Error.
             //TODO: Guardar Logs de errores.
@@ -71,21 +50,21 @@ public class OracleDataBase :IDisposable {
         private bool Connect() {
             bool flag = false;
             try {
-                if (Connection != null) {
-                    Connection.ConnectionString = ConnectionState.ConnectionString;
-                    Connection.Open();
+                if (this.Connection != null) {
+                    this.Connection.ConnectionString = this.ConnectionState.ConnectionString;
+                    this.Connection.Open();
                     flag = true;
                 }
             } catch (Exception ex) {
-                Disconnect();
-                AssignError(ref ex);
+                this.Disconnect();
+                this.AssignError(ref ex);
                 flag = false;
             }
             return flag;
         }
 
         public bool Disconnect() {
-            bool flag = false;
+            bool flag;
             try {
                 if (this.Connection != null) {
                     if (this.Connection.State != System.Data.ConnectionState.Closed) {
@@ -102,22 +81,19 @@ public class OracleDataBase :IDisposable {
         }
 
         public bool ExecuteProcedure(ref OracleCommand OraCommand, string SpName) {
-
             bool flag = true;
-
             try {
-                if (!IsConected()) {
-                    flag = Connect();
+                if (!this.IsConected()) {
+                    flag = this.Connect();
                 }
-
                 if (flag) {
-                    OraCommand.Connection = Connection;
+                    OraCommand.Connection = this.Connection;
                     OraCommand.CommandText = SpName;
                     OraCommand.CommandType = System.Data.CommandType.StoredProcedure;
                     OraCommand.ExecuteNonQuery();
                 }
             } catch (Exception ex) {
-                AssignError(ref ex);
+                this.AssignError(ref ex);
                 flag = false;
             }
             return flag;
@@ -126,8 +102,8 @@ public class OracleDataBase :IDisposable {
         public bool IsConected() {
             bool flag = false;
             try {
-                if (Connection != null) {
-                    switch (Connection.State) {
+                if (this.Connection != null) {
+                    switch (this.Connection.State) {
                         case System.Data.ConnectionState.Closed:
                         case System.Data.ConnectionState.Broken:
                         case System.Data.ConnectionState.Connecting:
@@ -142,82 +118,71 @@ public class OracleDataBase :IDisposable {
                 } else {
                     flag = false;
                 }
-
             } catch (Exception ex) {
-                AssignError(ref ex);
+                this.AssignError(ref ex);
                 flag = false;
             }
-
             return flag;
-
         }
 
         public bool ExecuteSQL(string SqlQuery) {
             bool flag = true;
             OracleCommand Command = new OracleCommand();
             try {
-                if (!IsConected()) {
-                    flag = Connect();
+                if (!this.IsConected()) {
+                    flag = this.Connect();
                 }
-
                 if (flag) {
-                    if ((DataReader != null)) {
-                        DataReader.Close();
-                        DataReader.Dispose();
+                    if ((this.DataReader != null)) {
+                        this.DataReader.Close();
+                        this.DataReader.Dispose();
                     }
-
-                    Command.Connection = Connection;
+                    Command.Connection = this.Connection;
                     Command.CommandType = System.Data.CommandType.Text;
                     Command.CommandText = SqlQuery;
-                    DataReader = Command.ExecuteReader();
+                    this.DataReader = Command.ExecuteReader();
                 }
 
             } catch (Exception ex) {
-                AssignError(ref ex);
+                this.AssignError(ref ex);
                 flag = false;
             } finally {
                 if (Command != null) {
                     Command.Dispose();
                 }
             }
-
             return flag;
-
         }
 
         public bool ExecuteSQL(string SqlQuery, ref int Rows) {
             bool flag = true;
             OracleCommand Command = new OracleCommand();
             try {
-                if (!IsConected()) {
-                    flag = Connect();
+                if (!this.IsConected()) {
+                    flag = this.Connect();
                 }
-
                 if (flag) {
-                    Transaction = Connection.BeginTransaction();
-                    Command = Connection.CreateCommand();
+                    this.Transaction = this.Connection.BeginTransaction();
+                    Command = this.Connection.CreateCommand();
                     Command.CommandType = System.Data.CommandType.Text;
                     Command.CommandText = SqlQuery;
                     Rows = Command.ExecuteNonQuery();
-                    Transaction.Commit();
+                    this.Transaction.Commit();
                 }
-
             } catch (Exception ex) {
                 this.Transaction.Rollback();
-                AssignError(ref ex);
+                this.AssignError(ref ex);
                 flag = false;
             } finally {
                 if (Command != null) {
                     Command.Dispose();
                 }
             }
-
             return flag;
-
         }
 
         public void Dispose() {
-            Dispose(true);
+            this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -233,7 +198,6 @@ public class OracleDataBase :IDisposable {
                     // Guardar Log de Error.
                     //TODO: log error.
                 }
-
             } catch (Exception ex) {
                 this.AssignError(ref ex);
             }
