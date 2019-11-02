@@ -151,6 +151,10 @@ namespace Chat_Virtual___Servidor {
                 } else if (Node == null) {                      //Verifia si el nodo que tengo es un apuntador nulo
                     Node = this.Users.GetNode(0);               //En ese caso obtiene el primer nodo de la lista
                 }
+                if (Node.element.ReadingQueue.IsEmpty()) {
+                    continue;
+                }
+                
                 Data data = Node.element.ReadingQueue.Dequeue();
                 if (data is ChatMessage chatMessage) {
                     ChainNode<User> receiver = this.Users.GetNode(0);
@@ -210,10 +214,15 @@ namespace Chat_Virtual___Servidor {
         /// </summary>
         private void ListenConnection() {          
             do {
-                try {
+                //try {
                     if (this.Server.Pending()) {
+                        this.ConsoleAppend("Prueba");
                         User U = new User (this.Server.AcceptTcpClient());
-                        this.Read(U);
+                        Thread.Sleep(1000);
+                        for (int i = 0; i<1000; i++) {
+                            this.Read(U);
+                        }
+                        
                         object obj = U.ReadingQueue.Dequeue();
                         if (obj is SignIn si) {
                             bool exist = false;
@@ -231,6 +240,21 @@ namespace Chat_Virtual___Servidor {
                                 this.Users.Add(U);                                  //Agrega el ususario a la de inicialización
                                 this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                                 this.InsertTable(U.Name, U.Client.Client.RemoteEndPoint.ToString());
+
+
+                                ChatMessage[] ms = new ChatMessage[20];
+                                for (int i = 0; i<ms.Length; i++) {
+                                    ms[i] = new ChatMessage("jdiegopm","jdiegopm","Prueba "+i);
+                                }
+
+                                for (int i = 0; i<ms.Length; i++) {
+                                    U.WritingQueue.Enqueue(ms[i]);
+                                }
+                                
+
+
+
+
                             } else {
                                 U.WritingQueue.Enqueue(new RequestAnswer(false));       //Agrega la respuesta a la cola de envío
                                 U.WritingQueue.Enqueue(new RequestError(1));            //Especifica el error del fallo
@@ -274,7 +298,7 @@ namespace Chat_Virtual___Servidor {
                             this.ConsoleAppend("La información de la nueva conexión no pudo ser interpretada correctamente.");
                         }
                     }
-                } catch (Exception) { }
+                //} catch (Exception) { }
             } while (this.Connected);
         }
 
@@ -293,7 +317,7 @@ namespace Chat_Virtual___Servidor {
                 }
                 return true;
             } catch (Exception) {
-                this.ConsoleAppend("Se ha perdido la conexión con el usuario [" + user.Name + "] Intentando reconectar.");
+                //this.ConsoleAppend("Se ha perdido la conexión con el usuario [" + user.Name + "] Intentando reconectar.");
                 return false;
             }
         }
@@ -314,7 +338,7 @@ namespace Chat_Virtual___Servidor {
                 }
                 return true;
             } catch (Exception) {
-                this.ConsoleAppend("Se ha perdido la conexión con el usuario [" + user.Name + "] Intentando reconectar.");
+                //this.ConsoleAppend("Se ha perdido la conexión con el usuario [" + user.Name + "] Intentando reconectar.");
                 return false;
             }
         }
