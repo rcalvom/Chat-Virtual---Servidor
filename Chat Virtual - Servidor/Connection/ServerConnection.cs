@@ -217,12 +217,14 @@ namespace Chat_Virtual___Servidor {
             do {
                 try {
                     if (this.Server.Pending()) {
-
+                        this.ConsoleAppend("Prueba");
                         User U = new User (this.Server.AcceptTcpClient());
                         object obj = null;
 
                         for (int i = 0; i<10;i++) {
-                            obj = U.ReadingQueue.Dequeue();
+                            try {
+                                obj = U.ReadingQueue.Dequeue();
+                            } catch (Exception) { }
                             if (obj == null) {
                                 Thread.Sleep(250);
                             } else {
@@ -306,7 +308,7 @@ namespace Chat_Virtual___Servidor {
                             }
                         }*/ else {
                             this.ConsoleAppend("No se ha recibido información de ingreso por parte del remoto. [" + U.Client.Client.RemoteEndPoint.ToString() + "] Se ha desconectado del servidor");
-                            U.Client.Close();
+                            //U.Client.Close();
                         }
                     }
                 } catch (Exception) { }
