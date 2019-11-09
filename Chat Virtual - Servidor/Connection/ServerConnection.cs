@@ -27,6 +27,7 @@ namespace Chat_Virtual___Servidor {
         private delegate void DDataGridViewPop(string name);
         private delegate void DMenuEnable(bool flag);
         private delegate void DAlterTable(string name, string ip);
+        private delegate void DClearTable();
 
         /// <summary>
         /// Constructor. Inicializa la instancia para poder ser posteriormente utilizada como servidor.
@@ -68,7 +69,7 @@ namespace Chat_Virtual___Servidor {
             this.Connected = false;
             this.ButtonText("Encender Servidor");
             this.MenuEnable(true);
-
+            this.ClearTable();
         }
 
         /// <summary>
@@ -216,14 +217,19 @@ namespace Chat_Virtual___Servidor {
             do {
                 try {
                     if (this.Server.Pending()) {
-                        this.ConsoleAppend("Prueba");
+
                         User U = new User (this.Server.AcceptTcpClient());
-                        Thread.Sleep(1000);
-                        for (int i = 0; i<1000; i++) {
-                            this.Read(U);
+                        object obj = null;
+
+                        for (int i = 0; i<10;i++) {
+                            obj = U.ReadingQueue.Dequeue();
+                            if (obj == null) {
+                                Thread.Sleep(250);
+                            } else {
+                                break;
+                            }
                         }
-                        
-                        object obj = U.ReadingQueue.Dequeue();
+
                         if (obj is SignIn si) {
                             bool exist = false;
                             this.Oracle.Oracle.ExecuteSQL("SELECT USERNAME,CONTRASENA FROM USUARIO");
@@ -234,13 +240,24 @@ namespace Chat_Virtual___Servidor {
                                 }
                             }
                             if (exist) {
-                                U.Name = si.user;                                       //Inicializa el nombre de ususario
-                                U.WritingQueue.Enqueue(new RequestAnswer(true));        //Agrega la respuesta a la cola de envío
-                                this.Write(U);                                         //Envía la respuesta
-                                this.Users.Add(U);                                  //Agrega el ususario a la de inicialización
+                                U.Name = si.user;                                    
+                                U.WritingQueue.Enqueue(new RequestAnswer(true));        
+                                this.Write(U);                                         
+                                this.Users.Add(U);                                  
                                 this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                                 this.InsertTable(U.Name, U.Client.Client.RemoteEndPoint.ToString());
 
+                                /*this.Oracle.Oracle.ExecuteSQL("SELECT USERNAME FROM USUARIO");
+                                DynamicArray<string> Chats = new DynamicArray<string>();
+                                while (this.Oracle.Oracle.DataReader.Read()) {
+                                    Chats.Add((string)this.Oracle.Oracle.DataReader["USERNAME"]);
+                                }
+                                for (int i = 0; i < Chats.Size(); i++) {
+                                    for (int j = i + 1; j < Chats.Size(); i++) {
+                                        U.WritingQueue.Enqueue(new Chat(Chats.Get(i), Chats.Get(j)));
+                                        this.Write(U);
+                                    }
+                                }*/
 
                                 /*ChatMessage[] ms = new ChatMessage[20];
                                 for (int i = 0; i<ms.Length; i++) {
@@ -250,8 +267,6 @@ namespace Chat_Virtual___Servidor {
                                 for (int i = 0; i<ms.Length; i++) {
                                     U.WritingQueue.Enqueue(ms[i]);
                                 }*/
-                                
-
 
                             } else {
                                 U.WritingQueue.Enqueue(new RequestAnswer(false));       //Agrega la respuesta a la cola de envío
@@ -261,18 +276,15 @@ namespace Chat_Virtual___Servidor {
                                 U.Client.Close();
                             }
                         } else if (obj is SignUp su) {
-                            RequestAnswer answer;
                             if (this.Oracle.Oracle.ExecuteSQL("INSERT INTO USUARIOS VALUES('" + su.userName + "','" + su.name + "','" + su.password + "',SYSDATE)")) {
-                                answer = new RequestAnswer(true);
-                                U.WritingQueue.Enqueue(answer);
+                                U.WritingQueue.Enqueue(new RequestAnswer(true));
                                 this.Write(U);
                                 this.ConsoleAppend("Se ha registrado el usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] correctamente.");
                                 this.Users.Add(U);
                                 this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                                 this.InsertTable(U.Name, U.Client.Client.RemoteEndPoint.ToString());
                             } else {
-                                answer = new RequestAnswer(false);
-                                U.WritingQueue.Enqueue(answer);
+                                U.WritingQueue.Enqueue(new RequestAnswer(false));
                                 U.WritingQueue.Enqueue(new RequestError(0));
                                 this.Write(U);
                                 this.ConsoleAppend("Se ha intentado registrar el remoto [" + U.Client.Client.RemoteEndPoint.ToString() + "] con un nombre de usuario ya existente.");
@@ -293,7 +305,8 @@ namespace Chat_Virtual___Servidor {
                                 temp = temp.next;
                             }
                         }*/ else {
-                            this.ConsoleAppend("La información de la nueva conexión no pudo ser interpretada correctamente.");
+                            this.ConsoleAppend("No se ha recibido información de ingreso por parte del remoto. [" + U.Client.Client.RemoteEndPoint.ToString() + "] Se ha desconectado del servidor");
+                            U.Client.Close();
                         }
                     }
                 } catch (Exception) { }
@@ -321,7 +334,7 @@ namespace Chat_Virtual___Servidor {
         }
 
         /// <summary>
-        /// Lee los datos que estén pendientes para un usuario y los guarda en la cola toRead del mismo
+        /// Lee los datos que estén pendientes para un usuario y los guarda en la cola ReadingQueue del mismo
         /// </summary>
         /// <param name="user">EL ususario del que se van a intentar leer datos</param>
         /// <returns>Verdadero si le leyeron todos los datos, falso si uno de ellos no pudo ser leido</returns>
@@ -388,7 +401,7 @@ namespace Chat_Virtual___Servidor {
         private void InsertTable(string name, string ip) {
             if (this.GraphicInterface.UsersTable.InvokeRequired) {
                 DDataGridViewPush d = new DDataGridViewPush(this.InsertTable);
-                this.GraphicInterface.Button.Invoke(d, new object[] { name, ip });
+                this.GraphicInterface.UsersTable.Invoke(d, new object[] { name, ip });
             } else {
                 this.GraphicInterface.UsersTable.Rows.Add(name, ip);
             }
@@ -401,7 +414,7 @@ namespace Chat_Virtual___Servidor {
         private void DeleteTable(string name) {
             if (this.GraphicInterface.UsersTable.InvokeRequired) {
                 DDataGridViewPop d = new DDataGridViewPop(this.DeleteTable);
-                this.GraphicInterface.Button.Invoke(d, new object[] { name});
+                this.GraphicInterface.UsersTable.Invoke(d, new object[] { name});
             } else {
                 int size = this.GraphicInterface.UsersTable.Rows.Count;
                 for (int i = 0; i<size; i++) {
@@ -420,7 +433,7 @@ namespace Chat_Virtual___Servidor {
         private void AlterIpTable(string name, string ip) {
             if (this.GraphicInterface.UsersTable.InvokeRequired) {
                 DAlterTable d = new DAlterTable(this.AlterIpTable);
-                this.GraphicInterface.Button.Invoke(d, new object[] { name, ip });
+                this.GraphicInterface.UsersTable.Invoke(d, new object[] { name, ip });
             } else {
                 int size = this.GraphicInterface.UsersTable.Rows.Count;
                 for (int i = 0; i < size; i++) {
@@ -439,10 +452,22 @@ namespace Chat_Virtual___Servidor {
         private void MenuEnable(bool flag) {
             if (this.GraphicInterface.MenuBar.InvokeRequired) {
                 DMenuEnable d = new DMenuEnable(this.MenuEnable);
-                this.GraphicInterface.Button.Invoke(d, new object[] { flag });
+                this.GraphicInterface.MenuBar.Invoke(d, new object[] { flag });
             } else {
                 this.GraphicInterface.configuraciónToolStripMenuItem.Enabled = flag;
 
+            }
+        }
+
+        /// <summary>
+        /// Metodo para hilo. Elimina todos los elementos de la tabla.
+        /// </summary>
+        private void ClearTable() {
+            if (this.GraphicInterface.UsersTable.InvokeRequired) {
+                DClearTable d = new DClearTable(this.ClearTable);
+                this.GraphicInterface.UsersTable.Invoke(d, null);
+            } else {
+                this.GraphicInterface.UsersTable.Rows.Clear();
             }
         }
 
