@@ -214,7 +214,7 @@ namespace Chat_Virtual___Servidor {
         /// </summary>
         private void ListenConnection() {          
             do {
-                //try {
+                try {
                     if (this.Server.Pending()) {
                         this.ConsoleAppend("Prueba");
                         User U = new User (this.Server.AcceptTcpClient());
@@ -242,17 +242,15 @@ namespace Chat_Virtual___Servidor {
                                 this.InsertTable(U.Name, U.Client.Client.RemoteEndPoint.ToString());
 
 
-                                ChatMessage[] ms = new ChatMessage[20];
+                                /*ChatMessage[] ms = new ChatMessage[20];
                                 for (int i = 0; i<ms.Length; i++) {
                                     ms[i] = new ChatMessage("jdiegopm","jdiegopm","Prueba "+i);
                                 }
 
                                 for (int i = 0; i<ms.Length; i++) {
                                     U.WritingQueue.Enqueue(ms[i]);
-                                }
+                                }*/
                                 
-
-
 
 
                             } else {
@@ -298,7 +296,7 @@ namespace Chat_Virtual___Servidor {
                             this.ConsoleAppend("La información de la nueva conexión no pudo ser interpretada correctamente.");
                         }
                     }
-                //} catch (Exception) { }
+                } catch (Exception) { }
             } while (this.Connected);
         }
 
