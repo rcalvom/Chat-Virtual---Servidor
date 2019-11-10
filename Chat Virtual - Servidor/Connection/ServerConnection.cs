@@ -12,7 +12,7 @@ namespace Chat_Virtual___Servidor {
     /// Esta Clase se encarga de todas las conexiones del servidor.
     /// </summary>
     public class ServerConnection{
-        public bool Connected { get; set; }                                        // Indica si el servidor esta encendido o no.
+        public bool Connected { get; set; }                                         // Indica si el servidor esta encendido o no.
         private TcpListener Server;                                                 // Permite la escucha de conexiones entrantesde red TCP.
         private readonly GraphicInterface GraphicInterface;                         // Referencia al conexto gráfico.
         private readonly LinkedList<User> Users;                                    // Colección que contiene los usuarios conectados.
@@ -127,10 +127,10 @@ namespace Chat_Virtual___Servidor {
             };
             t1.Start();
             this.ConsoleAppend("Se han comenzado a escuchar solicitudes de conexión entrantes.\n");
-            /*Thread t2 = new Thread(this.ExecuteRequest) {
+            Thread t2 = new Thread(this.ExecuteRequest) {
                 IsBackground = true
             };
-            t2.Start();*/
+            t2.Start();
             Thread t3 = new Thread(this.ListenUsers) {
                 IsBackground = true
             };
@@ -145,52 +145,51 @@ namespace Chat_Virtual___Servidor {
         /// Método de Hilo. Redirige los mensaje y responde a las peticiones de los usuarios
         /// </summary>
         private void ExecuteRequest() {
-            ChainNode<User> Node = null;
             do {
-                if (this.Users.IsEmpty()) {                     //Verifica que la lista de ususarios no está vacia
-                    continue;                                   //En caso de que lo está continúa con la ejecucion
-                } else if (Node == null) {                      //Verifia si el nodo que tengo es un apuntador nulo
-                    Node = this.Users.GetNode(0);               //En ese caso obtiene el primer nodo de la lista
-                }
-                if (Node.element.ReadingQueue.IsEmpty()) {
-                    continue;
-                }
-                
-                Data data = Node.element.ReadingQueue.Dequeue();
-                if (data is ChatMessage chatMessage) {
-                    ChainNode<User> receiver = this.Users.GetNode(0);
-                    while (receiver.next != null) {
-                        if (receiver.element.Name.Equals(chatMessage.Receiver)) {
-                            receiver.element.WritingQueue.Enqueue(chatMessage);
-                            // ¿Se va a enviar el mismo objeto?
-                            break;
+                Iterator<User> i = Users.Iterator();
+                while (i.HasNext()) {
+                    User user = i.Next();
+                    object Readed = user.ReadingDequeue();
+                    if (Readed == default) {
+                        continue;
+                    } else if (Readed is Chat ch) {
+                        User memberTwo;
+                        if (ch.memberOne.Equals(user.Name)) {
+                            memberTwo = SearchUser(ch.memberTwo);
+                        } else {
+                            memberTwo = SearchUser(ch.memberOne);
                         }
+                        user.WritingEnqueue(ch);
+                        memberTwo.WritingEnqueue(ch);
+                    } else if (Readed is ChatMessage ms) {
+                        User receiver = SearchUser(ms.Receiver);
+                        receiver.WritingEnqueue(ms);
                     }
-                    // TODO: falta hacer el insert a la tabla
-                } /*else if (data is ChatGroup chatGroup) {
-                    //hay que mirar en la tabla y ver que usuarios están en el grupo para enviarles el mensaje
-                }else if (data is DisconnectRequest dr) {
-                    this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha desconectado del servidor.");
-                    this.Users.Remove(Node);
-                    this.DeleteTable(Node.element.Name);
-                }*/
-                Node = Node.next;
+                }
             } while (this.Connected);
+        }
+
+        private User SearchUser(string userName) {
+            Iterator<User> i = Users.Iterator();
+            while (i.HasNext()) {
+                User u = i.Next();
+                if (u.Name.Equals(userName)) {
+                    return u;
+                }
+            }
+            return default;
         }
 
         /// <summary>
         /// Método de hilo. Lee cada usuario y revisa si le ha enviado datos al servidor.
         /// </summary>
         private void ListenUsers() { 
-            ChainNode<User> Node = null;
             do {
-                if (this.Users.IsEmpty()) {                     //Verifica que la lista de ususarios no está vacia
-                    continue;                                   //En caso de que lo está continúa con la ejecucion
-                } else if (Node == null) {                      //Verifia si el nodo que tengo es un apuntador nulo
-                    Node = this.Users.GetNode(0);               //En ese caso obtiene el primer nodo de la lista
+                Iterator<User> i = Users.Iterator();
+                while (i.HasNext()) {
+                    User user = i.Next();
+                    this.Read(user);                        //Intenta leer los datos que estén pendientes para ese usuario 
                 }
-                this.Read(Node.element);                        //Intenta leer los datos que estén pendientes para ese usuario
-                Node = Node.next;                               //Avanza al siguiente nodo
             } while (this.Connected);
         }
 
@@ -198,15 +197,12 @@ namespace Chat_Virtual___Servidor {
         /// Método de hilo. Escribe los datos listos en los clientes.
         /// </summary>
         private void WriteUsers() {
-            ChainNode<User> Node = null;
             do {
-                if (this.Users.IsEmpty()) {                     //Verifica que la lista de ususarios no está vacia
-                    continue;                                   //En caso de que lo está continúa con la ejecucion
-                } else if (Node == null) {                      //Verifia si el nodo que tengo es un apuntador nulo
-                    Node = this.Users.GetNode(0);               //En ese caso obtiene el primer nodo de la lista
+                Iterator<User> i = Users.Iterator();        //Obtiene el iterador para la lista
+                while (i.HasNext()) {
+                    User user = i.Next();                   //Obtiene cada elemento en la lista
+                    this.Write(user);                       //Intenta escribir los datos que estén pendientes para ese usuario
                 }
-                this.Write(Node.element);                       //Intenta escribir los datos que estén pendientes para ese usuario
-                Node = Node.next;                               //Avanza al siguiente nodo
             } while (this.Connected);
         }
 
@@ -223,9 +219,9 @@ namespace Chat_Virtual___Servidor {
                         for (int i = 0; i<10;i++) {
                             try {
                                 this.Read(U);
-                                obj = U.ReadingQueue.Dequeue();
+                                obj = U.ReadingDequeue();
                             } catch (Exception) { }
-                            if (obj == null) {
+                            if (obj == default) {
                                 Thread.Sleep(125);
                             } else {
                                 break;
@@ -243,7 +239,7 @@ namespace Chat_Virtual___Servidor {
                             }
                             if (exist) {
                                 U.Name = si.user;                                    
-                                U.WritingQueue.Enqueue(new RequestAnswer(true));        
+                                U.WritingEnqueue(new RequestAnswer(true));        
                                 this.Write(U);                                         
                                 this.Users.Add(U);                                  
                                 this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
@@ -271,23 +267,23 @@ namespace Chat_Virtual___Servidor {
                                 }*/
 
                             } else {
-                                U.WritingQueue.Enqueue(new RequestAnswer(false));
-                                U.WritingQueue.Enqueue(new RequestError(1));
+                                U.WritingEnqueue(new RequestAnswer(false));
+                                U.WritingEnqueue(new RequestError(1));
                                 this.Write(U);
                                 this.ConsoleAppend("Se ha intentado conectar el remoto [" + U.Client.Client.RemoteEndPoint.ToString() + "] con información de inicio de sesión incorrecta.");
                                 U.Client.Close();
                             }
                         } else if (obj is SignUp su) {
                             if (this.Oracle.Oracle.ExecuteSQL("INSERT INTO USUARIOS VALUES('" + su.userName + "','" + su.name + "','" + su.password + "',SYSDATE)")) {
-                                U.WritingQueue.Enqueue(new RequestAnswer(true));
+                                U.WritingEnqueue(new RequestAnswer(true));
                                 this.Write(U);
                                 this.ConsoleAppend("Se ha registrado el usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] correctamente.");
                                 this.Users.Add(U);
                                 this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                                 this.InsertTable(U.Name, U.Client.Client.RemoteEndPoint.ToString());
                             } else {
-                                U.WritingQueue.Enqueue(new RequestAnswer(false));
-                                U.WritingQueue.Enqueue(new RequestError(0));
+                                U.WritingEnqueue(new RequestAnswer(false));
+                                U.WritingEnqueue(new RequestError(0));
                                 this.Write(U);
                                 this.ConsoleAppend("Se ha intentado registrar el remoto [" + U.Client.Client.RemoteEndPoint.ToString() + "] con un nombre de usuario ya existente.");
                                 U.Client.Close();
@@ -321,16 +317,17 @@ namespace Chat_Virtual___Servidor {
         /// <param name="user">El ususario del que se van a intentar escribir los datos</param>
         /// <returns>Verdadero si los datos fueron enviados, falso si almenos uno falló</returns>
         private bool Write(User user) {
+            Data data = user.WritingDequeue();
+            if (data == default)
+                return false;
             try {
-                if (!user.WritingQueue.IsEmpty()) {                                                  // Verifica que la cola no este vacía
-                    byte[] toSend = Serializer.Serialize(user.WritingQueue.GetFrontElement());       // Serializa el primer objeto de la cola
-                    user.Writer.Write(toSend.Length);                                                // Envía el tamaño del objeto
-                    user.Writer.Write(toSend);                                                       // Envía el objeto
-                    user.WritingQueue.Dequeue();                                                     // Saca el objeto de la cola
-                }
+                byte[] toSend = Serializer.Serialize(data);                                      // Serializa el primer objeto de la cola
+                user.Writer.Write(toSend.Length);                                                // Envía el tamaño del objeto
+                user.Writer.Write(toSend);                                                       // Envía el objeto     
                 return true;
             } catch (Exception) {
                 //this.ConsoleAppend("Se ha perdido la conexión con el usuario [" + user.Name + "] Intentando reconectar.");
+                user.WritingEnqueue(data);
                 return false;
             }
         }
@@ -347,7 +344,7 @@ namespace Chat_Virtual___Servidor {
                     byte[] data = new byte[size];                                           // crea el arreglo de bytes para el objeto
                     data = user.Reader.ReadBytes(size);                                     // lee el el objeto y lo guarda en el arreglo de bytes
                     object a = Serializer.Deserialize(data);                                // deserializa el objeto
-                    user.ReadingQueue.Enqueue((Data)a);                                     // guarda el objeto en la cola
+                    user.ReadingEnqueue((Data)a);                                           // guarda el objeto en la cola
                 }
                 return true;
             } catch (Exception) {
@@ -472,6 +469,5 @@ namespace Chat_Virtual___Servidor {
                 this.GraphicInterface.UsersTable.Rows.Clear();
             }
         }
-
     }
 }
