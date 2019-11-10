@@ -26,6 +26,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GraphicInterface));
             this.Button = new System.Windows.Forms.Button();
             this.MenuBar = new System.Windows.Forms.MenuStrip();
             this.archivoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -88,7 +89,7 @@
             // 
             this.salirToolStripMenuItem.Name = "salirToolStripMenuItem";
             this.salirToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-            this.salirToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
+            this.salirToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.salirToolStripMenuItem.Text = "Salir";
             this.salirToolStripMenuItem.Click += new System.EventHandler(this.ExitEvent);
             // 
@@ -105,7 +106,7 @@
             // 
             this.serverToolStripMenuItem.Name = "serverToolStripMenuItem";
             this.serverToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
-            this.serverToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.serverToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.serverToolStripMenuItem.Text = "Servidor";
             this.serverToolStripMenuItem.Click += new System.EventHandler(this.ServerConfig_Click);
             // 
@@ -113,7 +114,7 @@
             // 
             this.oracleToolStripMenuItem.Name = "oracleToolStripMenuItem";
             this.oracleToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F7;
-            this.oracleToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.oracleToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.oracleToolStripMenuItem.Text = "Oracle";
             this.oracleToolStripMenuItem.Click += new System.EventHandler(this.OracleConfig_Click);
             // 
@@ -129,7 +130,7 @@
             // 
             this.informaciónToolStripMenuItem.Name = "informaciónToolStripMenuItem";
             this.informaciónToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F10;
-            this.informaciónToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.informaciónToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.informaciónToolStripMenuItem.Text = "Información";
             this.informaciónToolStripMenuItem.Click += new System.EventHandler(this.InfoEvent);
             // 
@@ -230,6 +231,7 @@
             this.Controls.Add(this.Servidor);
             this.Controls.Add(this.MenuBar);
             this.Controls.Add(this.Button);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.MenuBar;
             this.MaximizeBox = false;
             this.Name = "GraphicInterface";

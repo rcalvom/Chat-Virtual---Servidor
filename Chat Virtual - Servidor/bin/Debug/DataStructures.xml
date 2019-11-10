@@ -1,0 +1,626 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DataStructures</name>
+    </assembly>
+    <members>
+        <member name="T:DataStructures.Iterable`1">
+            <summary>
+            Propiedad de una estructura de datos de poder iterar sobre todos sus elementos
+            </summary>
+            <typeparam name="T">Tipo de datos almacenado en la estructura de datos</typeparam>
+        </member>
+        <member name="M:DataStructures.Iterable`1.Iterator">
+            <summary>
+            Obtiene un iterador sobre la estrucutra de datos
+            </summary>
+            <returns>Retorna el iterador especificado para cada estrucutra de datos</returns>
+        </member>
+        <member name="T:DataStructures.Iterator`1">
+            <summary>
+            Itera sobre todos los elmentos de una estrucuta de datos
+            </summary>
+            <typeparam name="T">Tipo de daato que va a ser almacenado</typeparam>
+        </member>
+        <member name="M:DataStructures.Iterator`1.HasNext">
+            <summary>
+            Comprueba si aún quedan más elementos sobre los cuales iterar
+            </summary>
+            <returns>Verdadero si quedan más elementos y falso en otro caso</returns>
+        </member>
+        <member name="M:DataStructures.Iterator`1.Next">
+            <summary>
+            Devuelve el valor del elemento actual y pasa al siguiente elemento en caso de que haya uno
+            </summary>
+            <returns>El valor del objeto actual</returns>
+        </member>
+        <member name="M:DataStructures.Iterator`1.Remove">
+            <summary>
+            Elimina el elemento actual
+            </summary>
+        </member>
+        <member name="T:DataStructures.ArrayHeap`1">
+            <summary>
+            Implementa un montículo, que representa una cola de prioridad
+            </summary>
+            <typeparam name="T">Tipo de dato que va a ser guardado en el montículo</typeparam>
+        </member>
+        <member name="F:DataStructures.ArrayHeap`1.Heap">
+            <summary>
+            Arreglo dinámico en el que se guardan los datos del montículo
+            </summary>
+        </member>
+        <member name="F:DataStructures.ArrayHeap`1.NumberElements">
+            <summary>
+            Cantidad de elementos que se están guardando en el montículo
+            </summary>
+        </member>
+        <member name="M:DataStructures.ArrayHeap`1.#ctor">
+            <summary>
+            Crea un montículo vacío
+            </summary>
+        </member>
+        <member name="M:DataStructures.ArrayHeap`1.IsEmpty">
+            <summary>
+            Consulta si el montículo se encuentra vacío
+            </summary>
+            <returns>Verdadero si el montículo está vacío y falso en otro caso</returns>
+        </member>
+        <member name="M:DataStructures.ArrayHeap`1.GetNumberOfElements">
+            <summary>
+            Consulta la cantidad de elementos almacenados en el montículo
+            </summary>
+            <returns>La cantidad de elementos que hay en el montículo</returns>
+        </member>
+        <member name="M:DataStructures.ArrayHeap`1.Peek">
+            <summary>
+            Consulta el elemento con la prioridad más alta sin sacarlo del montículo
+            </summary>
+            <returns>Retorna el elemento con la prioridad mas alta</returns>
+        </member>
+        <member name="M:DataStructures.ArrayHeap`1.ExtractMax">
+            <summary>
+            Obtiene el valor del elemento con la prioridad más alta y lo saca del montículo
+            </summary>
+            <returns>Retorna el elemento con la prioridad mas alta</returns>
+        </member>
+        <member name="M:DataStructures.ArrayHeap`1.Insert(System.Int32,`0)">
+            <summary>
+            Inserta un nuevo elemento en el montículo y lo organiza según su prioridad
+            </summary>
+            <param name="Priority">Prioridad del elemento</param>
+            <param name="element">Elemento que se va insertar</param>
+        </member>
+        <member name="M:DataStructures.ArrayHeap`1.ToString">
+            <summary>
+            Obtiene el string equivalente al montículo, mostrando los elementos que almacena y la prioridad de cada uno
+            </summary>
+            <returns>El string equivalente al montículo</returns>
+        </member>
+        <member name="M:DataStructures.ArrayHeap`1.GetMaxPriority(System.Int32,System.Int32)">
+            <summary>
+            Compara entre dos elementos y devuelve la posición del que tenga mas prioridad
+            </summary>
+            <param name="indexOne">Posicion del primer elemento</param>
+            <param name="indexTwo">Posicion del segundo elemento</param>
+            <returns>Retorna la posicion del elemento con mas prioridad</returns>
+        </member>
+        <member name="T:DataStructures.BinaryTree`1">
+            <summary>
+            Árbol de búsqueda binaria
+            </summary>
+            <typeparam name="T">El tipo de elemento que se va a guardar en el árbol</typeparam>
+        </member>
+        <member name="F:DataStructures.BinaryTree`1.root">
+            <summary>
+            Raíz del árbol
+            </summary>
+        </member>
+        <member name="M:DataStructures.BinaryTree`1.#ctor">
+            <summary>
+            Crea un árbol vacío
+            </summary>
+        </member>
+        <member name="M:DataStructures.BinaryTree`1.Insert(`0)">
+            <summary>
+            Inserta un nuevo elemento al árbol
+            </summary>
+            <param name="element">Valor del elemento que va a ser almacenado</param>
+        </member>
+        <member name="M:DataStructures.BinaryTree`1.Remove(`0)">
+            <summary>
+            Elimina un elemento en el árbol
+            </summary>
+            <param name="element">Elemento que va a ser eliminado del árbol</param>
+        </member>
+        <member name="M:DataStructures.BinaryTree`1.FindMin">
+            <summary>
+            Busca el elemento que tenga el menor valor dentro del árbol
+            </summary>
+            <returns>El elemento con el menor valor en todo el árbol</returns>
+        </member>
+        <member name="M:DataStructures.BinaryTree`1.FindMax">
+            <summary>
+            Busca el elemento que tenga el mayor valor dentro del árbol
+            </summary>
+            <returns>El elemento con el mayor valor en todo el árbol</returns>
+        </member>
+        <member name="M:DataStructures.BinaryTree`1.Contains(`0)">
+            <summary>
+            Verifica si el árbol contiene un elemento
+            </summary>
+            <param name="element">Elemento que se va a buscar</param>
+            <returns>Verdadero si el árbol contiene el elemento y falso en otro caso</returns>
+        </member>
+        <member name="M:DataStructures.BinaryTree`1.MakeEmpty">
+            <summary>
+            Elimina todos los elementos en el árbol
+            </summary>
+        </member>
+        <member name="M:DataStructures.BinaryTree`1.IsEmpty">
+            <summary>
+            Verifica si el árbol se encuentra vacío
+            </summary>
+            <returns>Verdadero si el árbol está vacío y falso en otro caso</returns>
+        </member>
+        <member name="M:DataStructures.BinaryTree`1.ToString">
+            <summary>
+            Crea un string con el equivalente al árbol y su contenido InOrder
+            </summary>
+            <returns>El string equivalente al árbol</returns>
+        </member>
+        <member name="T:DataStructures.BinaryTreeNode`1">
+            <summary>
+            Nodo para un árbol de búsqueda binario
+            </summary>
+            <typeparam name="T">Tipo de elemento que se va a guardar en el nodo</typeparam>
+        </member>
+        <member name="P:DataStructures.BinaryTreeNode`1.element">
+            <summary>
+            Elemento que se guarda en el nodo
+            </summary>
+        </member>
+        <member name="P:DataStructures.BinaryTreeNode`1.leftChild">
+            <summary>
+            Apuntador al hijo izquierdo del nodo
+            </summary>
+        </member>
+        <member name="P:DataStructures.BinaryTreeNode`1.rightChild">
+            <summary>
+            Apuntador al hijo derecho del nodo
+            </summary>
+        </member>
+        <member name="P:DataStructures.BinaryTreeNode`1.Height">
+            <summary>
+            Altura del nodo en el arbol
+            </summary>
+        </member>
+        <member name="M:DataStructures.BinaryTreeNode`1.#ctor(`0,System.Int32)">
+            <summary>
+            Inicializa únicamente el elemento almacenado en el nodo y los apuntadores a nulo
+            </summary>
+            <param name="element">Elemento que va a guardar el nodo</param>
+            <param name="Height">Altura del nodo en el arbol</param>
+        </member>
+        <member name="M:DataStructures.BinaryTreeNode`1.#ctor(`0,DataStructures.BinaryTreeNode{`0},DataStructures.BinaryTreeNode{`0},System.Int32)">
+            <summary>
+            Inicializa todos los atributos del nodo
+            </summary>
+            <param name="element">Elemento que guarda el nodo</param>
+            <param name="leftChild">Apuntador al hijo izquierdo</param>
+            <param name="rightChild">Apuntador al hijo derecho</param>
+            <param name="Height">Altura del nodo en el arbol</param>
+        </member>
+        <member name="M:DataStructures.BinaryTreeNode`1.ToString">
+            <summary>
+            Convierte el elemento almacenado en un string
+            </summary>
+            <returns>Devuelve el string equivalente al elemento almacenado</returns>
+        </member>
+        <member name="T:DataStructures.DynamicArray`1">
+            <summary>
+            Arreglo dinámico que almacena objetos del tipo especificado por T
+            </summary>
+            <typeparam name="T">Especifica el tipo de datos que va a ser guardado en el arrglo</typeparam>
+        </member>
+        <member name="P:DataStructures.DynamicArray`1.Size">
+            <summary>
+            Cantidad actual de datos almacenada por el arreglo
+            </summary>
+        </member>
+        <member name="M:DataStructures.DynamicArray`1.#ctor">
+            <summary>
+            Contructor por defecto de un arreglo dinámico con una capacidad inicial de 8 elementos
+            </summary>
+        </member>
+        <member name="M:DataStructures.DynamicArray`1.IsEmpty">
+            <summary>
+            Consulta si el arreglo está vacío
+            </summary>
+            <returns>Verdadero si el arreglo está vacio y falso en otro caso</returns>
+        </member>
+        <member name="M:DataStructures.DynamicArray`1.Add(`0)">
+            <summary>
+            Añade un elemento en la última posición del arreglo
+            </summary>
+            <param name="element">El elemento que va ser insertado</param>
+        </member>
+        <member name="M:DataStructures.DynamicArray`1.Remove(System.Int32)">
+            <summary>
+            Elimina el elemento que se encuentra en la posición dada por index y reubica los demás elmentos
+            </summary>
+            <param name="index">Posición en el arreglo del elemento que se quiere eliminar</param>
+            <exception cref="T:System.IndexOutOfRangeException">Si el index dado está fuera de los rangos del arreglo</exception>
+            <returns>El valor del elemento eliminado</returns>
+        </member>
+        <member name="M:DataStructures.DynamicArray`1.RemoveElement(`0)">
+            <summary>
+            Elimina el primer elemento que coincida con el objeto dado en el parámetro
+            </summary>
+            <param name="element">Elemento que se va a buscar y a eliminar</param>
+            <returns>Verdadero si se ha eliminado algun elemento del arreglo y falso en otro caso</returns>
+        </member>
+        <member name="M:DataStructures.DynamicArray`1.IndexOf(`0)">
+            <summary>
+            Busca la posicion de un elemento en el arreglo
+            </summary>
+            <param name="theElement">Valor del elemento que se va a buscar</param>
+            <returns>La posición del elemento en el arreglo</returns>
+        </member>
+        <member name="M:DataStructures.DynamicArray`1.Get(System.Int32)">
+            <summary>
+            Obtiene el elemento ubicado en la posición indicada
+            </summary>
+            <param name="index">Indica la posición del elemento que se quiere obtener</param>
+            <returns>El elemento especificado</returns>
+            <exception cref="T:System.IndexOutOfRangeException">Si el index dado está fuera de los rangos del arreglo</exception>
+        </member>
+        <member name="M:DataStructures.DynamicArray`1.Swap(System.Int32,System.Int32)">
+            <summary>
+            Intercambia de posición dos elementos en el arreglo
+            </summary>
+            <param name="indexOne">Posición del primer elemento</param>
+            <param name="indexTwo">Posición del segundo elemnto</param>
+        </member>
+        <member name="M:DataStructures.DynamicArray`1.Iterator">
+            <summary>
+            Objeto de tipo Iterator que sirve para recorrer todo el arreglo
+            </summary>
+            <returns>Un iterador sobre el arreglo</returns>
+        </member>
+        <member name="T:DataStructures.LinkedQueue`1">
+            <summary>
+            Cola lineal que almacena el tipo de objeto indicado por T
+            </summary>
+            <typeparam name="T">Indica el tipo de objeto que va a ser almacenado en la cola</typeparam>
+        </member>
+        <member name="F:DataStructures.LinkedQueue`1.front">
+            <summary>
+            Apuntador al primer nodo de la cola
+            </summary>
+        </member>
+        <member name="F:DataStructures.LinkedQueue`1.rear">
+            <summary>
+            Apuntador al último nodo de la cola
+            </summary>
+        </member>
+        <member name="P:DataStructures.LinkedQueue`1.Size">
+            <summary>
+            Indica la cantidad de elementos que están siendo almacenados en la cola
+            </summary>
+        </member>
+        <member name="M:DataStructures.LinkedQueue`1.#ctor">
+            <summary>
+            contruye una nueva cola vacía
+            </summary>
+        </member>
+        <member name="M:DataStructures.LinkedQueue`1.IsEmpty">
+            <summary>
+            Consulta si la cola esáa vacía
+            </summary>
+            <returns>Verdadero si la cola está vacía y falso en otro caso</returns>
+        </member>
+        <member name="M:DataStructures.LinkedQueue`1.GetFrontElement">
+            <summary>
+            Consulta el valor del primer elemento sin sacarlo de la cola
+            </summary>
+            <returns>default si la cola está vacía y el valor del primer elemento en otro caso</returns>
+        </member>
+        <member name="M:DataStructures.LinkedQueue`1.Dequeue">
+            <summary>
+            Obtiene el valor del primer elemento sacándolo de la cola
+            </summary>
+            <returns>default si la cola está vacía y el valor del primer elemento en otro caso</returns>
+        </member>
+        <member name="M:DataStructures.LinkedQueue`1.Enqueue(`0)">
+            <summary>
+            Inserta un nuevo elemento al final de la cola
+            </summary>
+            <param name="theElement">El valor del elemento que se va a insertar</param>
+        </member>
+        <member name="M:DataStructures.LinkedQueue`1.ToString">
+            <summary>
+            Obtiene el string equivalente a la cola mostrando todos los elementos que contiene
+            </summary>
+            <returns>El string equivalente a la cola</returns>
+        </member>
+        <member name="T:DataStructures.HashTable`2">
+            <summary>
+            Tabla de hash para almacenar cualquier tipo de objeto
+            </summary>
+            <typeparam name="K">Indica el tipo de objeto para la llave</typeparam>
+            <typeparam name="T">UIndica el tipo de objeto que se va a almacenar en la tabla</typeparam>
+        </member>
+        <member name="M:DataStructures.HashTable`2.#ctor(System.Int32)">
+            <summary>
+            Crea una tabla Hash vacía de un tamaño especificado por size
+            </summary>
+            <param name="size">Indica el tamaño de la tabla hash</param>
+        </member>
+        <member name="M:DataStructures.HashTable`2.IsEmpty">
+            <summary>
+            Consulta si la tabla está vacía
+            </summary>
+            <returns>Verdadero si la tabla está vacía y falso en otro casp</returns>
+        </member>
+        <member name="M:DataStructures.HashTable`2.ElementsQuantity">
+            <summary>
+            Consulta la cantidad de elementos que están almacenados en la tabla
+            </summary>
+            <returns>La cantidad de elementos que están almacenados en la tabla</returns>
+        </member>
+        <member name="M:DataStructures.HashTable`2.AddElement(`0,`1)">
+            <summary>
+            Inserta un nuevo elemento en la tablas
+            </summary>
+            <param name="key">Llave para el nuevo elemento</param>
+            <param name="element">Valor del nuevo elemento</param>
+            <returns>La posición de la tabla en donde fue guardado</returns>
+        </member>
+        <member name="M:DataStructures.HashTable`2.Remove(`0)">
+            <summary>
+            Elimina el elemento de la tabla que coincida con la llave indicada
+            </summary>
+            <param name="key">Valor de llave del objeto a eliminar</param>
+            <returns>El valor del elemento que fue eliminado o default si no se encontró el elemento a eliminar</returns>
+        </member>
+        <member name="M:DataStructures.HashTable`2.Search(`0)">
+            <summary>
+            Busca un elemento en la tablas
+            </summary>
+            <param name="key">El valor de la llave del elemento a buscar</param>
+            <returns>El valor del objeto si se encuetra y default en otro caso</returns>
+        </member>
+        <member name="M:DataStructures.HashTable`2.GetAll">
+            <summary>
+            Crea una lista encadenada con todos los elementos presentes en la tabla
+            </summary>
+            <returns>La lista de todos los elementos que están almacenados en la tabla</returns>
+        </member>
+        <member name="T:DataStructures.LinkedStack`1">
+            <summary>
+            Pila que usa Nodo simplemente encadenados y almacena datos de tipo T
+            </summary>
+            <typeparam name="T">Indica el tipo de dato que va a ser almacenado en la pila</typeparam>
+        </member>
+        <member name="F:DataStructures.LinkedStack`1.TopElement">
+            <summary>
+            Apuntador al primer elemento de la pila
+            </summary>
+        </member>
+        <member name="P:DataStructures.LinkedStack`1.Size">
+            <summary>
+            Indica la cantidad de elementos almacenados en la pila
+            </summary>
+        </member>
+        <member name="M:DataStructures.LinkedStack`1.#ctor">
+            <summary>
+            Construye una nueva pila vacía
+            </summary>
+        </member>
+        <member name="M:DataStructures.LinkedStack`1.IsEmpty">
+            <summary>
+            Consulta si la pila está vacía
+            </summary>
+            <returns>Verdadero si la pila está vacía y falso en otro caso</returns>
+        </member>
+        <member name="M:DataStructures.LinkedStack`1.Peek">
+            <summary>
+            Consulta el valor del primer elemento sin sacarlo de la pila
+            </summary>
+            <returns>El valor de elemento a la cabeza de la pila</returns>
+        </member>
+        <member name="M:DataStructures.LinkedStack`1.Pop">
+            <summary>
+            Obtiene el valor del primer elemento sacándolo de la pila
+            </summary>
+            <returns>El valor de elemento a la cabeza de la pila</returns>
+        </member>
+        <member name="M:DataStructures.LinkedStack`1.Push(`0)">
+            <summary>
+            Inserta un nuevo elemento a la cabeza de la pila
+            </summary>
+            <param name="theElement">El valor del elemento a insertar</param>
+        </member>
+        <member name="M:DataStructures.LinkedStack`1.ToString">
+            <summary>
+            Obtiene el string equivalente a la pila mostrando todos los elementos que contiene
+            </summary>
+            <returns>El string equivalente a la pila</returns>
+        </member>
+        <member name="T:DataStructures.LinkedList`1">
+            <summary>
+            Lista simplemente encadenada
+            </summary>
+            <typeparam name="T">El tipo de objeto que se va a guardar en la lista</typeparam>
+        </member>
+        <member name="F:DataStructures.LinkedList`1.FirstNode">
+            <summary>
+            Apuntador al primer nodo de la lista
+            </summary>
+        </member>
+        <member name="F:DataStructures.LinkedList`1.LastNode">
+            <summary>
+            Apuntador al último nodo de la lista
+            </summary>
+        </member>
+        <member name="P:DataStructures.LinkedList`1.Size">
+            <summary>
+            Cantidad de elementos que están almacenado en la lista
+            </summary>
+        </member>
+        <member name="M:DataStructures.LinkedList`1.#ctor">
+            <summary>
+            Construye una lista encadenada vacía
+            </summary>
+        </member>
+        <member name="M:DataStructures.LinkedList`1.IsEmpty">
+            <summary>
+            Consulta si la lista se encuentra vacía
+            </summary>
+            <returns>Verdadero si la lista está vacía y falso en otro caso</returns>
+        </member>
+        <member name="M:DataStructures.LinkedList`1.Get(System.Int32)">
+            <summary>
+            Obtiene el elemento almacenado en la posicion indicada por index
+            </summary>
+            <param name="index">Indica la posición del elemento</param>
+            <returns>El valor del elemento indicado</returns>
+            <exception cref="T:System.IndexOutOfRangeException">Si el index está fuera del rango de la lista</exception>
+        </member>
+        <member name="M:DataStructures.LinkedList`1.GetLast">
+            <summary>
+            Consulta el valor del último elemento de la lista
+            </summary>
+            <returns>El valor del último elemento de la lista</returns>
+        </member>
+        <member name="M:DataStructures.LinkedList`1.IndexOf(`0)">
+            <summary>
+            Busca la posición el la que se encuentra el elemento indicado
+            </summary>
+            <param name="theElement">Valor del elemento a buscar</param>
+            <returns>Si el elemento es encontrado devuelve su posición y -1 si no es encontrado</returns>
+        </member>
+        <member name="M:DataStructures.LinkedList`1.Remove(System.Int32)">
+            <summary>
+            Elimina el elemento de la posición indicada
+            </summary>
+            <param name="index">Indica la posición del elemento a eliminar</param>
+            <returns>El valor del objeto eliminado</returns>
+            <exception cref="T:System.IndexOutOfRangeException">Si el index dado excede el rango de la lista</exception>
+        </member>
+        <member name="M:DataStructures.LinkedList`1.RemoveElement(`0)">
+            <summary>
+            Elimina el primer elemento que coincida con el elemento dado
+            </summary>
+            <param name="element">El elemento a eliminar</param>
+            <returns>Verdadero si se eliminó un elemento y falso en otro caso</returns>
+        </member>
+        <member name="M:DataStructures.LinkedList`1.Add(System.Int32,`0)">
+            <summary>
+            Inserta un nuevo elemento en la lista en la posicion indicada
+            </summary>
+            <param name="index">Indica la posición en la que insertar el elemento</param>
+            <param name="theElement">El valor del elemento a insertar</param>
+            <exception cref="T:System.IndexOutOfRangeException">Si el index dado está excede los rangos de la lista</exception>
+        </member>
+        <member name="M:DataStructures.LinkedList`1.Add(`0)">
+            <summary>
+            Añade un nuevo elemento al final de la lista
+            </summary>
+            <param name="element">El valor del elemento a insertar</param>
+        </member>
+        <member name="M:DataStructures.LinkedList`1.AddFirst(`0)">
+            <summary>
+            Añade un nuevo elemento al inicio de la lista
+            </summary>
+            <param name="element">El valor del elemento a insertar</param>
+        </member>
+        <member name="M:DataStructures.LinkedList`1.GetNode(System.Int32)">
+            <summary>
+            Obtiene el nodo en la posición indicada por index
+            </summary>
+            <param name="index">Indica la posición del nodo que se quiere obtener</param>
+            <returns>El nodo de la posicion dada por index</returns>
+        </member>
+        <member name="M:DataStructures.LinkedList`1.ToString">
+            <summary>
+            Obtiene el string equivalente a la lista mostrando todos los elementos que contiene
+            </summary>
+            <returns>El string equivalente a la lista</returns>
+        </member>
+        <member name="M:DataStructures.LinkedList`1.Iterator">
+            <summary>
+            Obtiene el iterador correspondiente a la lista para poder recorrerla
+            </summary>
+            <returns>El iterador de la lista</returns>
+        </member>
+        <member name="T:DataStructures.ChainNode`1">
+            <summary>
+            Node para lista encadenada simple
+            </summary>
+            <typeparam name="T">Tipo de elemento que se va a guardar en la cadena</typeparam>
+        </member>
+        <member name="P:DataStructures.ChainNode`1.element">
+            <summary>
+            Elemento almacenado por el nodo
+            </summary>
+        </member>
+        <member name="P:DataStructures.ChainNode`1.next">
+            <summary>
+            Apuntador al nodo siguiente
+            </summary>
+        </member>
+        <member name="M:DataStructures.ChainNode`1.#ctor">
+            <summary>
+            Crea un nodo con valores por defecto
+            </summary>
+        </member>
+        <member name="M:DataStructures.ChainNode`1.#ctor(`0)">
+            <summary>
+            Crea uno nodo guardando el elemento indicado
+            </summary>
+            <param name="element">El elemento que va a ser guardado por el nodo</param>
+        </member>
+        <member name="M:DataStructures.ChainNode`1.#ctor(`0,DataStructures.ChainNode{`0})">
+            <summary>
+            Crea un nodo usando los valores especificados
+            </summary>
+            <param name="element">El elemento que va a ser guardado en el nodo</param>
+            <param name="next">Un apuntador a un nodo siguiente</param>
+        </member>
+        <member name="M:DataStructures.ChainNode`1.ToString">
+            <summary>
+            Convierte el nodo en un string
+            </summary>
+            <returns>Retorna el string correspondiente al nodo</returns>
+        </member>
+        <member name="T:DataStructures.TreeNode`1">
+            <summary>
+            Nodo para un árbol
+            </summary>
+            <typeparam name="T">El tipo de elemento que va a ser guardado en el nodo</typeparam>
+        </member>
+        <member name="P:DataStructures.TreeNode`1.Element">
+            <summary>
+            Elemento que almacena el nodo
+            </summary>
+        </member>
+        <member name="F:DataStructures.TreeNode`1.FirstChild">
+            <summary>
+            Apuntador al primer hijo del nodo
+            </summary>
+        </member>
+        <member name="F:DataStructures.TreeNode`1.NextNode">
+            <summary>
+            Apuntador al siguiente 'hermano' del nodo
+            </summary>
+        </member>
+        <member name="M:DataStructures.TreeNode`1.#ctor(`0)">
+            <summary>
+            Construye un nodo de árbol guardando el dato dado por element
+            </summary>
+            <param name="element">Elemento que va a ser guardado en el nodo</param>
+        </member>
+    </members>
+</doc>

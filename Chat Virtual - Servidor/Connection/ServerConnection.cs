@@ -127,10 +127,10 @@ namespace Chat_Virtual___Servidor {
             };
             t1.Start();
             this.ConsoleAppend("Se han comenzado a escuchar solicitudes de conexión entrantes.\n");
-            Thread t2 = new Thread(this.ExecuteRequest) {
+            /*Thread t2 = new Thread(this.ExecuteRequest) {
                 IsBackground = true
             };
-            t2.Start();
+            t2.Start();*/
             Thread t3 = new Thread(this.ListenUsers) {
                 IsBackground = true
             };
@@ -217,16 +217,16 @@ namespace Chat_Virtual___Servidor {
             do {
                 try {
                     if (this.Server.Pending()) {
-                        this.ConsoleAppend("Prueba");
                         User U = new User (this.Server.AcceptTcpClient());
                         object obj = null;
 
                         for (int i = 0; i<10;i++) {
                             try {
+                                this.Read(U);
                                 obj = U.ReadingQueue.Dequeue();
                             } catch (Exception) { }
                             if (obj == null) {
-                                Thread.Sleep(250);
+                                Thread.Sleep(125);
                             } else {
                                 break;
                             }
@@ -271,9 +271,9 @@ namespace Chat_Virtual___Servidor {
                                 }*/
 
                             } else {
-                                U.WritingQueue.Enqueue(new RequestAnswer(false));       //Agrega la respuesta a la cola de envío
-                                U.WritingQueue.Enqueue(new RequestError(1));            //Especifica el error del fallo
-                                this.Write(U);                                    //Envía la respuesta
+                                U.WritingQueue.Enqueue(new RequestAnswer(false));
+                                U.WritingQueue.Enqueue(new RequestError(1));
+                                this.Write(U);
                                 this.ConsoleAppend("Se ha intentado conectar el remoto [" + U.Client.Client.RemoteEndPoint.ToString() + "] con información de inicio de sesión incorrecta.");
                                 U.Client.Close();
                             }

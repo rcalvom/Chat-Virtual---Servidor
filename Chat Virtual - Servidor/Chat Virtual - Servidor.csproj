@@ -101,6 +101,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <EmbeddedResource Include="Frontend\ServerConfigInterface.resx">
       <DependentUpon>ServerConfigInterface.cs</DependentUpon>
@@ -117,6 +118,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\1200px-Universidad_Nacional_de_Colombia_-_Escudo_2016.svg.png" />
+    <None Include="Resources\1200px-Universidad_Nacional_de_Colombia_-_Escudo_2016.svg1.png" />
+    <Content Include="Resources\SadiriLogo2.png" />
+    <None Include="Resources\SadiriLogo21.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
