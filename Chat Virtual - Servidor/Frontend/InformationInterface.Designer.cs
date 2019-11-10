@@ -56,7 +56,6 @@
             this.label1.Size = new System.Drawing.Size(110, 13);
             this.label1.TabIndex = 1;
             this.label1.Text = "Ricardo Andrés Calvo";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // label2
             // 
@@ -66,7 +65,6 @@
             this.label2.Size = new System.Drawing.Size(139, 13);
             this.label2.TabIndex = 2;
             this.label2.Text = "Samuel González Nisperuza";
-            this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
             // label3
             // 
@@ -132,6 +130,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.CancelButton = this.BExit;
             this.ClientSize = new System.Drawing.Size(402, 235);
             this.ControlBox = false;

@@ -1,6 +1,7 @@
 ﻿using DataStructures;
 using ShippingData;
 using System;
+using System.Drawing;
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
@@ -70,6 +71,9 @@ namespace Chat_Virtual___Servidor {
             this.ButtonText("Encender Servidor");
             this.MenuEnable(true);
             this.ClearTable();
+            while (!this.Users.IsEmpty()) {
+                this.Users.Remove(0);
+            }
         }
 
         /// <summary>
@@ -146,7 +150,7 @@ namespace Chat_Virtual___Servidor {
         /// </summary>
         private void ExecuteRequest() {
             do {
-                Iterator<User> i = Users.Iterator();
+                Iterator<User> i = this.Users.Iterator();
                 while (i.HasNext()) {
                     User user = i.Next();
                     object Readed = user.ReadingDequeue();
@@ -155,22 +159,25 @@ namespace Chat_Virtual___Servidor {
                     } else if (Readed is Chat ch) {
                         User memberTwo;
                         if (ch.memberOne.Equals(user.Name)) {
-                            memberTwo = SearchUser(ch.memberTwo);
+                            memberTwo = this.SearchUser(ch.memberTwo);
                         } else {
-                            memberTwo = SearchUser(ch.memberOne);
+                            memberTwo = this.SearchUser(ch.memberOne);
                         }
                         user.WritingEnqueue(ch);
                         memberTwo.WritingEnqueue(ch);
                     } else if (Readed is ChatMessage ms) {
-                        User receiver = SearchUser(ms.Receiver);
+                        User receiver = this.SearchUser(ms.Receiver);
                         receiver.WritingEnqueue(ms);
                     }
                 }
             } while (this.Connected);
         }
 
+        /// <summary>
+        /// Devuelve el primer Usuario encontrado con el nombre correspondiente.
+        /// </summary>
         private User SearchUser(string userName) {
-            Iterator<User> i = Users.Iterator();
+            Iterator<User> i = this.Users.Iterator();
             while (i.HasNext()) {
                 User u = i.Next();
                 if (u.Name.Equals(userName)) {
@@ -185,7 +192,7 @@ namespace Chat_Virtual___Servidor {
         /// </summary>
         private void ListenUsers() { 
             do {
-                Iterator<User> i = Users.Iterator();
+                Iterator<User> i = this.Users.Iterator();
                 while (i.HasNext()) {
                     User user = i.Next();
                     this.Read(user);                        //Intenta leer los datos que estén pendientes para ese usuario 
@@ -198,7 +205,7 @@ namespace Chat_Virtual___Servidor {
         /// </summary>
         private void WriteUsers() {
             do {
-                Iterator<User> i = Users.Iterator();        //Obtiene el iterador para la lista
+                Iterator<User> i = this.Users.Iterator();        //Obtiene el iterador para la lista
                 while (i.HasNext()) {
                     User user = i.Next();                   //Obtiene cada elemento en la lista
                     this.Write(user);                       //Intenta escribir los datos que estén pendientes para ese usuario
@@ -266,6 +273,13 @@ namespace Chat_Virtual___Servidor {
                                     U.WritingQueue.Enqueue(ms[i]);
                                 }*/
 
+                                /*Bitmap imagen = new Bitmap(@"C:\Users\ricar\Downloads\Lucario.jpg");
+                                U.WritingEnqueue(new Profile(Serializer.SerializeImage(imagen), "Pispirispi en tusa."));
+                                this.Write(U);*/
+
+                                U.WritingEnqueue(new TreeActivities(null));
+                                this.Write(U);
+
                             } else {
                                 U.WritingEnqueue(new RequestAnswer(false));
                                 U.WritingEnqueue(new RequestError(1));
@@ -274,7 +288,8 @@ namespace Chat_Virtual___Servidor {
                                 U.Client.Close();
                             }
                         } else if (obj is SignUp su) {
-                            if (this.Oracle.Oracle.ExecuteSQL("INSERT INTO USUARIOS VALUES('" + su.userName + "','" + su.name + "','" + su.password + "',SYSDATE)")) {
+                            if (this.Oracle.Oracle.ExecuteSQL("INSERT INTO USUARIO VALUES('" + su.userName + "','" + su.name + "','" + su.password + "',SYSDATE)")) {
+                                U.Name = su.userName;
                                 U.WritingEnqueue(new RequestAnswer(true));
                                 this.Write(U);
                                 this.ConsoleAppend("Se ha registrado el usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] correctamente.");
@@ -320,16 +335,19 @@ namespace Chat_Virtual___Servidor {
             Data data = user.WritingDequeue();
             if (data == default)
                 return false;
-            try {
+            //try {
                 byte[] toSend = Serializer.Serialize(data);                                      // Serializa el primer objeto de la cola
+                if (data is Profile) {
+                    ;
+                }
                 user.Writer.Write(toSend.Length);                                                // Envía el tamaño del objeto
                 user.Writer.Write(toSend);                                                       // Envía el objeto     
                 return true;
-            } catch (Exception) {
+            /*} catch (Exception) {
                 //this.ConsoleAppend("Se ha perdido la conexión con el usuario [" + user.Name + "] Intentando reconectar.");
                 user.WritingEnqueue(data);
                 return false;
-            }
+            }*/
         }
 
         /// <summary>

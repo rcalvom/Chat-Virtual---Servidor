@@ -11,25 +11,25 @@ namespace Chat_Virtual___Servidor {
         public NetworkStream Stream { get; set; }
         public BinaryReader Reader { get; set; }
         public BinaryWriter Writer { get; set; }
-        protected LinkedQueue<Data> WritingQueue;
-        protected LinkedQueue<Data> ReadingQueue;
-        protected Semaphore CanWrite;
-        protected Semaphore CanRead;
+        private readonly LinkedQueue<Data> WritingQueue;
+        private readonly LinkedQueue<Data> ReadingQueue;
+        private readonly Semaphore CanWrite;
+        private readonly Semaphore CanRead;
 
         public User() {
             this.Client = new TcpClient();
             this.ReadingQueue = new LinkedQueue<Data>();
             this.WritingQueue = new LinkedQueue<Data>();
-            CanWrite = new Semaphore(1, 1);
-            CanRead = new Semaphore(1, 1);
+            this.CanWrite = new Semaphore(1, 1);
+            this.CanRead = new Semaphore(1, 1);
         }
         public User(string Name) {
             this.Name = Name;
             this.Client = new TcpClient();
             this.ReadingQueue = new LinkedQueue<Data>();
             this.WritingQueue = new LinkedQueue<Data>();
-            CanWrite = new Semaphore(1, 1);
-            CanRead = new Semaphore(1, 1);
+            this.CanWrite = new Semaphore(1, 1);
+            this.CanRead = new Semaphore(1, 1);
         }
 
         public User(TcpClient Client) {
@@ -39,43 +39,43 @@ namespace Chat_Virtual___Servidor {
             this.Reader = new BinaryReader(this.Stream);
             this.ReadingQueue = new LinkedQueue<Data>();
             this.WritingQueue = new LinkedQueue<Data>();
-            CanWrite = new Semaphore(1, 1);
-            CanRead = new Semaphore(1, 1);
+            this.CanWrite = new Semaphore(1, 1);
+            this.CanRead = new Semaphore(1, 1);
         }
 
         public void WritingEnqueue(Data data) {
-            CanWrite.WaitOne();
-            WritingQueue.Enqueue(data);
-            CanWrite.Release();
+            this.CanWrite.WaitOne();
+            this.WritingQueue.Enqueue(data);
+            this.CanWrite.Release();
         }
 
         public void ReadingEnqueue(Data data) {
-            CanRead.WaitOne();
-            ReadingQueue.Enqueue(data);
-            CanRead.Release();
+            this.CanRead.WaitOne();
+            this.ReadingQueue.Enqueue(data);
+            this.CanRead.Release();
         }
 
         public Data WritingDequeue() {
-            CanWrite.WaitOne();
+            this.CanWrite.WaitOne();
             Data data;
-            if (WritingQueue.IsEmpty()) {
+            if (this.WritingQueue.IsEmpty()) {
                 data = default;
             } else {
-                data = WritingQueue.Dequeue();
+                data = this.WritingQueue.Dequeue();
             }
-            CanWrite.Release();
+            this.CanWrite.Release();
             return data;
         }
 
         public Data ReadingDequeue() {
-            CanRead.WaitOne();
+            this.CanRead.WaitOne();
             Data data;
-            if (ReadingQueue.IsEmpty()) {
+            if (this.ReadingQueue.IsEmpty()) {
                 data = default;
             } else {
-                data = ReadingQueue.Dequeue();
+                data = this.ReadingQueue.Dequeue();
             }
-            CanRead.Release();
+            this.CanRead.Release();
             return data;
         }
     }

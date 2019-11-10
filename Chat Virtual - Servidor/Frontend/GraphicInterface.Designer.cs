@@ -45,26 +45,30 @@
             this.Ip = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.dataGridView2 = new System.Windows.Forms.DataGridView();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.MenuBar.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.UsersTable)).BeginInit();
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // Button
             // 
+            this.Button.BackColor = System.Drawing.SystemColors.ButtonShadow;
             this.Button.Location = new System.Drawing.Point(12, 415);
             this.Button.Name = "Button";
             this.Button.Size = new System.Drawing.Size(137, 23);
             this.Button.TabIndex = 0;
             this.Button.Text = "Encender servidor.";
-            this.Button.UseVisualStyleBackColor = true;
+            this.Button.UseVisualStyleBackColor = false;
             this.Button.Click += new System.EventHandler(this.ButtonEvent);
             // 
             // MenuBar
             // 
+            this.MenuBar.BackColor = System.Drawing.SystemColors.ControlDark;
             this.MenuBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.archivoToolStripMenuItem,
             this.configuraciónToolStripMenuItem,
@@ -89,7 +93,7 @@
             // 
             this.salirToolStripMenuItem.Name = "salirToolStripMenuItem";
             this.salirToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-            this.salirToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.salirToolStripMenuItem.Size = new System.Drawing.Size(138, 22);
             this.salirToolStripMenuItem.Text = "Salir";
             this.salirToolStripMenuItem.Click += new System.EventHandler(this.ExitEvent);
             // 
@@ -106,7 +110,7 @@
             // 
             this.serverToolStripMenuItem.Name = "serverToolStripMenuItem";
             this.serverToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
-            this.serverToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.serverToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.serverToolStripMenuItem.Text = "Servidor";
             this.serverToolStripMenuItem.Click += new System.EventHandler(this.ServerConfig_Click);
             // 
@@ -114,7 +118,7 @@
             // 
             this.oracleToolStripMenuItem.Name = "oracleToolStripMenuItem";
             this.oracleToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F7;
-            this.oracleToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.oracleToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.oracleToolStripMenuItem.Text = "Oracle";
             this.oracleToolStripMenuItem.Click += new System.EventHandler(this.OracleConfig_Click);
             // 
@@ -130,27 +134,28 @@
             // 
             this.informaciónToolStripMenuItem.Name = "informaciónToolStripMenuItem";
             this.informaciónToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F10;
-            this.informaciónToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.informaciónToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
             this.informaciónToolStripMenuItem.Text = "Información";
             this.informaciónToolStripMenuItem.Click += new System.EventHandler(this.InfoEvent);
             // 
             // Servidor
             // 
             this.Servidor.AutoSize = true;
-            this.Servidor.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Servidor.Location = new System.Drawing.Point(210, 33);
+            this.Servidor.Font = new System.Drawing.Font("MV Boli", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Servidor.Location = new System.Drawing.Point(355, 40);
             this.Servidor.Name = "Servidor";
-            this.Servidor.Size = new System.Drawing.Size(334, 37);
+            this.Servidor.Size = new System.Drawing.Size(189, 63);
             this.Servidor.TabIndex = 3;
-            this.Servidor.Text = "Servidor Chat Virtual";
+            this.Servidor.Text = "SADIRI";
             // 
             // LogConsole
             // 
-            this.LogConsole.Location = new System.Drawing.Point(12, 82);
+            this.LogConsole.BackColor = System.Drawing.SystemColors.AppWorkspace;
+            this.LogConsole.Location = new System.Drawing.Point(12, 110);
             this.LogConsole.Name = "LogConsole";
             this.LogConsole.ReadOnly = true;
             this.LogConsole.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedVertical;
-            this.LogConsole.Size = new System.Drawing.Size(455, 317);
+            this.LogConsole.Size = new System.Drawing.Size(455, 289);
             this.LogConsole.TabIndex = 4;
             this.LogConsole.Text = "";
             // 
@@ -158,10 +163,10 @@
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Location = new System.Drawing.Point(489, 82);
+            this.tabControl1.Location = new System.Drawing.Point(489, 110);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(299, 317);
+            this.tabControl1.Size = new System.Drawing.Size(299, 289);
             this.tabControl1.TabIndex = 5;
             // 
             // tabPage1
@@ -170,7 +175,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(291, 291);
+            this.tabPage1.Size = new System.Drawing.Size(291, 263);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Clientes Conectados";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -207,7 +212,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(291, 291);
+            this.tabPage2.Size = new System.Drawing.Size(291, 263);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Grupos Activos";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -220,12 +225,24 @@
             this.dataGridView2.Size = new System.Drawing.Size(279, 279);
             this.dataGridView2.TabIndex = 0;
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = global::Chat_Virtual___Servidor.Properties.Resources.SadiriLogo2;
+            this.pictureBox1.Location = new System.Drawing.Point(249, 34);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(99, 69);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox1.TabIndex = 6;
+            this.pictureBox1.TabStop = false;
+            // 
             // GraphicInterface
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.LogConsole);
             this.Controls.Add(this.Servidor);
@@ -243,6 +260,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.UsersTable)).EndInit();
             this.tabPage2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -267,6 +285,7 @@
         public System.Windows.Forms.DataGridView UsersTable;
         public System.Windows.Forms.ToolStripMenuItem configuraciónToolStripMenuItem;
         public System.Windows.Forms.MenuStrip MenuBar;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }
 
