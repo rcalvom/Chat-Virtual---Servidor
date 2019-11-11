@@ -166,8 +166,16 @@ namespace Chat_Virtual___Servidor {
                         user.WritingEnqueue(ch);
                         memberTwo.WritingEnqueue(ch);
                     } else if (Readed is ChatMessage ms) {
+                        DateTime CurrentDate = DateTime.Now;
+                        ms.Hour = CurrentDate.Hour;
+                        Date date;
+                        date.Day = (short)CurrentDate.Day;
+                        date.Month = (short)CurrentDate.Month;
+                        date.Year = (short)CurrentDate.Year;
+                        ms.date = date;
                         User receiver = this.SearchUser(ms.Receiver);
                         receiver.WritingEnqueue(ms);
+                        user.WritingEnqueue(ms);
                     }
                 }
             } while (this.Connected);
