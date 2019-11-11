@@ -164,7 +164,7 @@ namespace Chat_Virtual___Servidor {
                             memberTwo = this.SearchUser(ch.memberOne);
                         }
                         user.WritingEnqueue(ch);
-                        memberTwo.WritingEnqueue(ch);
+                        //memberTwo.WritingEnqueue(ch);
                     } else if (Readed is ChatMessage ms) {
                         DateTime CurrentDate = DateTime.Now;
                         ms.Hour = CurrentDate.Hour;
