@@ -273,12 +273,13 @@ namespace Chat_Virtual___Servidor {
                                     U.WritingQueue.Enqueue(ms[i]);
                                 }*/
 
-                                /*Bitmap imagen = new Bitmap(@"C:\Users\ricar\Downloads\Lucario.jpg");
-                                U.WritingEnqueue(new Profile(Serializer.SerializeImage(imagen), "Pispirispi en tusa."));
-                                this.Write(U);*/
-
-                                U.WritingEnqueue(new TreeActivities(null));
+                                Bitmap imagen = new Bitmap(@"C:\Users\ricar\Downloads\default.jpg");
+                                U.WritingEnqueue(new Profile(Serializer.SerializeImage(imagen), "Hey there! I am using SADIRI."));
                                 this.Write(U);
+
+                                /*string[] tree = { null, "Tareas","Matematicas","Programacion","Taller de Calculo",null,"Programar Sadiri","Implementar Gráfos y montículos" };
+                                U.WritingEnqueue(new TreeActivities(tree));
+                                this.Write(U);*/
 
                             } else {
                                 U.WritingEnqueue(new RequestAnswer(false));

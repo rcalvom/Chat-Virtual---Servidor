@@ -23,6 +23,7 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ServerConfigInterface));
             this.LTitle = new System.Windows.Forms.Label();
             this.LMaxUsers = new System.Windows.Forms.Label();
             this.LPort = new System.Windows.Forms.Label();
@@ -101,6 +102,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.CancelButton = this.BCancel;
             this.ClientSize = new System.Drawing.Size(268, 185);
             this.Controls.Add(this.BCancel);
@@ -110,6 +112,7 @@
             this.Controls.Add(this.LPort);
             this.Controls.Add(this.LMaxUsers);
             this.Controls.Add(this.LTitle);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "ServerConfigInterface";
