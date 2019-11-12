@@ -169,6 +169,12 @@
             </summary>
             <returns>El string equivalente al árbol</returns>
         </member>
+        <member name="M:DataStructures.BinaryTree`1.ToArray">
+            <summary>
+            Convierte el árbol en un arreglo donde los espacios vacios se llenan con default
+            </summary>
+            <returns>El arreglo equivalente al árbol</returns>
+        </member>
         <member name="T:DataStructures.BinaryTreeNode`1">
             <summary>
             Nodo para un árbol de búsqueda binario
@@ -371,7 +377,7 @@
         </member>
         <member name="M:DataStructures.HashTable`2.AddElement(`0,`1)">
             <summary>
-            Inserta un nuevo elemento en la tablas
+            Inserta un nuevo elemento en la tabla
             </summary>
             <param name="key">Llave para el nuevo elemento</param>
             <param name="element">Valor del nuevo elemento</param>
@@ -554,6 +560,12 @@
             Obtiene el iterador correspondiente a la lista para poder recorrerla
             </summary>
             <returns>El iterador de la lista</returns>
+        </member>
+        <member name="M:DataStructures.LinkedList`1.ToArray">
+            <summary>
+            Crea un arreglo con una copia de todos los elementos de la lista
+            </summary>
+            <returns>Retorna null si la lista está vacía o el arreglo correspondiente a la lista en otro caso</returns>
         </member>
         <member name="T:DataStructures.ChainNode`1">
             <summary>

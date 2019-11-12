@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using static ShippingData.Message;
 
 namespace Chat_Virtual___Servidor {
 
@@ -166,13 +167,7 @@ namespace Chat_Virtual___Servidor {
                         user.WritingEnqueue(ch);
                         memberTwo.WritingEnqueue(ch);
                     } else if (Readed is ChatMessage ms) {
-                        DateTime CurrentDate = DateTime.Now;
-                        ms.Hour = CurrentDate.Hour;
-                        Date date;
-                        date.Day = (short)CurrentDate.Day;
-                        date.Month = (short)CurrentDate.Month;
-                        date.Year = (short)CurrentDate.Year;
-                        ms.date = date;
+                        ms.date = new Date(DateTime.Now);
                         User receiver = this.SearchUser(ms.Receiver);
                         receiver.WritingEnqueue(ms);
                         user.WritingEnqueue(ms);
@@ -230,8 +225,7 @@ namespace Chat_Virtual___Servidor {
                     if (this.Server.Pending()) {
                         User U = new User (this.Server.AcceptTcpClient());
                         object obj = null;
-
-                        for (int i = 0; i<10;i++) {
+                        for (int i = 0; i<25;i++) {
                             try {
                                 this.Read(U);
                                 obj = U.ReadingDequeue();
@@ -242,7 +236,6 @@ namespace Chat_Virtual___Servidor {
                                 break;
                             }
                         }
-
                         if (obj is SignIn si) {
                             bool exist = false;
                             this.Oracle.Oracle.ExecuteSQL("SELECT USERNAME,CONTRASENA FROM USUARIO");
@@ -273,21 +266,18 @@ namespace Chat_Virtual___Servidor {
                                 }*/
 
 
-                                ChatMessage[] ms = new ChatMessage[20];
+                                /*ChatMessage[] ms = new ChatMessage[20];
                                 for (int i = 0; i<ms.Length; i++) {
                                     ms[i] = new ChatMessage("jdiegopm","jdiegopm","Prueba "+i);
                                 }
 
                                 for (int i = 0; i<ms.Length; i++) {
                                     U.WritingEnqueue(ms[i]);
-                                }
+                                }*/
 
                                 Bitmap imagen = new Bitmap(@"C:\Users\ricar\Downloads\default.jpg");
                                 U.WritingEnqueue(new Profile(Serializer.SerializeImage(imagen), "Hey there! I am using SADIRI."));
                                 this.Write(U);
-
-
-
 
                                 /*string[] tree = { null, "Tareas","Matematicas","Programacion","Taller de Calculo",null,"Programar Sadiri","Implementar Gráfos y montículos" };
                                 U.WritingEnqueue(new TreeActivities(tree));
