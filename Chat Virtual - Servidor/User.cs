@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using DataStructures;
 using ShippingData;
 using System.Threading;
+using System;
 
 namespace Chat_Virtual___Servidor {
     public class User {
@@ -57,24 +58,14 @@ namespace Chat_Virtual___Servidor {
 
         public Data WritingDequeue() {
             this.CanWrite.WaitOne();
-            Data data;
-            if (this.WritingQueue.IsEmpty()) {
-                data = default;
-            } else {
-                data = this.WritingQueue.Dequeue();
-            }
+            Data data = this.WritingQueue.Dequeue();
             this.CanWrite.Release();
             return data;
         }
 
         public Data ReadingDequeue() {
             this.CanRead.WaitOne();
-            Data data;
-            if (this.ReadingQueue.IsEmpty()) {
-                data = default;
-            } else {
-                data = this.ReadingQueue.Dequeue();
-            }
+            Data data = this.ReadingQueue.Dequeue();
             this.CanRead.Release();
             return data;
         }

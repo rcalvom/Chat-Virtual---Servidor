@@ -164,7 +164,7 @@ namespace Chat_Virtual___Servidor {
                             memberTwo = this.SearchUser(ch.memberOne);
                         }
                         user.WritingEnqueue(ch);
-                        //memberTwo.WritingEnqueue(ch);
+                        memberTwo.WritingEnqueue(ch);
                     } else if (Readed is ChatMessage ms) {
                         DateTime CurrentDate = DateTime.Now;
                         ms.Hour = CurrentDate.Hour;
@@ -272,18 +272,22 @@ namespace Chat_Virtual___Servidor {
                                     }
                                 }*/
 
-                                /*ChatMessage[] ms = new ChatMessage[20];
+
+                                ChatMessage[] ms = new ChatMessage[20];
                                 for (int i = 0; i<ms.Length; i++) {
                                     ms[i] = new ChatMessage("jdiegopm","jdiegopm","Prueba "+i);
                                 }
 
                                 for (int i = 0; i<ms.Length; i++) {
-                                    U.WritingQueue.Enqueue(ms[i]);
-                                }*/
+                                    U.WritingEnqueue(ms[i]);
+                                }
 
                                 Bitmap imagen = new Bitmap(@"C:\Users\ricar\Downloads\default.jpg");
                                 U.WritingEnqueue(new Profile(Serializer.SerializeImage(imagen), "Hey there! I am using SADIRI."));
                                 this.Write(U);
+
+
+
 
                                 /*string[] tree = { null, "Tareas","Matematicas","Programacion","Taller de Calculo",null,"Programar Sadiri","Implementar Gráfos y montículos" };
                                 U.WritingEnqueue(new TreeActivities(tree));
@@ -344,19 +348,16 @@ namespace Chat_Virtual___Servidor {
             Data data = user.WritingDequeue();
             if (data == default)
                 return false;
-            //try {
+            try {
                 byte[] toSend = Serializer.Serialize(data);                                      // Serializa el primer objeto de la cola
-                if (data is Profile) {
-                    ;
-                }
                 user.Writer.Write(toSend.Length);                                                // Envía el tamaño del objeto
                 user.Writer.Write(toSend);                                                       // Envía el objeto     
                 return true;
-            /*} catch (Exception) {
-                //this.ConsoleAppend("Se ha perdido la conexión con el usuario [" + user.Name + "] Intentando reconectar.");
+            } catch (Exception) {
+                this.ConsoleAppend("Se ha perdido la conexión con el usuario [" + user.Name + "] Intentando reconectar.");
                 user.WritingEnqueue(data);
                 return false;
-            }*/
+            }
         }
 
         /// <summary>
