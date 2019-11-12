@@ -222,10 +222,10 @@ namespace Chat_Virtual___Servidor {
         private void ListenConnection() {          
             do {
                 try {
-                    if (this.Server.Pending()) {
+                    if (this.Server.Pending()) {                                            // Si hay solicitudes de conexión entrantes.
                         User U = new User (this.Server.AcceptTcpClient());
                         object obj = null;
-                        for (int i = 0; i<25;i++) {
+                        for (int i = 0; i<25;i++) {                                         // Intenta 25 veces recibir el objeto inicial.
                             try {
                                 this.Read(U);
                                 obj = U.ReadingDequeue();
@@ -236,7 +236,7 @@ namespace Chat_Virtual___Servidor {
                                 break;
                             }
                         }
-                        if (obj is SignIn si) {
+                        if (obj is SignIn si) {                                             // Si el objeto recibido es un inicio de sesión.
                             bool exist = false;
                             this.Oracle.Oracle.ExecuteSQL("SELECT USERNAME,CONTRASENA FROM USUARIO");
                             while (this.Oracle.Oracle.DataReader.Read()) {
@@ -245,7 +245,7 @@ namespace Chat_Virtual___Servidor {
                                     break;
                                 }
                             }
-                            if (exist) {
+                            if (exist) {                                                    // Si la información del cliente corresponde con la de la base de datos.
                                 U.Name = si.user;                                    
                                 U.WritingEnqueue(new RequestAnswer(true));        
                                 this.Write(U);                                         
@@ -275,6 +275,7 @@ namespace Chat_Virtual___Servidor {
                                     U.WritingEnqueue(ms[i]);
                                 }*/
 
+                                //Envío de imagen de perfil y estado.
                                 Bitmap imagen = new Bitmap(@"C:\Users\ricar\Downloads\default.jpg");
                                 U.WritingEnqueue(new Profile(Serializer.SerializeImage(imagen), "Hey there! I am using SADIRI."));
                                 this.Write(U);
@@ -283,14 +284,14 @@ namespace Chat_Virtual___Servidor {
                                 U.WritingEnqueue(new TreeActivities(tree));
                                 this.Write(U);*/
 
-                            } else {
+                            } else {                                                                                        // Si la infomación de inicio de sesión es incorrecta.
                                 U.WritingEnqueue(new RequestAnswer(false));
                                 U.WritingEnqueue(new RequestError(1));
                                 this.Write(U);
                                 this.ConsoleAppend("Se ha intentado conectar el remoto [" + U.Client.Client.RemoteEndPoint.ToString() + "] con información de inicio de sesión incorrecta.");
                                 U.Client.Close();
                             }
-                        } else if (obj is SignUp su) {
+                        } else if (obj is SignUp su) {                                                                      // Si el objeto recibido es un nuevo registro
                             if (this.Oracle.Oracle.ExecuteSQL("INSERT INTO USUARIO VALUES('" + su.userName + "','" + su.name + "','" + su.password + "',SYSDATE)")) {
                                 U.Name = su.userName;
                                 U.WritingEnqueue(new RequestAnswer(true));
@@ -320,9 +321,9 @@ namespace Chat_Virtual___Servidor {
                                 }
                                 temp = temp.next;
                             }
-                        }*/ else {
+                        }*/ else {                                                                  // Si no llego objeto inicial.
                             this.ConsoleAppend("No se ha recibido información de ingreso por parte del remoto. [" + U.Client.Client.RemoteEndPoint.ToString() + "] Se ha desconectado del servidor");
-                            //U.Client.Close();
+                            U.Client.Close();
                         }
                     }
                 } catch (Exception) { }
@@ -343,8 +344,9 @@ namespace Chat_Virtual___Servidor {
                 user.Writer.Write(toSend.Length);                                                // Envía el tamaño del objeto
                 user.Writer.Write(toSend);                                                       // Envía el objeto     
                 return true;
-            } catch (Exception) {
+            } catch (Exception ex) {
                 this.ConsoleAppend("Se ha perdido la conexión con el usuario [" + user.Name + "] Intentando reconectar.");
+                this.ConsoleAppend(ex.Message);
                 user.WritingEnqueue(data);
                 return false;
             }
