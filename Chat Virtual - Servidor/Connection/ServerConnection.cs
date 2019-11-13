@@ -158,18 +158,20 @@ namespace Chat_Virtual___Servidor {
                     if (Readed == default) {
                         continue;
                     } else if (Readed is Chat ch) {
-                        User memberTwo;
-                        if (ch.memberOne.Equals(user.Name)) {
-                            memberTwo = this.SearchUser(ch.memberTwo);
-                        } else {
-                            memberTwo = this.SearchUser(ch.memberOne);
+                        this.Oracle.Oracle.ExecuteSQL("SELECT userName FROM USUARIO WHERE userName like '%" + ch.memberTwo + "%'");
+                        while (this.Oracle.Oracle.DataReader.Read()) {
+                            user.WritingEnqueue(new Chat(ch.memberOne, this.Oracle.Oracle.DataReader["USERNAME"].ToString()));
                         }
-                        user.WritingEnqueue(ch);
-                        memberTwo.WritingEnqueue(ch);
                     } else if (Readed is ChatMessage ms) {
                         ms.date = new Date(DateTime.Now);
+                        int id;
+                        this.Oracle.Oracle.ExecuteSQL("SELECT MAX(ID_MENSAJE) FROM MENSAJE_CHAT WHERE userName = '" + ms.Sender + "' and destinatario = '" + ms.Receiver + "'");
+                        id = int.Parse(this.Oracle.Oracle.DataReader["ID_MENSAJE"].ToString()) + 1;
+                        this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJE_CHAT VALUES (" + id + ", '" + ms.Sender + "', '" + ms.Receiver
+                            + "', SYSDATE, '" + ms.Content + "')");
                         User receiver = this.SearchUser(ms.Receiver);
-                        receiver.WritingEnqueue(ms);
+                        if(receiver != default)
+                            receiver.WritingEnqueue(ms);
                         user.WritingEnqueue(ms);
                     }
                 }
