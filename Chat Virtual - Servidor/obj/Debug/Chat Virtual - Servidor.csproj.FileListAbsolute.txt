@@ -42,3 +42,20 @@ C:\Users\ricar\OneDrive\Documentos\GitHub\Chat-Virtual---Servidor\Chat Virtual -
 C:\Users\ricar\OneDrive\Documentos\GitHub\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat_Virtual___Servidor.ServerConfigInterface.resources
 C:\Users\ricar\OneDrive\Documentos\GitHub\Chat-Virtual---Servidor\Chat Virtual - Servidor\bin\Debug\ShippingData.dll
 C:\Users\ricar\OneDrive\Documentos\GitHub\Chat-Virtual---Servidor\Chat Virtual - Servidor\bin\Debug\DataStructures.xml
+C:\Users\Juan Diego\Desktop\General\Trabajos\Programacion\C#\Chat-Virtual---Servidor\Chat Virtual - Servidor\bin\Debug\Chat Virtual - Servidor.exe.config
+C:\Users\Juan Diego\Desktop\General\Trabajos\Programacion\C#\Chat-Virtual---Servidor\Chat Virtual - Servidor\bin\Debug\Chat Virtual - Servidor.exe
+C:\Users\Juan Diego\Desktop\General\Trabajos\Programacion\C#\Chat-Virtual---Servidor\Chat Virtual - Servidor\bin\Debug\Chat Virtual - Servidor.pdb
+C:\Users\Juan Diego\Desktop\General\Trabajos\Programacion\C#\Chat-Virtual---Servidor\Chat Virtual - Servidor\bin\Debug\DataStructures.dll
+C:\Users\Juan Diego\Desktop\General\Trabajos\Programacion\C#\Chat-Virtual---Servidor\Chat Virtual - Servidor\bin\Debug\ShippingData.dll
+C:\Users\Juan Diego\Desktop\General\Trabajos\Programacion\C#\Chat-Virtual---Servidor\Chat Virtual - Servidor\bin\Debug\DataStructures.xml
+C:\Users\Juan Diego\Desktop\General\Trabajos\Programacion\C#\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat Virtual - Servidor.csprojAssemblyReference.cache
+C:\Users\Juan Diego\Desktop\General\Trabajos\Programacion\C#\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat_Virtual___Servidor.GraphicInterface.resources
+C:\Users\Juan Diego\Desktop\General\Trabajos\Programacion\C#\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat_Virtual___Servidor.Frontend.InformationInterface.resources
+C:\Users\Juan Diego\Desktop\General\Trabajos\Programacion\C#\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat_Virtual___Servidor.OracleConfigInterface.resources
+C:\Users\Juan Diego\Desktop\General\Trabajos\Programacion\C#\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat_Virtual___Servidor.Properties.Resources.resources
+C:\Users\Juan Diego\Desktop\General\Trabajos\Programacion\C#\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat_Virtual___Servidor.ServerConfigInterface.resources
+C:\Users\Juan Diego\Desktop\General\Trabajos\Programacion\C#\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat Virtual - Servidor.csproj.GenerateResource.cache
+C:\Users\Juan Diego\Desktop\General\Trabajos\Programacion\C#\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat Virtual - Servidor.csproj.CoreCompileInputs.cache
+C:\Users\Juan Diego\Desktop\General\Trabajos\Programacion\C#\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat Virtual - Servidor.csproj.CopyComplete
+C:\Users\Juan Diego\Desktop\General\Trabajos\Programacion\C#\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat Virtual - Servidor.exe
+C:\Users\Juan Diego\Desktop\General\Trabajos\Programacion\C#\Chat-Virtual---Servidor\Chat Virtual - Servidor\obj\Debug\Chat Virtual - Servidor.pdb

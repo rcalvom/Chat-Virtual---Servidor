@@ -158,16 +158,21 @@ namespace Chat_Virtual___Servidor {
                     if (Readed == default) {
                         continue;
                     } else if (Readed is Chat ch) {
-                        this.Oracle.Oracle.ExecuteSQL("SELECT USERNAME FROM USUARIO WHERE USERNAME LIKE '%" + ch.memberTwo + "%'");
-                        while (this.Oracle.Oracle.DataReader.Read()) 
-                            user.WritingEnqueue(new Chat(ch.memberOne, this.Oracle.Oracle.DataReader["USERNAME"].ToString()));
+                        this.Oracle.Oracle.ExecuteSQL("SELECT USERNAME, FOTO1, FOTO2 FROM USUARIO WHERE USERNAME LIKE '%" + ch.memberTwo + "%'");
+                        while (this.Oracle.Oracle.DataReader.Read()) {
+                            string foto = this.Oracle.Oracle.DataReader["FOTO1"].ToString() + this.Oracle.Oracle.DataReader["FOTO2"];
+                            Profile p = new Profile(this.Oracle.Oracle.DataReader["USERNAME"].ToString(), Serializer.StringToByte(foto), null);
+                            user.WritingEnqueue(new Chat(ch.memberOne, p));
+                        }
                     } else if (Readed is ChatMessage ms) {
                         ms.date = new Date(DateTime.Now);
                         int id;
+                        string Imagen1 = "", Imagen2 = "";
+                        GetImage(Imagen1, Imagen2, ms.Image);
                         this.Oracle.Oracle.ExecuteSQL("SELECT MAX(ID_MENSAJE) FROM MENSAJE_CHAT WHERE USERNAME = '" + ms.Sender + "' and destinatario = '" + ms.Receiver + "'");
                         id = int.Parse(this.Oracle.Oracle.DataReader["ID_MENSAJE"].ToString()) + 1;
                         this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJE_CHAT VALUES (" + id + ", '" + ms.Sender + "', '" + ms.Receiver
-                            + "', SYSDATE, '" + ms.Content + "')");
+                            + "', SYSDATE, '" + ms.Content + "', '" + Imagen1 + "', '" + Imagen2 + "')");
                         User receiver = this.SearchUser(ms.Receiver);
                         if(receiver != default)
                             receiver.WritingEnqueue(ms);
@@ -186,10 +191,25 @@ namespace Chat_Virtual___Servidor {
                         groupMessage.date = new Date(DateTime.Now);
                         this.Oracle.Oracle.ExecuteSQL("SELECT MAX(ID_MENSAJE) FROM MENSAJE_GRUPO WHERE USERNAME = '" + user.Name + "' and GRUPO_REC = '" + groupMessage.IdGroupReceiver + "'");
                         int id = int.Parse(this.Oracle.Oracle.DataReader["ID_MENSAJE"].ToString());
-
+                    } else if (Readed is Profile profile) {
+                        string Foto1 = "", Foto2 = "";
+                        GetImage(Foto1, Foto2, profile.Image);
+                        this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIO SET FOTO1='" + Foto1 + "', FOTO2='" + Foto2 + "' WHERE USERNAME ='" + profile.Name + "'");
                     }
                 }
             } while (this.Connected);
+        }
+
+        private void GetImage(string Part1, string Part2, byte[] Image) {
+            Part1 = Serializer.ByteToString(Image);
+            if (Part1.Length > 3000) {
+                Part2 = Part1.Substring(3000, Part1.Length);
+                Part1 = Part1.Substring(0, 3000);
+            } else {
+                Part2 = "NULL";
+            }
+            if (Part1.Length == 0)
+                Part1 = "NULL";
         }
 
         /// <summary>
@@ -293,7 +313,7 @@ namespace Chat_Virtual___Servidor {
 
                                 //Envío de imagen de perfil y estado.
                                 Bitmap imagen = new Bitmap(@"C:\Users\ricar\Downloads\default.jpg");
-                                U.WritingEnqueue(new Profile(Serializer.SerializeImage(imagen), "Hey there! I am using SADIRI."));
+                                U.WritingEnqueue(new Profile(U.Name, Serializer.SerializeImage(imagen), "Hey there! I am using SADIRI."));
                                 this.Write(U);
 
                                 /*string[] tree = { null, "Tareas","Matematicas","Programacion","Taller de Calculo",null,"Programar Sadiri","Implementar Gráfos y montículos" };
