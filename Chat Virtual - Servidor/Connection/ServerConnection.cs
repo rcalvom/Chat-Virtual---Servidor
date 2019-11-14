@@ -158,14 +158,13 @@ namespace Chat_Virtual___Servidor {
                     if (Readed == default) {
                         continue;
                     } else if (Readed is Chat ch) {
-                        this.Oracle.Oracle.ExecuteSQL("SELECT userName FROM USUARIO WHERE userName like '%" + ch.memberTwo + "%'");
-                        while (this.Oracle.Oracle.DataReader.Read()) {
+                        this.Oracle.Oracle.ExecuteSQL("SELECT USERNAME FROM USUARIO WHERE USERNAME LIKE '%" + ch.memberTwo + "%'");
+                        while (this.Oracle.Oracle.DataReader.Read()) 
                             user.WritingEnqueue(new Chat(ch.memberOne, this.Oracle.Oracle.DataReader["USERNAME"].ToString()));
-                        }
                     } else if (Readed is ChatMessage ms) {
                         ms.date = new Date(DateTime.Now);
                         int id;
-                        this.Oracle.Oracle.ExecuteSQL("SELECT MAX(ID_MENSAJE) FROM MENSAJE_CHAT WHERE userName = '" + ms.Sender + "' and destinatario = '" + ms.Receiver + "'");
+                        this.Oracle.Oracle.ExecuteSQL("SELECT MAX(ID_MENSAJE) FROM MENSAJE_CHAT WHERE USERNAME = '" + ms.Sender + "' and destinatario = '" + ms.Receiver + "'");
                         id = int.Parse(this.Oracle.Oracle.DataReader["ID_MENSAJE"].ToString()) + 1;
                         this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJE_CHAT VALUES (" + id + ", '" + ms.Sender + "', '" + ms.Receiver
                             + "', SYSDATE, '" + ms.Content + "')");
@@ -173,6 +172,21 @@ namespace Chat_Virtual___Servidor {
                         if(receiver != default)
                             receiver.WritingEnqueue(ms);
                         user.WritingEnqueue(ms);
+                    } else if (Readed is ChatGroup group) {
+                        this.Oracle.Oracle.ExecuteSQL(
+                            "SELECT GRUPO.ID_GRUPO AS CODE, GROUPNAME AS NAME " +
+                            "FROM PERTENENCIA-GRUPO, GRUPO " +
+                            "WHERE USERNAME = '" + user.Name + "' AND PERTENENCIA-GRUPO.ID_GRUPO = GRUPO.ID_GRUPO AND GROUPNAME LIKE '%" + group.name + "%'");
+                        while (this.Oracle.Oracle.DataReader.Read()) {
+                            int Code = int.Parse(this.Oracle.Oracle.DataReader["CODE"].ToString());
+                            string name = this.Oracle.Oracle.DataReader["NAME"].ToString();
+                            user.WritingEnqueue(new ChatGroup(Code, name));
+                        }
+                    } else if(Readed is GroupMessage groupMessage) {
+                        groupMessage.date = new Date(DateTime.Now);
+                        this.Oracle.Oracle.ExecuteSQL("SELECT MAX(ID_MENSAJE) FROM MENSAJE_GRUPO WHERE USERNAME = '" + user.Name + "' and GRUPO_REC = '" + groupMessage.IdGroupReceiver + "'");
+                        int id = int.Parse(this.Oracle.Oracle.DataReader["ID_MENSAJE"].ToString());
+
                     }
                 }
             } while (this.Connected);
