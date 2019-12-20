@@ -169,12 +169,12 @@ namespace Chat_Virtual___Servidor {
                         int id;
                         string Imagen1 = "", Imagen2 = "";
                         GetImage(Imagen1, Imagen2, ms.Image);
-                        this.Oracle.Oracle.ExecuteSQL("SELECT MAX(ID_MENSAJE) FROM MENSAJE_CHAT WHERE USERNAME = '" + ms.Sender + "' and destinatario = '" + ms.Receiver + "'");
+                        this.Oracle.Oracle.ExecuteSQL("SELECT MAX(ID_MENSAJE) FROM MENSAJE_CHAT WHERE USERNAME = '" + ms.Sender + "' AND DESTINATARIO = '" + ms.Receiver + "'");
                         id = int.Parse(this.Oracle.Oracle.DataReader["ID_MENSAJE"].ToString()) + 1;
                         this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJE_CHAT VALUES (" + id + ", '" + ms.Sender + "', '" + ms.Receiver
                             + "', SYSDATE, '" + ms.Content + "', '" + Imagen1 + "', '" + Imagen2 + "')");
                         User receiver = this.SearchUser(ms.Receiver);
-                        if(receiver != default)
+                        if (receiver != default)
                             receiver.WritingEnqueue(ms);
                         user.WritingEnqueue(ms);
                     } else if (Readed is ChatGroup group) {
@@ -187,7 +187,7 @@ namespace Chat_Virtual___Servidor {
                             string name = this.Oracle.Oracle.DataReader["NAME"].ToString();
                             user.WritingEnqueue(new ChatGroup(Code, name, true));
                         }
-                    } else if(Readed is GroupMessage groupMessage) {
+                    } else if (Readed is GroupMessage groupMessage) {
                         groupMessage.date = new Date(DateTime.Now);
                         this.Oracle.Oracle.ExecuteSQL("SELECT MAX(ID_MENSAJE) FROM MENSAJE_GRUPO WHERE USERNAME = '" + user.Name + "' and GRUPO_REC = '" + groupMessage.IdGroupReceiver + "'");
                         int id = int.Parse(this.Oracle.Oracle.DataReader["ID_MENSAJE"].ToString());
@@ -195,6 +195,16 @@ namespace Chat_Virtual___Servidor {
                         string Foto1 = "", Foto2 = "";
                         GetImage(Foto1, Foto2, profile.Image);
                         this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIO SET FOTO1='" + Foto1 + "', FOTO2='" + Foto2 + "' WHERE USERNAME ='" + profile.Name + "'");
+                    } else if (Readed is ChangePassword changePassword) {
+                        this.Oracle.Oracle.ExecuteSQL("SELECT PASSWORD FROM USUARIO WHERE USERNAME = '" + changePassword.UserName + "'");
+                        string currentPassword = this.Oracle.Oracle.DataReader["PASSWORD"].ToString();
+                        if (changePassword.NewPassword.Equals(currentPassword)) {
+                            user.WritingEnqueue(new RequestAnswer(false, 3));
+                            user.WritingEnqueue(new RequestError(3));
+                        } else {
+                            this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIO SET PASSWORD = '" + changePassword.NewPassword + "' WHERE USERNAME = '" + changePassword.UserName + "'");
+                            user.WritingEnqueue(new RequestAnswer(true, 3));
+                        }
                     }
                 }
             } while (this.Connected);
@@ -202,14 +212,14 @@ namespace Chat_Virtual___Servidor {
 
         private void GetImage(string Part1, string Part2, byte[] Image) {
             Part1 = Serializer.ByteToString(Image);
-            if (Part1.Length > 3000) {
+            if (Part1.Length == 0)
+                Part1 = "NULL";
+            else if (Part1.Length > 3000) {
                 Part2 = Part1.Substring(3000, Part1.Length);
-                Part1 = Part1.Substring(0, 3000);
+                Part1 = Part1.Substring(0, 3001);
             } else {
                 Part2 = "NULL";
             }
-            if (Part1.Length == 0)
-                Part1 = "NULL";
         }
 
         /// <summary>
