@@ -158,11 +158,11 @@ namespace Chat_Virtual___Servidor {
                     if (Readed == default) {
                         continue;
                     } else if (Readed is Chat ch) {
-                        this.Oracle.Oracle.ExecuteSQL("SELECT USERNAME, FOTO1, FOTO2 FROM USUARIO WHERE USERNAME LIKE '%" + ch.memberTwo + "%'");
+                        this.Oracle.Oracle.ExecuteSQL("SELECT USERNAME, FOTO1, FOTO2 FROM USUARIO WHERE NAMESEARCH LIKE '%" + ch.memberTwo.Name.ToLower() + "%'");
                         while (this.Oracle.Oracle.DataReader.Read()) {
                             string foto = this.Oracle.Oracle.DataReader["FOTO1"].ToString() + this.Oracle.Oracle.DataReader["FOTO2"];
                             Profile p = new Profile(this.Oracle.Oracle.DataReader["USERNAME"].ToString(), Serializer.StringToByte(foto), null);
-                            user.WritingEnqueue(new Chat(ch.memberOne, p));
+                            user.WritingEnqueue(new Chat(ch.memberOne, p, true));
                         }
                     } else if (Readed is ChatMessage ms) {
                         ms.date = new Date(DateTime.Now);
@@ -185,7 +185,7 @@ namespace Chat_Virtual___Servidor {
                         while (this.Oracle.Oracle.DataReader.Read()) {
                             int Code = int.Parse(this.Oracle.Oracle.DataReader["CODE"].ToString());
                             string name = this.Oracle.Oracle.DataReader["NAME"].ToString();
-                            user.WritingEnqueue(new ChatGroup(Code, name));
+                            user.WritingEnqueue(new ChatGroup(Code, name, true));
                         }
                     } else if(Readed is GroupMessage groupMessage) {
                         groupMessage.date = new Date(DateTime.Now);
