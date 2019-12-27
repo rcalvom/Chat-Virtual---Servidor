@@ -136,7 +136,7 @@ namespace Chat_Virtual___Servidor {
                 IsBackground = true
             };
             t2.Start();
-            Thread t3 = new Thread(this.ListenUsers) {
+            Thread t3 = new Thread(this.ReadUsers) {
                 IsBackground = true
             };
             t3.Start();
@@ -233,18 +233,18 @@ namespace Chat_Virtual___Servidor {
                     return u;
                 }
             }
-            return default;
+            return null;
         }
 
         /// <summary>
         /// Método de hilo. Lee cada usuario y revisa si le ha enviado datos al servidor.
         /// </summary>
-        private void ListenUsers() { 
+        private void ReadUsers() { 
             do {
                 Iterator<User> i = this.Users.Iterator();
                 while (i.HasNext()) {
                     User user = i.Next();
-                    this.Read(user);                        //Intenta leer los datos que estén pendientes para ese usuario 
+                    this.Read(user);                        // Intenta leer los datos que estén pendientes para ese usuario .
                 }
             } while (this.Connected);
         }
@@ -254,10 +254,10 @@ namespace Chat_Virtual___Servidor {
         /// </summary>
         private void WriteUsers() {
             do {
-                Iterator<User> i = this.Users.Iterator();        //Obtiene el iterador para la lista
+                Iterator<User> i = this.Users.Iterator();        // Obtiene el iterador para la lista.
                 while (i.HasNext()) {
-                    User user = i.Next();                   //Obtiene cada elemento en la lista
-                    this.Write(user);                       //Intenta escribir los datos que estén pendientes para ese usuario
+                    User user = i.Next();                   // Obtiene cada elemento en la lista.
+                    this.Write(user);                       // Intenta escribir los datos que estén pendientes para ese usuario.
                 }
             } while (this.Connected);
         }
@@ -271,7 +271,8 @@ namespace Chat_Virtual___Servidor {
                     if (this.Server.Pending()) {                                            // Si hay solicitudes de conexión entrantes.
                         User U = new User (this.Server.AcceptTcpClient());
                         object obj = null;
-                        for (int i = 0; i<25;i++) {                                         // Intenta 25 veces recibir el objeto inicial.
+
+                        for (int i = 0; i < 25; i++) {                                      // Intenta 25 veces recibir el objeto inicial.
                             try {
                                 this.Read(U);
                                 obj = U.ReadingDequeue();
@@ -282,9 +283,10 @@ namespace Chat_Virtual___Servidor {
                                 break;
                             }
                         }
+
                         if (obj is SignIn si) {                                             // Si el objeto recibido es un inicio de sesión.
                             bool exist = false;
-                            this.Oracle.Oracle.ExecuteSQL("SELECT USERNAME,CONTRASENA FROM USUARIO");
+                            this.Oracle.Oracle.ExecuteSQL("SELECT USERNAME, CONTRASENA FROM USUARIO");
                             while (this.Oracle.Oracle.DataReader.Read()) {
                                 if (this.Oracle.Oracle.DataReader["USERNAME"].Equals(si.user) && this.Oracle.Oracle.DataReader["CONTRASENA"].Equals(si.password)) {
                                     exist = true;
@@ -299,36 +301,7 @@ namespace Chat_Virtual___Servidor {
                                 this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                                 this.InsertTable(U.Name, U.Client.Client.RemoteEndPoint.ToString());
 
-                                /*this.Oracle.Oracle.ExecuteSQL("SELECT USERNAME FROM USUARIO");
-                                DynamicArray<string> Chats = new DynamicArray<string>();
-                                while (this.Oracle.Oracle.DataReader.Read()) {
-                                    Chats.Add((string)this.Oracle.Oracle.DataReader["USERNAME"]);
-                                }
-                                for (int i = 0; i < Chats.Size(); i++) {
-                                    for (int j = i + 1; j < Chats.Size(); i++) {
-                                        U.WritingQueue.Enqueue(new Chat(Chats.Get(i), Chats.Get(j)));
-                                        this.Write(U);
-                                    }
-                                }*/
-
-
-                                /*ChatMessage[] ms = new ChatMessage[20];
-                                for (int i = 0; i<ms.Length; i++) {
-                                    ms[i] = new ChatMessage("jdiegopm","jdiegopm","Prueba "+i);
-                                }
-
-                                for (int i = 0; i<ms.Length; i++) {
-                                    U.WritingEnqueue(ms[i]);
-                                }*/
-
-                                //Envío de imagen de perfil y estado.
-                                Bitmap imagen = new Bitmap(@"C:\Users\ricar\Downloads\default.jpg");
-                                U.WritingEnqueue(new Profile(U.Name, Serializer.SerializeImage(imagen), "Hey there! I am using SADIRI."));
-                                this.Write(U);
-
-                                /*string[] tree = { null, "Tareas","Matematicas","Programacion","Taller de Calculo",null,"Programar Sadiri","Implementar Gráfos y montículos" };
-                                U.WritingEnqueue(new TreeActivities(tree));
-                                this.Write(U);*/
+                                // TODO: Envío de imagen de perfil y estado de la base de datos.
 
                             } else {                                                                                        // Si la infomación de inicio de sesión es incorrecta.
                                 U.WritingEnqueue(new RequestAnswer(false));
@@ -338,7 +311,7 @@ namespace Chat_Virtual___Servidor {
                                 U.Client.Close();
                             }
                         } else if (obj is SignUp su) {                                                                      // Si el objeto recibido es un nuevo registro
-                            if (this.Oracle.Oracle.ExecuteSQL("INSERT INTO USUARIO VALUES('" + su.userName + "','" + su.name + "','" + su.password + "',SYSDATE)")) {
+                            if (this.Oracle.Oracle.ExecuteSQL("INSERT INTO USUARIO VALUES('" + su.userName + "' ,'" + su.name + "' ,'" + su.password + "', SYSDATE)")) {
                                 U.Name = su.userName;
                                 U.WritingEnqueue(new RequestAnswer(true));
                                 this.Write(U);
@@ -346,6 +319,7 @@ namespace Chat_Virtual___Servidor {
                                 this.Users.Add(U);
                                 this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                                 this.InsertTable(U.Name, U.Client.Client.RemoteEndPoint.ToString());
+                                // TODO: Enviar imagen de perfil y estado por defecto.
                             } else {
                                 U.WritingEnqueue(new RequestAnswer(false));
                                 U.WritingEnqueue(new RequestError(0));
@@ -353,22 +327,11 @@ namespace Chat_Virtual___Servidor {
                                 this.ConsoleAppend("Se ha intentado registrar el remoto [" + U.Client.Client.RemoteEndPoint.ToString() + "] con un nombre de usuario ya existente.");
                                 U.Client.Close();
                             }
-                        } /*else if (obj is ConnectionTest ct) {
-                            // ¿Se va a devolver algo?
-                        } else if (obj is ReconnectRequest rr) {
-                            ChainNode<User> temp = this.Users.Get(0);
-                            while (temp.next != null) {
-                                if (U.Name.Equals(temp.element.Name)) {
-                                    // Sustutuir nodo
-                                    // Actualizar tabla de usuarios.
-                                    this.ConsoleAppend("Reconectado correctamente con el usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "].");
-
-                                    break;
-                                }
-                                temp = temp.next;
-                            }
-                        }*/ else {                                                                  // Si no llego objeto inicial.
-                            this.ConsoleAppend("No se ha recibido información de ingreso por parte del remoto. [" + U.Client.Client.RemoteEndPoint.ToString() + "] Se ha desconectado del servidor");
+                        } else if (obj is null) {                                                 // Si no llego onjeto inicial.
+                            this.ConsoleAppend("No se recibió informmación de ingreso por parte del remoto. [" + U.Client.Client.RemoteEndPoint.ToString() + "] Se ha desconectado del servidor.");
+                            U.Client.Close();
+                        } else {                                                                  // Si el objeto inicial no es un tipo de dato reconocido.
+                            this.ConsoleAppend("No se reconoce la información de ingreso por parte del remoto. [" + U.Client.Client.RemoteEndPoint.ToString() + "] Se ha desconectado del servidor.");
                             U.Client.Close();
                         }
                     }
@@ -377,40 +340,42 @@ namespace Chat_Virtual___Servidor {
         }
 
         /// <summary>
-        /// Escribe los datos que esten pendientes en la cola toWrite de un ususario
+        /// Escribe los datos que esten pendientes en la cola WritingQueue de un ususario.
         /// </summary>
-        /// <param name="user">El ususario del que se van a intentar escribir los datos</param>
-        /// <returns>Verdadero si los datos fueron enviados, falso si almenos uno falló</returns>
+        /// <param name="user">El ususario del que se van a intentar escribir los datos.</param>
+        /// <returns>Verdadero si los datos fueron enviados, falso si almenos uno falló.</returns>
         private bool Write(User user) {
             Data data = user.WritingDequeue();
-            if (data == default)
+            if (data == default) {
                 return false;
-            try {
-                byte[] toSend = Serializer.Serialize(data);                                      // Serializa el primer objeto de la cola
-                user.Writer.Write(toSend.Length);                                                // Envía el tamaño del objeto
-                user.Writer.Write(toSend);                                                       // Envía el objeto     
-                return true;
-            } catch (Exception ex) {
-                this.ConsoleAppend("Se ha perdido la conexión con el usuario [" + user.Name + "] Intentando reconectar.");
-                this.ConsoleAppend(ex.Message);
-                user.WritingEnqueue(data);
-                return false;
+            } else {
+                try {
+                    byte[] toSend = Serializer.Serialize(data);                                      // Serializa el primer objeto de la cola.
+                    user.Writer.Write(toSend.Length);                                                // Envía el tamaño del objeto.
+                    user.Writer.Write(toSend);                                                       // Envía el objeto.     
+                    return true;
+                } catch (Exception ex) {
+                    //this.ConsoleAppend("Se ha perdido la conexión con el usuario [" + user.Name + "] Intentando reconectar.");
+                    //this.ConsoleAppend(ex.Message);
+                    user.WritingEnqueue(data);
+                    return false;
+                }
             }
         }
 
         /// <summary>
-        /// Lee los datos que estén pendientes para un usuario y los guarda en la cola ReadingQueue del mismo
+        /// Lee los datos que estén pendientes para un usuario y los guarda en la cola ReadingQueue del mismo.
         /// </summary>
-        /// <param name="user">EL ususario del que se van a intentar leer datos</param>
+        /// <param name="user">EL ususario del que se van a intentar leer datos.</param>
         /// <returns>Verdadero si le leyeron todos los datos, falso si uno de ellos no pudo ser leido</returns>
         private bool Read(User user) {
             try {
-                if (user.Stream.DataAvailable) {                                            // Verefica si hay datos por leer
-                    int size = user.Reader.ReadInt32();                                     // lee el tamaño del objeto
-                    byte[] data = new byte[size];                                           // crea el arreglo de bytes para el objeto
-                    data = user.Reader.ReadBytes(size);                                     // lee el el objeto y lo guarda en el arreglo de bytes
-                    object a = Serializer.Deserialize(data);                                // deserializa el objeto
-                    user.ReadingEnqueue((Data)a);                                           // guarda el objeto en la cola
+                if (user.Stream.DataAvailable) {                                            // Verifica si hay datos por leer.
+                    int size = user.Reader.ReadInt32();                                     // Lee el tamaño del objeto.
+                    byte[] data = new byte[size];                                           // Crea el arreglo de bytes para el objeto.
+                    data = user.Reader.ReadBytes(size);                                     // Lee el el objeto y lo guarda en el arreglo de bytes.
+                    object a = Serializer.Deserialize(data);                                // Deserializa el objeto.
+                    user.ReadingEnqueue((Data)a);                                           // Guarda el objeto en la cola de lectura.
                 }
                 return true;
             } catch (Exception) {
