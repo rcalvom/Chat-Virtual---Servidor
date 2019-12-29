@@ -165,7 +165,20 @@ namespace Chat_Virtual___Servidor {
                     } else if (Readed is ChatGroup group) {                                                     // Si se desea obtener la información de un grupo.
                         
                     } else if (Readed is GroupMessage groupMessage) {                                           // Si se envía un mensaje en un grupo.
-                        
+                        if (groupMessage.Image == null && groupMessage.Content != null) {
+                            this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_GRUPO VALUES('" + groupMessage.Sender + "','" + groupMessage.IdGroupReceiver + "', default,'"+groupMessage.Content+"', NULL)");
+                        } else if (groupMessage.Image != null && groupMessage.Content == null) {
+                            Image image = Serializer.DeserializeImage(groupMessage.Image);
+                            string path = "F:\\SADIRI\\MensajesGrupos\\" + groupMessage.IdGroupReceiver + groupMessage.Sender + ".png"; //TODO: revisar.
+                            image.Save(path);
+                            this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_GRUPO VALUES('" + groupMessage.Sender + "','" + groupMessage.IdGroupReceiver + "', default, NULL, '"+path+"')");
+                        }else if (groupMessage.Image != null && groupMessage.Content != null) {
+                            Image image = Serializer.DeserializeImage(groupMessage.Image);
+                            string path = "F:\\SADIRI\\MensajesGrupos\\" + groupMessage.IdGroupReceiver + groupMessage.Sender + ".png"; //TODO: revisar.
+                            image.Save(path);
+                            this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_GRUPO VALUES('" + groupMessage.Sender + "','" + groupMessage.IdGroupReceiver + "', default, '" + groupMessage.Content + "', '" + path + "')");
+                        }
+                        //TODO: Enviar a otros usuarios.
                     } else if (Readed is Profile profile) {                                                     // Si es un cambio de perfil.
                         if (profile.Status != null) {
                             this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET ESTADO = '" + profile.Status + "' WHERE USUARIO = '" + profile.Name + "'");
@@ -272,7 +285,15 @@ namespace Chat_Virtual___Servidor {
                                 this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                                 this.InsertTable(U.Name, U.Client.Client.RemoteEndPoint.ToString());
 
-                                // TODO: Envío de imagen de perfil y estado de la base de datos.
+                                Profile profile = new Profile();
+                                this.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = "+U.Name);
+                                string path = this.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString();
+                                this.Oracle.Oracle.ExecuteSQL("SELECT ESTADO FROM USUARIOS WHERE USUARIO = " + U.Name);
+                                string status = this.Oracle.Oracle.DataReader["ESTADO"].ToString();
+                                profile.Image = Serializer.SerializeImage(Image.FromFile(path));
+                                profile.Status = status;
+                                profile.Name = U.Name;
+                                U.WritingEnqueue(profile);
 
                             } else {                                                                                        // Si la infomación de inicio de sesión es incorrecta.
                                 U.WritingEnqueue(new RequestAnswer(false));
@@ -290,7 +311,17 @@ namespace Chat_Virtual___Servidor {
                                 this.Users.Add(U);
                                 this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
                                 this.InsertTable(U.Name, U.Client.Client.RemoteEndPoint.ToString());
-                                // TODO: Enviar imagen de perfil y estado por defecto.
+
+                                Profile profile = new Profile();
+                                this.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = " + U.Name);
+                                string path = this.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString();
+                                this.Oracle.Oracle.ExecuteSQL("SELECT ESTADO FROM USUARIOS WHERE USUARIO = " + U.Name);
+                                string status = this.Oracle.Oracle.DataReader["ESTADO"].ToString();
+                                profile.Image = Serializer.SerializeImage(Image.FromFile(path));
+                                profile.Status = status;
+                                profile.Name = U.Name;
+                                U.WritingEnqueue(profile);
+
                             } else {
                                 U.WritingEnqueue(new RequestAnswer(false));
                                 U.WritingEnqueue(new RequestError(0));
