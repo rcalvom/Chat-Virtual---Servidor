@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using static ShippingData.Message;
+using Oracle.ManagedDataAccess.Client;
 
 namespace Chat_Virtual___Servidor {
 
@@ -155,71 +156,41 @@ namespace Chat_Virtual___Servidor {
                 while (i.HasNext()) {
                     User user = i.Next();
                     object Readed = user.ReadingDequeue();
-                    if (Readed == default) {
+                    if (Readed == null) {
                         continue;
-                    } else if (Readed is Chat ch) {
-                        this.Oracle.Oracle.ExecuteSQL("SELECT USERNAME, FOTO1, FOTO2 FROM USUARIO WHERE NAMESEARCH LIKE '%" + ch.memberTwo.Name.ToLower() + "%'");
-                        while (this.Oracle.Oracle.DataReader.Read()) {
-                            string foto = this.Oracle.Oracle.DataReader["FOTO1"].ToString() + this.Oracle.Oracle.DataReader["FOTO2"];
-                            Profile p = new Profile(this.Oracle.Oracle.DataReader["USERNAME"].ToString(), Serializer.StringToByte(foto), null);
-                            user.WritingEnqueue(new Chat(ch.memberOne, p, true));
+                    } else if (Readed is Chat ch) {                                                             // Si se desea obtener la información de un Chat privado.
+                        
+                    } else if (Readed is ChatMessage ms) {                                                      // Si se envía un mensaje en privado.
+                        
+                    } else if (Readed is ChatGroup group) {                                                     // Si se desea obtener la información de un grupo.
+                        
+                    } else if (Readed is GroupMessage groupMessage) {                                           // Si se envía un mensaje en un grupo.
+                        
+                    } else if (Readed is Profile profile) {                                                     // Si es un cambio de perfil.
+                        if (profile.Status != null) {
+                            this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET ESTADO = '" + profile.Status + "' WHERE USUARIO = '" + profile.Name + "'");
+                            user.WritingEnqueue(new RequestAnswer(true));
                         }
-                    } else if (Readed is ChatMessage ms) {
-                        ms.date = new Date(DateTime.Now);
-                        int id;
-                        string Imagen1 = "", Imagen2 = "";
-                        GetImage(Imagen1, Imagen2, ms.Image);
-                        this.Oracle.Oracle.ExecuteSQL("SELECT MAX(ID_MENSAJE) FROM MENSAJE_CHAT WHERE USERNAME = '" + ms.Sender + "' AND DESTINATARIO = '" + ms.Receiver + "'");
-                        id = int.Parse(this.Oracle.Oracle.DataReader["ID_MENSAJE"].ToString()) + 1;
-                        this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJE_CHAT VALUES (" + id + ", '" + ms.Sender + "', '" + ms.Receiver
-                            + "', SYSDATE, '" + ms.Content + "', '" + Imagen1 + "', '" + Imagen2 + "')");
-                        User receiver = this.SearchUser(ms.Receiver);
-                        if (receiver != default)
-                            receiver.WritingEnqueue(ms);
-                        user.WritingEnqueue(ms);
-                    } else if (Readed is ChatGroup group) {
-                        this.Oracle.Oracle.ExecuteSQL(
-                            "SELECT GRUPO.ID_GRUPO AS CODE, GROUPNAME AS NAME " +
-                            "FROM PERTENENCIA-GRUPO, GRUPO " +
-                            "WHERE USERNAME = '" + user.Name + "' AND PERTENENCIA-GRUPO.ID_GRUPO = GRUPO.ID_GRUPO AND GROUPNAME LIKE '%" + group.name + "%'");
-                        while (this.Oracle.Oracle.DataReader.Read()) {
-                            int Code = int.Parse(this.Oracle.Oracle.DataReader["CODE"].ToString());
-                            string name = this.Oracle.Oracle.DataReader["NAME"].ToString();
-                            user.WritingEnqueue(new ChatGroup(Code, name, true));
+                        if (profile.Image != null) {
+                            Image foto = Serializer.DeserializeImage(profile.Image);
+                            foto.Save("F:\\SADIRI\\Usuarios\\"+profile.Name+".png");
+                            this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET RUTA_FOTO = 'F:\\SADIRI\\Usuarios\\"+profile.Name+".png' WHERE USUARIO = '" + profile.Name + "'");
+                            user.WritingEnqueue(new RequestAnswer(true)); //TODO: Código respuesta.
                         }
-                    } else if (Readed is GroupMessage groupMessage) {
-                        groupMessage.date = new Date(DateTime.Now);
-                        this.Oracle.Oracle.ExecuteSQL("SELECT MAX(ID_MENSAJE) FROM MENSAJE_GRUPO WHERE USERNAME = '" + user.Name + "' and GRUPO_REC = '" + groupMessage.IdGroupReceiver + "'");
-                        int id = int.Parse(this.Oracle.Oracle.DataReader["ID_MENSAJE"].ToString());
-                    } else if (Readed is Profile profile) {
-                        string Foto1 = "", Foto2 = "";
-                        GetImage(Foto1, Foto2, profile.Image);
-                        this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIO SET FOTO1='" + Foto1 + "', FOTO2='" + Foto2 + "' WHERE USERNAME ='" + profile.Name + "'");
-                    } else if (Readed is ChangePassword changePassword) {
-                        this.Oracle.Oracle.ExecuteSQL("SELECT PASSWORD FROM USUARIO WHERE USERNAME = '" + changePassword.UserName + "'");
-                        string currentPassword = this.Oracle.Oracle.DataReader["PASSWORD"].ToString();
+
+                    } else if (Readed is ChangePassword changePassword) {                                       // Si es una solicitud de cambio de contraseña.
+                        this.Oracle.Oracle.ExecuteSQL("SELECT CONTRASEÑA FROM USUARIOS WHERE USUARIO = '" + changePassword.UserName + "'");
+                        string currentPassword = this.Oracle.Oracle.DataReader["CONTRASEÑA"].ToString();
                         if (changePassword.NewPassword.Equals(currentPassword)) {
                             user.WritingEnqueue(new RequestAnswer(false, 3));
                             user.WritingEnqueue(new RequestError(3));
                         } else {
-                            this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIO SET PASSWORD = '" + changePassword.NewPassword + "' WHERE USERNAME = '" + changePassword.UserName + "'");
+                            this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET CONSTRASEÑA = '" + changePassword.NewPassword + "' WHERE USUARIO = '" + changePassword.UserName + "'");
                             user.WritingEnqueue(new RequestAnswer(true, 3));
                         }
                     }
                 }
             } while (this.Connected);
-        }
-
-        private void GetImage(string Part1, string Part2, byte[] Image) {
-            Part1 = Serializer.ByteToString(Image);
-            if (Part1.Length == 0)
-                Part1 = "NULL";
-            else if (Part1.Length > 3000) {
-                Part2 = Part1.Substring(3000, Part1.Length);
-                Part1 = Part1.Substring(0, 3001);
-            } else {
-                Part2 = "NULL";
-            }
         }
 
         /// <summary>
@@ -286,9 +257,9 @@ namespace Chat_Virtual___Servidor {
 
                         if (obj is SignIn si) {                                             // Si el objeto recibido es un inicio de sesión.
                             bool exist = false;
-                            this.Oracle.Oracle.ExecuteSQL("SELECT USERNAME, CONTRASENA FROM USUARIO");
+                            this.Oracle.Oracle.ExecuteSQL("SELECT * FROM INFOMRACION_INICIO");
                             while (this.Oracle.Oracle.DataReader.Read()) {
-                                if (this.Oracle.Oracle.DataReader["USERNAME"].Equals(si.user) && this.Oracle.Oracle.DataReader["CONTRASENA"].Equals(si.password)) {
+                                if (this.Oracle.Oracle.DataReader["USUARIO"].Equals(si.user) && this.Oracle.Oracle.DataReader["CONTRASEÑA"].Equals(si.password)) {
                                     exist = true;
                                     break;
                                 }
@@ -311,7 +282,7 @@ namespace Chat_Virtual___Servidor {
                                 U.Client.Close();
                             }
                         } else if (obj is SignUp su) {                                                                      // Si el objeto recibido es un nuevo registro
-                            if (this.Oracle.Oracle.ExecuteSQL("INSERT INTO USUARIO VALUES('" + su.userName + "' ,'" + su.name + "' ,'" + su.password + "', SYSDATE)")) {
+                            if (this.Oracle.Oracle.ExecuteSQL("INSERT INTO USUARIOS VALUES('"+su.userName+"', '"+su.name+"', '"+su.password+"', 'Hey there! I am using SADIRI.','F:\\SADIRI\\Usuarios\\default.png', default)")) {
                                 U.Name = su.userName;
                                 U.WritingEnqueue(new RequestAnswer(true));
                                 this.Write(U);
