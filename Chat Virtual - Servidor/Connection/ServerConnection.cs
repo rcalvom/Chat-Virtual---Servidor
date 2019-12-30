@@ -193,6 +193,7 @@ namespace Chat_Virtual___Servidor {
 
                     } else if (Readed is ChangePassword changePassword) {                                       // Si es una solicitud de cambio de contraseña.
                         this.Oracle.Oracle.ExecuteSQL("SELECT CONTRASEÑA FROM USUARIOS WHERE USUARIO = '" + changePassword.UserName + "'");
+                        this.Oracle.Oracle.DataReader.Read();
                         string currentPassword = this.Oracle.Oracle.DataReader["CONTRASEÑA"].ToString();
                         if (changePassword.NewPassword.Equals(currentPassword)) {
                             user.WritingEnqueue(new RequestAnswer(false, 3));
@@ -249,7 +250,7 @@ namespace Chat_Virtual___Servidor {
         /// <summary>
         /// Esta a la escucha de nuevos clientes y verifica su información de inicio de sesión.
         /// </summary>
-        private void ListenConnection() {          
+        private void ListenConnection() {
             do {
                 try {
                     if (this.Server.Pending()) {                                            // Si hay solicitudes de conexión entrantes.
@@ -286,9 +287,11 @@ namespace Chat_Virtual___Servidor {
                                 this.InsertTable(U.Name, U.Client.Client.RemoteEndPoint.ToString());
 
                                 Profile profile = new Profile();
-                                this.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = "+U.Name);
+                                this.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = '" + U.Name + "'");
+                                this.Oracle.Oracle.DataReader.Read();
                                 string path = this.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString();
-                                this.Oracle.Oracle.ExecuteSQL("SELECT ESTADO FROM USUARIOS WHERE USUARIO = " + U.Name);
+                                this.Oracle.Oracle.ExecuteSQL("SELECT ESTADO FROM USUARIOS WHERE USUARIO = '" + U.Name + "'");
+                                this.Oracle.Oracle.DataReader.Read();
                                 string status = this.Oracle.Oracle.DataReader["ESTADO"].ToString();
                                 profile.Image = Serializer.SerializeImage(Image.FromFile(path));
                                 profile.Status = status;
@@ -313,9 +316,11 @@ namespace Chat_Virtual___Servidor {
                                 this.InsertTable(U.Name, U.Client.Client.RemoteEndPoint.ToString());
 
                                 Profile profile = new Profile();
-                                this.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = " + U.Name);
+                                this.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = '" + U.Name + "'");
+                                this.Oracle.Oracle.DataReader.Read();
                                 string path = this.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString();
-                                this.Oracle.Oracle.ExecuteSQL("SELECT ESTADO FROM USUARIOS WHERE USUARIO = " + U.Name);
+                                this.Oracle.Oracle.ExecuteSQL("SELECT ESTADO FROM USUARIOS WHERE USUARIO = '" + U.Name + "'");
+                                this.Oracle.Oracle.DataReader.Read();
                                 string status = this.Oracle.Oracle.DataReader["ESTADO"].ToString();
                                 profile.Image = Serializer.SerializeImage(Image.FromFile(path));
                                 profile.Status = status;
@@ -337,7 +342,9 @@ namespace Chat_Virtual___Servidor {
                             U.Client.Close();
                         }
                     }
-                } catch (Exception) { }
+                } catch (Exception ex) {
+                    Console.WriteLine(ex);
+                }
             } while (this.Connected);
         }
 
