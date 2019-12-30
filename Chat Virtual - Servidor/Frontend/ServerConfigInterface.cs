@@ -48,5 +48,7 @@ namespace Chat_Virtual___Servidor {
         private void Cancel_Click(object sender, EventArgs e) {
             this.Close();
         }
+
+
     }
 }

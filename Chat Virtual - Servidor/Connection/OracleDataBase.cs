@@ -3,7 +3,7 @@ using Oracle.ManagedDataAccess.Client;
 
 
 namespace Chat_Virtual___Servidor{
-public class OracleDataBase :IDisposable {
+public class OracleDataBase : IDisposable {
 
         public OracleConnection Connection { set; get; }
         public OracleTransaction Transaction { set; get; }

@@ -21,10 +21,6 @@ namespace Chat_Virtual___Servidor {
             Application.Exit();
         }
 
-        private void InfoEvent(object sender, EventArgs e){
-            new InformationInterface().ShowDialog();
-        }
-
         private void ButtonEvent(object sender, EventArgs e){
             if (this.Server.Connected) {
                 this.Server.ShutDown();
@@ -43,11 +39,21 @@ namespace Chat_Virtual___Servidor {
         }
 
         private void ServerConfig_Click(object sender, EventArgs e) {
-            new ServerConfigInterface().ShowDialog();
+            ServerConfigInterface sci = new ServerConfigInterface();
+            sci.ShowDialog();
+            sci.Dispose();
         }
 
         private void OracleConfig_Click(object sender, EventArgs e) {
-            new OracleConfigInterface().ShowDialog();
+            OracleConfigInterface oci = new OracleConfigInterface();
+            oci.ShowDialog();
+            oci.Dispose();
+        }
+
+        private void InfoEvent(object sender, EventArgs e) {
+            InformationInterface ii = new InformationInterface();
+            ii.ShowDialog();
+            ii.Dispose();
         }
     }
 }
