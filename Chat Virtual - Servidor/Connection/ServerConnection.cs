@@ -208,14 +208,14 @@ namespace Chat_Virtual___Servidor {
                             this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET CONSTRASEÑA = '" + changePassword.NewPassword + "' WHERE USUARIO = '" + changePassword.UserName + "'");
                             user.WritingEnqueue(new RequestAnswer(true, 3));
                         }
-                    }else if (Readed is TreeActivities tree) {
+                    } else if (Readed is TreeActivities tree) {
                         string path = "F:\\SADIRI\\ArbolesTareas\\" + user.Name + ".dat";
                         IFormatter formatter = new BinaryFormatter();
-                        Stream stream = new FileStream(path, FileMode.Create, FileAccess.Write);
-                        formatter.Serialize(stream, tree.Tree);
+                        FileStream stream = File.Open(path, FileMode.Create, FileAccess.Write);
+                        formatter.Serialize(stream, tree.Node);
                         stream.Close();
-                        this.Oracle.Oracle.ExecuteSQL("UPDATE RUTA_ARBOL FROM USUARIOS WHERE USUARIO = '" + user.Name + "'");
-                        this.ConsoleAppend("Se ha guardado satisfactoriamente el arbol de tareas del usuario  [" + user.Name + " | " + user.Client.Client.RemoteEndPoint.ToString() + "]. ");
+                        this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET RUTA_ARBOL = '" + path + "' WHERE USUARIO = '" + user.Name + "'");
+                        this.ConsoleAppend("Se ha guardado satisfactoriamente el árbol de tareas del usuario  [" + user.Name + " | " + user.Client.Client.RemoteEndPoint.ToString() + "]. ");
                         // TODO: Respuesta.
                     }
                 }
@@ -315,18 +315,17 @@ namespace Chat_Virtual___Servidor {
                                 profile.Name = U.Name;
                                 U.WritingEnqueue(profile);
 
-                                /*TreeActivities tree = new TreeActivities();
+                                TreeActivities tree = new TreeActivities();
                                 this.Oracle.Oracle.ExecuteSQL("SELECT RUTA_ARBOL FROM USUARIOS WHERE USUARIO = '" + U.Name + "'");
                                 this.Oracle.Oracle.DataReader.Read();
                                 string treePath = this.Oracle.Oracle.DataReader["RUTA_ARBOL"].ToString();
-                                if (treePath != null) {
+                                if (treePath != "") {
                                     IFormatter formatter = new BinaryFormatter();
-                                    Stream fstream = new FileStream(treePath, FileMode.Open, FileAccess.Read);
-                                    try {
-                                        tree.Tree = (TreeNode)formatter.Deserialize(fstream);
-                                    } catch (Exception) { }
-                                    fstream.Close();
-                                }*/
+                                    Stream stream = File.Open(path, FileMode.Open, FileAccess.Read);
+                                    tree.Node = (TreeNode)formatter.Deserialize(stream);
+                                    U.WritingEnqueue(tree);
+                                    stream.Close();
+                                }
 
                             } else {                                                                                        // Si la infomación de inicio de sesión es incorrecta.
                                 U.WritingEnqueue(new RequestAnswer(false));
