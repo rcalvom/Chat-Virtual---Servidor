@@ -180,13 +180,14 @@ namespace Chat_Virtual___Servidor {
                         }
                     } else if (Readed is ChatMessage ms) {                                                      // Si se envía un mensaje en privado.
                         ms.date = new ShippingData.Message.Date(DateTime.Now);
-                        this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_CHAT VALUES ('" + ms.Sender + "', '" + ms.Receiver
+                        this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_CHAT VALUES (DEFAULT, '" + ms.Sender + "', '" + ms.Receiver
                             + "', DEFAULT, '" + ms.Content + "', NULL)");
                         User theOther;
-                        if (user.Name.Equals(ms.Sender))
-                            theOther = SearchUser(ms.Receiver);
-                        else
-                            theOther = SearchUser(ms.Sender);
+                        if (user.Name.Equals(ms.Sender)) {
+                            theOther = this.SearchUser(ms.Receiver);
+                        } else {
+                            theOther = this.SearchUser(ms.Sender);
+                        }
                         user.WritingEnqueue(ms);
                         theOther.WritingEnqueue(ms);
                     } else if (Readed is ChatGroup group) {                                                     // Si se desea obtener la información de un grupo.
