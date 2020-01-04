@@ -210,7 +210,7 @@ namespace Chat_Virtual___Servidor {
                             this.ConsoleAppend("Se ha cambiado satisfactoriamente la contraseña del usuario  [" + user.Name + " | " + user.Client.Client.RemoteEndPoint.ToString() + "]. ");
                             user.WritingEnqueue(new RequestAnswer(true, 3));
                         }
-                    } else if (Readed is TreeActivities tree) {
+                    } else if (Readed is TreeActivities tree) {                                                 // Si es una actualización del arbol de tareas.
                         string path = "F:\\SADIRI\\ArbolesTareas\\" + user.Name + ".dat";
                         IFormatter formatter = new BinaryFormatter();
                         using (FileStream stream = File.Open(path, FileMode.Create, FileAccess.Write)) {
@@ -324,7 +324,7 @@ namespace Chat_Virtual___Servidor {
                                 string treePath = this.Oracle.Oracle.DataReader["RUTA_ARBOL"].ToString();
                                 if (treePath != "") {
                                     IFormatter formatter = new BinaryFormatter();
-                                    using (FileStream stream = File.Open(path, FileMode.Open, FileAccess.Read)) {
+                                    using (FileStream stream = File.Open(treePath, FileMode.Open, FileAccess.Read)) {
                                         tree.Node = (TreeNode[])formatter.Deserialize(stream);
                                         stream.Close();
                                     }
