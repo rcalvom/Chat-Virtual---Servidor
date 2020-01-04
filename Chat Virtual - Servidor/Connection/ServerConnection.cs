@@ -191,6 +191,7 @@ namespace Chat_Virtual___Servidor {
                             string path = "F:\\SADIRI\\Usuarios\\" + profile.Name + ".png";
                             using (FileStream stream = File.Open(path, FileMode.Create)) {
                                 foto.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                                stream.Close();
                             }
                             this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET RUTA_FOTO = 'F:\\SADIRI\\Usuarios\\" + profile.Name + ".png' WHERE USUARIO = '" + profile.Name + "'");
                             user.WritingEnqueue(new RequestAnswer(true)); //TODO: Código respuesta.
@@ -200,20 +201,22 @@ namespace Chat_Virtual___Servidor {
                         this.Oracle.Oracle.ExecuteSQL("SELECT CONTRASEÑA FROM USUARIOS WHERE USUARIO = '" + changePassword.UserName + "'");
                         this.Oracle.Oracle.DataReader.Read();
                         string currentPassword = this.Oracle.Oracle.DataReader["CONTRASEÑA"].ToString();
-                        if (changePassword.NewPassword.Equals(currentPassword)) {
+                        if (!changePassword.CurrentPassword.Equals(currentPassword)) {
                             user.WritingEnqueue(new RequestAnswer(false, 3));
                             user.WritingEnqueue(new RequestError(3));
-                            this.ConsoleAppend("Se ha cambiado satisfactoriamente la contraseña del usuario  [" + user.Name + " | " + user.Client.Client.RemoteEndPoint.ToString() + "]. ");
+                            this.ConsoleAppend("El cambio contraseña del usuario  [" + user.Name + " | " + user.Client.Client.RemoteEndPoint.ToString() + "]. no pudo ser realizado.");
                         } else {
-                            this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET CONSTRASEÑA = '" + changePassword.NewPassword + "' WHERE USUARIO = '" + changePassword.UserName + "'");
+                            this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET CONTRASEÑA = '" + changePassword.NewPassword + "' WHERE USUARIO = '" + changePassword.UserName + "'");
+                            this.ConsoleAppend("Se ha cambiado satisfactoriamente la contraseña del usuario  [" + user.Name + " | " + user.Client.Client.RemoteEndPoint.ToString() + "]. ");
                             user.WritingEnqueue(new RequestAnswer(true, 3));
                         }
                     } else if (Readed is TreeActivities tree) {
                         string path = "F:\\SADIRI\\ArbolesTareas\\" + user.Name + ".dat";
                         IFormatter formatter = new BinaryFormatter();
-                        FileStream stream = File.Open(path, FileMode.Create, FileAccess.Write);
-                        formatter.Serialize(stream, tree.Node);
-                        stream.Close();
+                        using (FileStream stream = File.Open(path, FileMode.Create, FileAccess.Write)) {
+                            formatter.Serialize(stream, tree.Node);
+                            stream.Close();
+                        }
                         this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET RUTA_ARBOL = '" + path + "' WHERE USUARIO = '" + user.Name + "'");
                         this.ConsoleAppend("Se ha guardado satisfactoriamente el árbol de tareas del usuario  [" + user.Name + " | " + user.Client.Client.RemoteEndPoint.ToString() + "]. ");
                         // TODO: Respuesta.
@@ -321,10 +324,11 @@ namespace Chat_Virtual___Servidor {
                                 string treePath = this.Oracle.Oracle.DataReader["RUTA_ARBOL"].ToString();
                                 if (treePath != "") {
                                     IFormatter formatter = new BinaryFormatter();
-                                    Stream stream = File.Open(path, FileMode.Open, FileAccess.Read);
-                                    tree.Node = (TreeNode)formatter.Deserialize(stream);
+                                    using (FileStream stream = File.Open(path, FileMode.Open, FileAccess.Read)) {
+                                        tree.Node = (TreeNode[])formatter.Deserialize(stream);
+                                        stream.Close();
+                                    }
                                     U.WritingEnqueue(tree);
-                                    stream.Close();
                                 }
 
                             } else {                                                                                        // Si la infomación de inicio de sesión es incorrecta.
@@ -353,6 +357,7 @@ namespace Chat_Virtual___Servidor {
                                 string status = this.Oracle.Oracle.DataReader["ESTADO"].ToString();
                                 using (FileStream stream = File.Open(path, FileMode.Open)) {
                                     profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
+                                    stream.Close();
                                 }
                                 profile.Status = status;
                                 profile.Name = U.Name;
