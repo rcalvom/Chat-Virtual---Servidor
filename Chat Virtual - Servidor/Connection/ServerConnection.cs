@@ -161,7 +161,19 @@ namespace Chat_Virtual___Servidor {
                     if (Readed == null) {
                         continue;
                     } else if (Readed is Chat ch) {                                                             // Si se desea obtener la información de un Chat privado.
-
+                        if (ch.Searched) {
+                            this.Oracle.Oracle.ExecuteSQL(
+                                "SELECT USUARIO, ESTADO, RUTA_FOTO" +
+                                "FROM USUARIOS" +
+                                "WHERE LOWER(USUARIO) LIKE '%" + ch.memberTwo.Name.ToLower() + "%'");
+                            while (this.Oracle.Oracle.DataReader.Read()) {
+                                string name = this.Oracle.Oracle.DataReader["USUARIO"].ToString();
+                                byte[] image = Serializer.SerializeImage(Image.FromFile(this.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString()));
+                                string status = this.Oracle.Oracle.DataReader["ESTADO"].ToString();
+                                Profile profile = new Profile(name, image, status);
+                                user.WritingEnqueue(new Chat(ch.memberOne, profile, true));
+                            }
+                        }
                     } else if (Readed is ChatMessage ms) {                                                      // Si se envía un mensaje en privado.
 
                     } else if (Readed is ChatGroup group) {                                                     // Si se desea obtener la información de un grupo.
