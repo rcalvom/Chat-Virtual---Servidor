@@ -44,6 +44,13 @@ namespace Chat_Virtual___Servidor {
             this.CanRead = new Semaphore(1, 1);
         }
 
+        public void RefreshStream(TcpClient Client) {
+            this.Client = Client;
+            this.Stream = Client.GetStream();
+            this.Writer = new BinaryWriter(this.Stream);
+            this.Reader = new BinaryReader(this.Stream);
+        }
+
         public void WritingEnqueue(Data data) {
             this.CanWrite.WaitOne();
             this.WritingQueue.Enqueue(data);

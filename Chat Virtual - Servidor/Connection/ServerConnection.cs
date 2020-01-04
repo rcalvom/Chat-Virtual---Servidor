@@ -161,7 +161,19 @@ namespace Chat_Virtual___Servidor {
                     if (Readed == null) {
                         continue;
                     } else if (Readed is Chat ch) {                                                             // Si se desea obtener la información de un Chat privado.
-
+                        if (ch.Searched) {
+                            this.Oracle.Oracle.ExecuteSQL(
+                                "SELECT USUARIO, ESTADO, RUTA_FOTO" +
+                                "FROM USUARIOS" +
+                                "WHERE LOWER(USUARIO) LIKE '%" + ch.memberTwo.Name.ToLower() + "%'");
+                            while (this.Oracle.Oracle.DataReader.Read()) {
+                                string name = this.Oracle.Oracle.DataReader["USUARIO"].ToString();
+                                byte[] image = Serializer.SerializeImage(Image.FromFile(this.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString()));
+                                string status = this.Oracle.Oracle.DataReader["ESTADO"].ToString();
+                                Profile profile = new Profile(name, image, status);
+                                user.WritingEnqueue(new Chat(ch.memberOne, profile, true));
+                            }
+                        }
                     } else if (Readed is ChatMessage ms) {                                                      // Si se envía un mensaje en privado.
 
                     } else if (Readed is ChatGroup group) {                                                     // Si se desea obtener la información de un grupo.
@@ -269,117 +281,134 @@ namespace Chat_Virtual___Servidor {
         /// Esta a la escucha de nuevos clientes y verifica su información de inicio de sesión.
         /// </summary>
         private void ListenConnection() {
+            LinkedList<User> NotInitialisedUser = new LinkedList<User>();
             do {
                 try {
                     if (this.Server.Pending()) {                                            // Si hay solicitudes de conexión entrantes.
                         User U = new User(this.Server.AcceptTcpClient());
-                        object obj = null;
-
-                        for (int i = 0; i < 25; i++) {                                      // Intenta 25 veces recibir el objeto inicial.
-                            try {
-                                this.Read(U);
-                                obj = U.ReadingDequeue();
-                            } catch (Exception) { }
-                            if (obj == default) {
-                                Thread.Sleep(125);
-                            } else {
+                        bool Find = false;
+                        Iterator<User> uIterator = Users.Iterator();
+                        while (uIterator.HasNext()) {
+                            User user = uIterator.Next();
+                            if (user.Client.Client.RemoteEndPoint.ToString().Equals(U.Client.Client.RemoteEndPoint.ToString())) {
+                                try {
+                                    user.Client.Client.Disconnect(true);
+                                } catch (Exception) { }
+                                user.RefreshStream(U.Client);
+                                Find = true;
                                 break;
                             }
                         }
-
-                        if (obj is SignIn si) {                                             // Si el objeto recibido es un inicio de sesión.
-                            bool exist = false;
-                            this.Oracle.Oracle.ExecuteSQL("SELECT * FROM INFOMRACION_INICIO");
-                            while (this.Oracle.Oracle.DataReader.Read()) {
-                                if (this.Oracle.Oracle.DataReader["USUARIO"].Equals(si.user) && this.Oracle.Oracle.DataReader["CONTRASEÑA"].Equals(si.password)) {
-                                    exist = true;
-                                    break;
-                                }
-                            }
-                            if (exist) {                                                    // Si la información del cliente corresponde con la de la base de datos.
-                                U.Name = si.user;
-                                U.WritingEnqueue(new RequestAnswer(true));
-                                this.Write(U);
-                                this.Users.Add(U);
-                                this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
-                                this.InsertTable(U.Name, U.Client.Client.RemoteEndPoint.ToString());
-
-                                Profile profile = new Profile();
-                                this.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = '" + U.Name + "'");
-                                this.Oracle.Oracle.DataReader.Read();
-                                string path = this.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString();
-                                this.Oracle.Oracle.ExecuteSQL("SELECT ESTADO FROM USUARIOS WHERE USUARIO = '" + U.Name + "'");
-                                this.Oracle.Oracle.DataReader.Read();
-                                string status = this.Oracle.Oracle.DataReader["ESTADO"].ToString();
-                                using (FileStream stream = File.Open(path, FileMode.Open)) {
-                                    profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
-                                }
-                                profile.Status = status;
-                                profile.Name = U.Name;
-                                U.WritingEnqueue(profile);
-
-                                TreeActivities tree = new TreeActivities();
-                                this.Oracle.Oracle.ExecuteSQL("SELECT RUTA_ARBOL FROM USUARIOS WHERE USUARIO = '" + U.Name + "'");
-                                this.Oracle.Oracle.DataReader.Read();
-                                string treePath = this.Oracle.Oracle.DataReader["RUTA_ARBOL"].ToString();
-                                if (treePath != "") {
-                                    IFormatter formatter = new BinaryFormatter();
-                                    using (FileStream stream = File.Open(treePath, FileMode.Open, FileAccess.Read)) {
-                                        tree.Node = (TreeNode[])formatter.Deserialize(stream);
-                                        stream.Close();
-                                    }
-                                    U.WritingEnqueue(tree);
-                                }
-
-                            } else {                                                                                        // Si la infomación de inicio de sesión es incorrecta.
-                                U.WritingEnqueue(new RequestAnswer(false));
-                                U.WritingEnqueue(new RequestError(1));
-                                this.Write(U);
-                                this.ConsoleAppend("Se ha intentado conectar el remoto [" + U.Client.Client.RemoteEndPoint.ToString() + "] con información de inicio de sesión incorrecta.");
-                                U.Client.Close();
-                            }
-                        } else if (obj is SignUp su) {                                                                      // Si el objeto recibido es un nuevo registro
-                            if (this.Oracle.Oracle.ExecuteSQL("INSERT INTO USUARIOS VALUES('" + su.userName + "', '" + su.name + "', '" + su.password + "', 'Hey there! I am using SADIRI.','F:\\SADIRI\\Usuarios\\default.png', null, default)")) {
-                                U.Name = su.userName;
-                                U.WritingEnqueue(new RequestAnswer(true));
-                                this.Write(U);
-                                this.ConsoleAppend("Se ha registrado el usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] correctamente.");
-                                this.Users.Add(U);
-                                this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
-                                this.InsertTable(U.Name, U.Client.Client.RemoteEndPoint.ToString());
-
-                                Profile profile = new Profile();
-                                this.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = '" + U.Name + "'");
-                                this.Oracle.Oracle.DataReader.Read();
-                                string path = this.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString();
-                                this.Oracle.Oracle.ExecuteSQL("SELECT ESTADO FROM USUARIOS WHERE USUARIO = '" + U.Name + "'");
-                                this.Oracle.Oracle.DataReader.Read();
-                                string status = this.Oracle.Oracle.DataReader["ESTADO"].ToString();
-                                using (FileStream stream = File.Open(path, FileMode.Open)) {
-                                    profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
-                                    stream.Close();
-                                }
-                                profile.Status = status;
-                                profile.Name = U.Name;
-                                U.WritingEnqueue(profile);
-
-                            } else {
-                                U.WritingEnqueue(new RequestAnswer(false));
-                                U.WritingEnqueue(new RequestError(0));
-                                this.Write(U);
-                                this.ConsoleAppend("Se ha intentado registrar el remoto [" + U.Client.Client.RemoteEndPoint.ToString() + "] con un nombre de usuario ya existente.");
-                                U.Client.Close();
-                            }
-                        } else if (obj is null) {                                                 // Si no llego objeto inicial.
-                            this.ConsoleAppend("No se recibió informmación de ingreso por parte del remoto. [" + U.Client.Client.RemoteEndPoint.ToString() + "] Se ha desconectado del servidor.");
-                            U.Client.Close();
-                        } else {                                                                  // Si el objeto inicial no es un tipo de dato reconocido.
-                            this.ConsoleAppend("No se reconoce la información de ingreso por parte del remoto. [" + U.Client.Client.RemoteEndPoint.ToString() + "] Se ha desconectado del servidor.");
-                            U.Client.Close();
-                        }
+                        if(!Find)
+                            NotInitialisedUser.Add(U);
                     }
                 } catch (Exception ex) {
                     Console.WriteLine(ex);
+                }
+
+                Iterator<User> iterator = NotInitialisedUser.Iterator();
+                while (iterator.HasNext()) {
+                    User user = iterator.Next();
+                    Data data;
+
+                    if (Read(user)) {
+                        data = user.ReadingDequeue();
+                    } else {
+                        continue;
+                    }
+
+                    if (data is SignIn si) {                                             // Si el objeto recibido es un inicio de sesión.
+                        bool exist = false;
+                        this.Oracle.Oracle.ExecuteSQL("SELECT * FROM INFOMRACION_INICIO");
+                        while (this.Oracle.Oracle.DataReader.Read()) {
+                            if (this.Oracle.Oracle.DataReader["USUARIO"].Equals(si.user) && this.Oracle.Oracle.DataReader["CONTRASEÑA"].Equals(si.password)) {
+                                exist = true;
+                                break;
+                            }
+                        }
+                        if (exist) {                                                    // Si la información del cliente corresponde con la de la base de datos.
+                            user.Name = si.user;
+                            user.WritingEnqueue(new RequestAnswer(true));
+                            this.Write(user);
+                            this.Users.Add(user);
+                            this.ConsoleAppend("El usuario [" + user.Name + " | " + user.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
+                            this.InsertTable(user.Name, user.Client.Client.RemoteEndPoint.ToString());
+
+                            Profile profile = new Profile();
+                            this.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = '" + user.Name + "'");
+                            this.Oracle.Oracle.DataReader.Read();
+                            string path = this.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString();
+                            this.Oracle.Oracle.ExecuteSQL("SELECT ESTADO FROM USUARIOS WHERE USUARIO = '" + user.Name + "'");
+                            this.Oracle.Oracle.DataReader.Read();
+                            string status = this.Oracle.Oracle.DataReader["ESTADO"].ToString();
+                            using (FileStream stream = File.Open(path, FileMode.Open)) {
+                                profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
+                            }
+                            profile.Status = status;
+                            profile.Name = user.Name;
+                            user.WritingEnqueue(profile);
+
+                            TreeActivities tree = new TreeActivities();
+                            this.Oracle.Oracle.ExecuteSQL("SELECT RUTA_ARBOL FROM USUARIOS WHERE USUARIO = '" + user.Name + "'");
+                            this.Oracle.Oracle.DataReader.Read();
+                            string treePath = this.Oracle.Oracle.DataReader["RUTA_ARBOL"].ToString();
+                            if (treePath != "") {
+                                IFormatter formatter = new BinaryFormatter();
+                                using (FileStream stream = File.Open(treePath, FileMode.Open, FileAccess.Read)) {
+                                    tree.Node = (TreeNode[])formatter.Deserialize(stream);
+                                    stream.Close();
+                                }
+                                user.WritingEnqueue(tree);
+                            }
+                            NotInitialisedUser.RemoveElement(user);
+                            Users.Add(user);
+                        } else {                                                                                        // Si la infomación de inicio de sesión es incorrecta.
+                            user.WritingEnqueue(new RequestAnswer(false));
+                            user.WritingEnqueue(new RequestError(1));
+                            this.Write(user);
+                            this.ConsoleAppend("Se ha intentado conectar el remoto [" + user.Client.Client.RemoteEndPoint.ToString() + "] con información de inicio de sesión incorrecta.");
+                            user.Client.Close();
+                        }
+                    } else if (data is SignUp su) {                                                                      // Si el objeto recibido es un nuevo registro
+                        if (this.Oracle.Oracle.ExecuteSQL("INSERT INTO USUARIOS VALUES('" + su.userName + "', '" + su.name + "', '" + su.password + "', 'Hey there! I am using SADIRI.','F:\\SADIRI\\Usuarios\\default.png', null, default)")) {
+                            user.Name = su.userName;
+                            user.WritingEnqueue(new RequestAnswer(true));
+                            this.Write(user);
+                            this.ConsoleAppend("Se ha registrado el usuario [" + user.Name + " | " + user.Client.Client.RemoteEndPoint.ToString() + "] correctamente.");
+                            this.Users.Add(user);
+                            this.ConsoleAppend("El usuario [" + user.Name + " | " + user.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
+                            this.InsertTable(user.Name, user.Client.Client.RemoteEndPoint.ToString());
+
+                            Profile profile = new Profile();
+                            this.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = '" + user.Name + "'");
+                            this.Oracle.Oracle.DataReader.Read();
+                            string path = this.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString();
+                            this.Oracle.Oracle.ExecuteSQL("SELECT ESTADO FROM USUARIOS WHERE USUARIO = '" + user.Name + "'");
+                            this.Oracle.Oracle.DataReader.Read();
+                            string status = this.Oracle.Oracle.DataReader["ESTADO"].ToString();
+                            using (FileStream stream = File.Open(path, FileMode.Open)) {
+                                profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
+                                stream.Close();
+                            }
+                            profile.Status = status;
+                            profile.Name = user.Name;
+                            user.WritingEnqueue(profile);
+                            NotInitialisedUser.RemoveElement(user);
+                            Users.Add(user);
+                        } else {
+                            user.WritingEnqueue(new RequestAnswer(false));
+                            user.WritingEnqueue(new RequestError(0));
+                            this.Write(user);
+                            this.ConsoleAppend("Se ha intentado registrar el remoto [" + user.Client.Client.RemoteEndPoint.ToString() + "] con un nombre de usuario ya existente.");
+                            user.Client.Close();
+                        }
+                    } else if (data is null) {                                                 // Si no llego objeto inicial.
+                        this.ConsoleAppend("No se recibió informmación de ingreso por parte del remoto. [" + user.Client.Client.RemoteEndPoint.ToString() + "] Se ha desconectado del servidor.");
+                        user.Client.Close();
+                    } else {                                                                  // Si el objeto inicial no es un tipo de dato reconocido.
+                        this.ConsoleAppend("No se reconoce la información de ingreso por parte del remoto. [" + user.Client.Client.RemoteEndPoint.ToString() + "] Se ha desconectado del servidor.");
+                        user.Client.Close();
+                    }
                 }
             } while (this.Connected);
         }
@@ -421,8 +450,10 @@ namespace Chat_Virtual___Servidor {
                     data = user.Reader.ReadBytes(size);                                     // Lee el el objeto y lo guarda en el arreglo de bytes.
                     object a = Serializer.Deserialize(data);                                // Deserializa el objeto.
                     user.ReadingEnqueue((Data)a);                                           // Guarda el objeto en la cola de lectura.
+                    return true;
+                } else {
+                    return false;
                 }
-                return true;
             } catch (Exception) {
                 //this.ConsoleAppend("Se ha perdido la conexión con el usuario [" + user.Name + "] Intentando reconectar.");
                 return false;
