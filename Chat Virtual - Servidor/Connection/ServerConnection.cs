@@ -180,6 +180,21 @@ namespace Chat_Virtual___Servidor {
                                 }
                                 user.WritingEnqueue(new Chat(ch.memberOne, profile, true));
                             }
+                        } else {
+                            this.Oracle.Oracle.ExecuteSQL("SELECT USUARIO, ESTADO, RUTA_FOTO " +
+                                "FROM USUARIO " +
+                                "WHERE USUARIO = '" + ch.memberTwo.Name + "'");
+                            if (this.Oracle.Oracle.DataReader.Read()) {
+                                Profile profile = new Profile {
+                                    Name = this.Oracle.Oracle.DataReader["USUARIO"].ToString(),
+                                    Status = this.Oracle.Oracle.DataReader["ESTADO"].ToString()
+                                };
+                                using (FileStream stream = File.Open(this.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString(), FileMode.Open)) {
+                                    profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
+                                    stream.Close();
+                                }
+                                user.WritingEnqueue(new Chat(ch.memberOne, profile, false));
+                            }
                         }
                     } else if (Readed is ChatMessage ms) {                                                      // Si se envía un mensaje en privado.
                         ms.date = new ShippingData.Message.Date(DateTime.Now);
