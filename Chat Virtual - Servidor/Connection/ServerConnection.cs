@@ -58,7 +58,7 @@ namespace Chat_Virtual___Servidor {
         }
 
         /// <summary>
-        /// Apaga el servidor, elimina la conexión de la base de datos y finaliza la escucha de nuevas solicitudes
+        /// Apaga el servidor, elimina la conexión de la base de datos y finaliza la escucha de nuevas solicitudes.
         /// </summary>
         public void ShutDown() {
             try {
@@ -111,6 +111,9 @@ namespace Chat_Virtual___Servidor {
             this.ConsoleAppend("Servidor inicializado correctamente.\n");
             this.ButtonText("Apagar Servidor");
             this.ButtonEnable(true);
+
+            // TODO: CARGAR GRUPOS ACTIVOS
+
         }
 
         /// <summary>
@@ -180,8 +183,23 @@ namespace Chat_Virtual___Servidor {
                         }
                     } else if (Readed is ChatMessage ms) {                                                      // Si se envía un mensaje en privado.
                         ms.date = new ShippingData.Message.Date(DateTime.Now);
-                        this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_CHAT VALUES (DEFAULT, '" + ms.Sender + "', '" + ms.Receiver
+                        if (ms.Image == null) {
+                            this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_CHAT VALUES (DEFAULT, '" + ms.Sender + "', '" + ms.Receiver
                             + "', DEFAULT, '" + ms.Content + "', NULL)");
+                        } else {
+                            this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_CHAT VALUES (DEFAULT, '" + ms.Sender + "', '" + ms.Receiver
+                            + "', DEFAULT, '" + ms.Content + "', 'F:\\SADIRI\\MensajesChat\\')");
+                            Image picture = Serializer.DeserializeImage(ms.Image);
+
+                            this.Oracle.Oracle.ExecuteSQL("SELECT MAX(ID_MENSAJE) AS MAX FROM MENSAJES_CHAT");
+                            this.Oracle.Oracle.DataReader.Read();
+
+                            string path = "F:\\SADIRI\\MensajesChat\\"+this.Oracle.Oracle.DataReader["MAX"].ToString() +".png";
+                            using (FileStream stream = File.Open(path, FileMode.Create)) {
+                                picture.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                                stream.Close();
+                            }
+                        }
                         User theOther;
                         if (user.Name.Equals(ms.Sender)) {
                             theOther = this.SearchUser(ms.Receiver);
@@ -190,23 +208,11 @@ namespace Chat_Virtual___Servidor {
                         }
                         user.WritingEnqueue(ms);
                         theOther.WritingEnqueue(ms);
+                        this.ConsoleAppend("Mensaje  [" + ms.Sender + "] a [" + ms.Receiver + "]: " + ms.Content);
                     } else if (Readed is ChatGroup group) {                                                     // Si se desea obtener la información de un grupo.
 
                     } else if (Readed is GroupMessage groupMessage) {                                           // Si se envía un mensaje en un grupo.
-                        if (groupMessage.Image == null && groupMessage.Content != null) {
-                            this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_GRUPO VALUES('" + groupMessage.Sender + "','" + groupMessage.IdGroupReceiver + "', default,'" + groupMessage.Content + "', NULL)");
-                        } else if (groupMessage.Image != null && groupMessage.Content == null) {
-                            Image image = Serializer.DeserializeImage(groupMessage.Image);
-                            string path = "F:\\SADIRI\\MensajesGrupos\\" + groupMessage.IdGroupReceiver + groupMessage.Sender + ".png"; // TODO: revisar.
-                            image.Save(path);
-                            this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_GRUPO VALUES('" + groupMessage.Sender + "','" + groupMessage.IdGroupReceiver + "', default, NULL, '" + path + "')");
-                        } else if (groupMessage.Image != null && groupMessage.Content != null) {
-                            Image image = Serializer.DeserializeImage(groupMessage.Image);
-                            string path = "F:\\SADIRI\\MensajesGrupos\\" + groupMessage.IdGroupReceiver + groupMessage.Sender + ".png"; //TODO: revisar.
-                            image.Save(path);
-                            this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_GRUPO VALUES('" + groupMessage.Sender + "','" + groupMessage.IdGroupReceiver + "', default, '" + groupMessage.Content + "', '" + path + "')");
-                        }
-                        //TODO: Enviar a otros usuarios.
+                        //Carpeta: F:\\SADIRI\\MensajesGrupos\\
                     } else if (Readed is Profile profile) {                                                     // Si es un cambio de perfil.
                         if (profile.Status != null) {
                             this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET ESTADO = '" + profile.Status + "' WHERE USUARIO = '" + profile.Name + "'");
@@ -222,7 +228,7 @@ namespace Chat_Virtual___Servidor {
                             this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET RUTA_FOTO = 'F:\\SADIRI\\Usuarios\\" + profile.Name + ".png' WHERE USUARIO = '" + profile.Name + "'");
                             user.WritingEnqueue(new RequestAnswer(true)); //TODO: Código respuesta.
                         }
-                        this.ConsoleAppend("Se ha cambiado satisfactoriamente el perfil del usuario  [" + user.Name + " | " + user.Client.Client.RemoteEndPoint.ToString() + "]. ");
+                        this.ConsoleAppend("Se ha cambiado satisfactoriamente el perfil del usuario  [" + user.Name + " | " + IPAddress.Parse(((IPEndPoint)user.Client.Client.RemoteEndPoint).Address.ToString()) + "]. ");
                     } else if (Readed is ChangePassword changePassword) {                                       // Si es una solicitud de cambio de contraseña.
                         this.Oracle.Oracle.ExecuteSQL("SELECT CONTRASEÑA FROM USUARIOS WHERE USUARIO = '" + changePassword.UserName + "'");
                         this.Oracle.Oracle.DataReader.Read();
@@ -230,7 +236,7 @@ namespace Chat_Virtual___Servidor {
                         if (!changePassword.CurrentPassword.Equals(currentPassword)) {
                             user.WritingEnqueue(new RequestAnswer(false, 3));
                             user.WritingEnqueue(new RequestError(3));
-                            this.ConsoleAppend("El cambio contraseña del usuario  [" + user.Name + " | " + user.Client.Client.RemoteEndPoint.ToString() + "]. no pudo ser realizado.");
+                            this.ConsoleAppend("El cambio contraseña del usuario  [" + user.Name + " | " + IPAddress.Parse(((IPEndPoint)user.Client.Client.RemoteEndPoint).Address.ToString()) + "]. no pudo ser realizado.");
                         } else {
                             this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET CONTRASEÑA = '" + changePassword.NewPassword + "' WHERE USUARIO = '" + changePassword.UserName + "'");
                             this.ConsoleAppend("Se ha cambiado satisfactoriamente la contraseña del usuario  [" + user.Name + " | " + user.Client.Client.RemoteEndPoint.ToString() + "]. ");
@@ -244,8 +250,7 @@ namespace Chat_Virtual___Servidor {
                             stream.Close();
                         }
                         this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET RUTA_ARBOL = '" + path + "' WHERE USUARIO = '" + user.Name + "'");
-                        this.ConsoleAppend("Se ha guardado satisfactoriamente el árbol de tareas del usuario  [" + user.Name + " | " + user.Client.Client.RemoteEndPoint.ToString() + "]. ");
-                        // TODO: Respuesta.
+                        this.ConsoleAppend("Se ha guardado satisfactoriamente el árbol de tareas del usuario  [" + user.Name + " | " + IPAddress.Parse(((IPEndPoint)user.Client.Client.RemoteEndPoint).Address.ToString()) + "]. ");
                     }
                 }
             } while (this.Connected);
@@ -283,7 +288,7 @@ namespace Chat_Virtual___Servidor {
         /// </summary>
         private void WriteUsers() {
             do {
-                Iterator<User> i = this.Users.Iterator();        // Obtiene el iterador para la lista.
+                Iterator<User> i = this.Users.Iterator();   // Obtiene el iterador para la lista.
                 while (i.HasNext()) {
                     User user = i.Next();                   // Obtiene cada elemento en la lista.
                     this.Write(user);                       // Intenta escribir los datos que estén pendientes para ese usuario.
@@ -306,7 +311,7 @@ namespace Chat_Virtual___Servidor {
                                 this.Read(U);
                                 obj = U.ReadingDequeue();
                             } catch (Exception) { }
-                            if (obj == default) {
+                            if (obj == null) {
                                 Thread.Sleep(125);
                             } else {
                                 break;
@@ -327,8 +332,8 @@ namespace Chat_Virtual___Servidor {
                                 U.WritingEnqueue(new RequestAnswer(true));
                                 this.Write(U);
                                 this.Users.Add(U);
-                                this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
-                                this.InsertTable(U.Name, U.Client.Client.RemoteEndPoint.ToString());
+                                this.ConsoleAppend("El usuario [" + U.Name + " | " + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] se ha conectado satisfactoriamente.");
+                                this.InsertTable(U.Name, IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()).ToString());
 
                                 Profile profile = new Profile();
                                 this.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = '" + U.Name + "'");
@@ -361,7 +366,7 @@ namespace Chat_Virtual___Servidor {
                                 U.WritingEnqueue(new RequestAnswer(false));
                                 U.WritingEnqueue(new RequestError(1));
                                 this.Write(U);
-                                this.ConsoleAppend("Se ha intentado conectar el remoto [" + U.Client.Client.RemoteEndPoint.ToString() + "] con información de inicio de sesión incorrecta.");
+                                this.ConsoleAppend("Se ha intentado conectar el remoto [" + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] con información de inicio de sesión incorrecta.");
                                 U.Client.Close();
                             }
                         } else if (obj is SignUp su) {                                                                      // Si el objeto recibido es un nuevo registro
@@ -369,10 +374,10 @@ namespace Chat_Virtual___Servidor {
                                 U.Name = su.userName;
                                 U.WritingEnqueue(new RequestAnswer(true));
                                 this.Write(U);
-                                this.ConsoleAppend("Se ha registrado el usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] correctamente.");
+                                this.ConsoleAppend("Se ha registrado el usuario [" + U.Name + " | " + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] correctamente.");
                                 this.Users.Add(U);
                                 this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
-                                this.InsertTable(U.Name, U.Client.Client.RemoteEndPoint.ToString());
+                                this.InsertTable(U.Name, IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()).ToString());
 
                                 Profile profile = new Profile();
                                 this.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = '" + U.Name + "'");
@@ -393,14 +398,14 @@ namespace Chat_Virtual___Servidor {
                                 U.WritingEnqueue(new RequestAnswer(false));
                                 U.WritingEnqueue(new RequestError(0));
                                 this.Write(U);
-                                this.ConsoleAppend("Se ha intentado registrar el remoto [" + U.Client.Client.RemoteEndPoint.ToString() + "] con un nombre de usuario ya existente.");
+                                this.ConsoleAppend("Se ha intentado registrar el remoto [" + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] con un nombre de usuario ya existente.");
                                 U.Client.Close();
                             }
                         } else if (obj is null) {                                                 // Si no llego objeto inicial.
-                            this.ConsoleAppend("No se recibió informmación de ingreso por parte del remoto. [" + U.Client.Client.RemoteEndPoint.ToString() + "] Se ha desconectado del servidor.");
+                            this.ConsoleAppend("No se recibió informmación de ingreso por parte del remoto. [" + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] Se ha desconectado del servidor.");
                             U.Client.Close();
                         } else {                                                                  // Si el objeto inicial no es un tipo de dato reconocido.
-                            this.ConsoleAppend("No se reconoce la información de ingreso por parte del remoto. [" + U.Client.Client.RemoteEndPoint.ToString() + "] Se ha desconectado del servidor.");
+                            this.ConsoleAppend("No se reconoce la información de ingreso por parte del remoto. [" + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] Se ha desconectado del servidor.");
                             U.Client.Close();
                         }
                     }

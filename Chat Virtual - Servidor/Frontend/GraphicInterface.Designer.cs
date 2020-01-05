@@ -151,10 +151,11 @@
             // LogConsole
             // 
             this.LogConsole.BackColor = System.Drawing.SystemColors.AppWorkspace;
+            this.LogConsole.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.LogConsole.Location = new System.Drawing.Point(12, 110);
             this.LogConsole.Name = "LogConsole";
             this.LogConsole.ReadOnly = true;
-            this.LogConsole.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedVertical;
+            this.LogConsole.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
             this.LogConsole.Size = new System.Drawing.Size(455, 289);
             this.LogConsole.TabIndex = 4;
             this.LogConsole.Text = "";
