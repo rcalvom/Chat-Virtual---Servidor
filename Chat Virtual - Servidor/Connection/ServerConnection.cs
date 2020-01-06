@@ -182,7 +182,7 @@ namespace Chat_Virtual___Servidor {
                             }
                         } else {
                             this.Oracle.Oracle.ExecuteSQL("SELECT USUARIO, ESTADO, RUTA_FOTO " +
-                                "FROM USUARIO " +
+                                "FROM USUARIOS " +
                                 "WHERE USUARIO = '" + ch.memberTwo.Name + "'");
                             if (this.Oracle.Oracle.DataReader.Read()) {
                                 Profile profile = new Profile {
