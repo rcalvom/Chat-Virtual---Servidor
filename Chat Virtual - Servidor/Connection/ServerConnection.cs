@@ -199,10 +199,13 @@ namespace Chat_Virtual___Servidor {
                     } else if (Readed is ChatMessage ms) {                                                      // Si se envía un mensaje en privado.
                         ms.date = new ShippingData.Message.Date(DateTime.Now);
                         if (ms.Image == null) {
-                            this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_CHAT VALUES (DEFAULT, '" + ms.Sender + "', '" + ms.Receiver
+                            var a = this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_CHAT VALUES (DEFAULT, '" + ms.Sender + "', '" + ms.Receiver
                             + "', DEFAULT, '" + ms.Content + "', NULL)");
+                            if (!a) {
+                                ;
+                            }
                         } else {
-                            this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_CHAT VALUES (DEFAULT, '" + ms.Sender + "', '" + ms.Receiver
+                            var a = this.Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_CHAT VALUES (DEFAULT, '" + ms.Sender + "', '" + ms.Receiver
                             + "', DEFAULT, '" + ms.Content + "', 'F:\\SADIRI\\MensajesChat\\')");
                             Image picture = Serializer.DeserializeImage(ms.Image);
 
@@ -221,8 +224,8 @@ namespace Chat_Virtual___Servidor {
                         } else {
                             theOther = this.SearchUser(ms.Sender);
                         }
-                        user.WritingEnqueue(ms);
-                        theOther.WritingEnqueue(ms);
+                        user?.WritingEnqueue(ms);
+                        theOther?.WritingEnqueue(ms);
                         this.ConsoleAppend("Mensaje  [" + ms.Sender + "] a [" + ms.Receiver + "]: " + ms.Content);
                     } else if (Readed is ChatGroup group) {                                                     // Si se desea obtener la información de un grupo.
 
