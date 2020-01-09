@@ -164,37 +164,19 @@ namespace Chat_Virtual___Servidor {
                     if (Readed == null) {
                         continue;
                     } else if (Readed is Chat ch) {                                                             // Si se desea obtener la información de un Chat privado.
-                        if (ch.Searched) {
-                            this.Oracle.Oracle.ExecuteSQL(
-                                "SELECT USUARIO, ESTADO, RUTA_FOTO " +
-                                "FROM USUARIOS " +
-                                "WHERE LOWER(USUARIO) LIKE '%" + ch.memberTwo.Name.ToLower() + "%'");
-                            while (this.Oracle.Oracle.DataReader.Read()) {
-                                Profile profile = new Profile {
-                                    Name = this.Oracle.Oracle.DataReader["USUARIO"].ToString(),
-                                    Status = this.Oracle.Oracle.DataReader["ESTADO"].ToString()
-                                };
-                                using (FileStream stream = File.Open(this.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString(), FileMode.Open)) {
-                                    profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
-                                    stream.Close();
-                                }
-                                user.WritingEnqueue(new Chat(ch.memberOne, profile, true));
+                        this.Oracle.Oracle.ExecuteSQL("SELECT USUARIO, ESTADO, RUTA_FOTO " +
+                            "FROM USUARIOS " +
+                            "WHERE USUARIO = '" + ch.memberTwo.Name + "'");
+                        if (this.Oracle.Oracle.DataReader.Read()) {
+                            Profile profile = new Profile {
+                                Name = this.Oracle.Oracle.DataReader["USUARIO"].ToString(),
+                                Status = this.Oracle.Oracle.DataReader["ESTADO"].ToString()
+                            };
+                            using (FileStream stream = File.Open(this.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString(), FileMode.Open)) {
+                                profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
+                                stream.Close();
                             }
-                        } else {
-                            this.Oracle.Oracle.ExecuteSQL("SELECT USUARIO, ESTADO, RUTA_FOTO " +
-                                "FROM USUARIOS " +
-                                "WHERE USUARIO = '" + ch.memberTwo.Name + "'");
-                            if (this.Oracle.Oracle.DataReader.Read()) {
-                                Profile profile = new Profile {
-                                    Name = this.Oracle.Oracle.DataReader["USUARIO"].ToString(),
-                                    Status = this.Oracle.Oracle.DataReader["ESTADO"].ToString()
-                                };
-                                using (FileStream stream = File.Open(this.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString(), FileMode.Open)) {
-                                    profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
-                                    stream.Close();
-                                }
-                                user.WritingEnqueue(new Chat(ch.memberOne, profile, false));
-                            }
+                            user.WritingEnqueue(new Chat(ch.memberOne, profile));
                         }
                     } else if (Readed is ChatMessage ms) {                                                      // Si se envía un mensaje en privado.
                         ms.date = new ShippingData.Message.Date(DateTime.Now);
@@ -269,6 +251,30 @@ namespace Chat_Virtual___Servidor {
                         }
                         this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET RUTA_ARBOL = '" + path + "' WHERE USUARIO = '" + user.Name + "'");
                         this.ConsoleAppend("Se ha guardado satisfactoriamente el árbol de tareas del usuario  [" + user.Name + " | " + IPAddress.Parse(((IPEndPoint)user.Client.Client.RemoteEndPoint).Address.ToString()) + "]. ");
+                    } else if(Readed is Search search) {
+                        if(search.ToSearch == ToSearch.User) {
+                            this.Oracle.Oracle.ExecuteSQL(
+                                "SELECT USUARIO, ESTADO, RUTA_FOTO " +
+                                "FROM USUARIOS " +
+                                "WHERE LOWER(USUARIO) LIKE '%" + search.StringToSearch.ToLower() + "%'");
+                            LinkedList<Profile> Results = new LinkedList<Profile>();
+                            while (this.Oracle.Oracle.DataReader.Read()) {
+                                Profile Profile = new Profile {
+                                    Name = this.Oracle.Oracle.DataReader["USUARIO"].ToString(),
+                                    Status = this.Oracle.Oracle.DataReader["ESTADO"].ToString()
+                                };
+                                using (FileStream stream = File.Open(this.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString(), FileMode.Open)) {
+                                    Profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
+                                    stream.Close();
+                                }
+                                Results.Add(Profile);
+                            }
+                            user.WritingEnqueue(new ChatsResult(Results.ToArray()));
+                        } else if (search.ToSearch == ToSearch.Group) {
+
+                        } else {
+
+                        }
                     }
                 }
             } while (this.Connected);
