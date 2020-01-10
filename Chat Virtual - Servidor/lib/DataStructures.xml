@@ -435,7 +435,12 @@
             </summary>
             <returns>Verdadero si la tabla está vacía y falso en otro casp</returns>
         </member>
-        <member name="M:DataStructures.HashTable`2.ElementsQuantity">
+        <member name="M:DataStructures.HashTable`2.MakeEmpty">
+            <summary>
+            Elimina todos los registros existentes dentro de la tabla
+            </summary>
+        </member>
+        <member name="M:DataStructures.HashTable`2.NumberOfElements">
             <summary>
             Consulta la cantidad de elementos que están almacenados en la tabla
             </summary>
