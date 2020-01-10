@@ -145,7 +145,7 @@ namespace Chat_Virtual___Servidor {
             do {
                 try {
                     if (this.Server.Pending()) {                                            // Si hay solicitudes de conexión entrantes.
-                        User U = new User(this.Server.AcceptTcpClient());
+                        User U = new User(this.Server.AcceptTcpClient());/*
                         object obj = null;
 
                         for (int i = 0; i < 25; i++) {                                      // Intenta 25 veces recibir el objeto inicial.
@@ -248,7 +248,7 @@ namespace Chat_Virtual___Servidor {
                         } else {                                                                  // Si el objeto inicial no es un tipo de dato reconocido.
                             this.ConsoleAppend("No se reconoce la información de ingreso por parte del remoto. [" + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] Se ha desconectado del servidor.");
                             U.Client.Close();
-                        }
+                        }*/
                     }
                 } catch (Exception ex) {
                     Console.WriteLine(ex);

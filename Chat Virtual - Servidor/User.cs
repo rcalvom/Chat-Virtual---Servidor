@@ -7,6 +7,7 @@ using System;
 using System.Drawing;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
+using System.Windows.Forms;
 
 namespace Chat_Virtual___Servidor {
     public class User {
@@ -93,12 +94,8 @@ namespace Chat_Virtual___Servidor {
         }
 
         public void Disconnect() {
-            while (Read())
-                continue;
             Client.Close();
             ServerConnection.Users.Remove(Name);
-            //while (!ReadingQueue.IsEmpty())
-              //  Thread.Sleep(100);
             IsActive = false;
         }
 
@@ -118,7 +115,86 @@ namespace Chat_Virtual___Servidor {
                     continue;
                 }
                 DataBaseConnection Oracle = ServerConnection.Oracle;
-                if (Readed is Chat ch) {                                                             // Si se desea obtener la información de un Chat privado.
+                if (Readed is SignIn si) {                                             // Si el objeto recibido es un inicio de sesión.
+                    bool exist = false;
+                    ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT * FROM INFOMRACION_INICIO");
+                    while (ServerConnection.Oracle.Oracle.DataReader.Read()) {
+                        if (ServerConnection.Oracle.Oracle.DataReader["USUARIO"].Equals(si.user) && ServerConnection.Oracle.Oracle.DataReader["CONTRASEÑA"].Equals(si.password)) {
+                            exist = true;
+                            break;
+                        }
+                    }
+                    if (exist) {                                                    // Si la información del cliente corresponde con la de la base de datos.
+                        Name = si.user;
+                        WritingEnqueue(new RequestAnswer(true));
+                        ServerConnection.Users.AddElement(this.Name, this);
+                        //this.ConsoleAppend("El usuario [" + U.Name + " | " + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] se ha conectado satisfactoriamente.");
+                        //this.InsertTable(U.Name, IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()).ToString());
+
+                        Profile profile = new Profile();
+                        ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = '" + this.Name + "'");
+                        ServerConnection.Oracle.Oracle.DataReader.Read();
+                        string path = ServerConnection.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString();
+                        ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT ESTADO FROM USUARIOS WHERE USUARIO = '" + this.Name + "'");
+                        ServerConnection.Oracle.Oracle.DataReader.Read();
+                        string status = ServerConnection.Oracle.Oracle.DataReader["ESTADO"].ToString();
+                        using (FileStream stream = File.Open(path, FileMode.Open)) {
+                            profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
+                        }
+                        profile.Status = status;
+                        profile.Name = Name;
+                        WritingEnqueue(profile);
+
+                        TreeActivities tree = new TreeActivities();
+                        ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT RUTA_ARBOL FROM USUARIOS WHERE USUARIO = '" + this.Name + "'");
+                        ServerConnection.Oracle.Oracle.DataReader.Read();
+                        string treePath = ServerConnection.Oracle.Oracle.DataReader["RUTA_ARBOL"].ToString();
+                        if (treePath != "") {
+                            IFormatter formatter = new BinaryFormatter();
+                            using (FileStream stream = File.Open(treePath, FileMode.Open, FileAccess.Read)) {
+                                tree.Node = (TreeNode[])formatter.Deserialize(stream);
+                                stream.Close();
+                            }
+                            WritingEnqueue(tree);
+                        }
+                    } else {                                                                                        // Si la infomación de inicio de sesión es incorrecta.
+                        WritingEnqueue(new RequestAnswer(false));
+                        WritingEnqueue(new RequestError(1));
+                        //this.ConsoleAppend("Se ha intentado conectar el remoto [" + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] con información de inicio de sesión incorrecta.");
+                        Disconnect();
+                    }
+                } else if (Readed is SignUp su) {                                                                      // Si el objeto recibido es un nuevo registro
+                    if (ServerConnection.Oracle.Oracle.ExecuteSQL("INSERT INTO USUARIOS VALUES('" + su.userName + "', '" + su.name + "', '" + su.password + "', 'Hey there! I am using SADIRI.','F:\\SADIRI\\Usuarios\\default.png', null, default)")) {
+                        this.Name = su.userName;
+                        WritingEnqueue(new RequestAnswer(true));
+                        //this.ConsoleAppend("Se ha registrado el usuario [" + U.Name + " | " + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] correctamente.");
+                        ServerConnection.Users.AddElement(Name, this);
+                        //this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
+                        //this.InsertTable(U.Name, IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()).ToString());
+
+                        Profile profile = new Profile();
+                        ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = '" + this.Name + "'");
+                        ServerConnection.Oracle.Oracle.DataReader.Read();
+                        string path = ServerConnection.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString();
+                        ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT ESTADO FROM USUARIOS WHERE USUARIO = '" + this.Name + "'");
+                        ServerConnection.Oracle.Oracle.DataReader.Read();
+                        string status = ServerConnection.Oracle.Oracle.DataReader["ESTADO"].ToString();
+                        using (FileStream stream = File.Open(path, FileMode.Open)) {
+                            profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
+                            stream.Close();
+                        }
+                        profile.Status = status;
+                        profile.Name = this.Name;
+                        WritingEnqueue(profile);
+
+                    } else {
+                        WritingEnqueue(new RequestAnswer(false));
+                        WritingEnqueue(new RequestError(0));
+                        Write();
+                        //this.ConsoleAppend("Se ha intentado registrar el remoto [" + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] con un nombre de usuario ya existente.");
+                        Disconnect();
+                    }
+                } else if (Readed is Chat ch) {                                                             // Si se desea obtener la información de un Chat privado.
                     Oracle.Oracle.ExecuteSQL("SELECT USUARIO, ESTADO, RUTA_FOTO " +
                         "FROM USUARIOS " +
                         "WHERE USUARIO = '" + ch.memberTwo.Name + "'");
