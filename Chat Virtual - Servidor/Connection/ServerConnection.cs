@@ -252,7 +252,7 @@ namespace Chat_Virtual___Servidor {
                         this.Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET RUTA_ARBOL = '" + path + "' WHERE USUARIO = '" + user.Name + "'");
                         this.ConsoleAppend("Se ha guardado satisfactoriamente el árbol de tareas del usuario  [" + user.Name + " | " + IPAddress.Parse(((IPEndPoint)user.Client.Client.RemoteEndPoint).Address.ToString()) + "]. ");
                     } else if(Readed is Search search) {
-                        if(search.ToSearch == ToSearch.User) {
+                        if(search.ToSearch == ToSearch.Chat) {
                             this.Oracle.Oracle.ExecuteSQL(
                                 "SELECT USUARIO, ESTADO, RUTA_FOTO " +
                                 "FROM USUARIOS " +

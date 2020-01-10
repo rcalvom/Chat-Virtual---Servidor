@@ -4,6 +4,72 @@
         <name>DataStructures</name>
     </assembly>
     <members>
+        <member name="T:DataStructures.ArrayMinHeap`1">
+            <summary>
+            Implementa  una cola de prioridad donde se atienden primero las prioridades más pequeñas
+            </summary>
+            <typeparam name="T">Tipo de dato que va a ser guardado en el montículo</typeparam>
+        </member>
+        <member name="F:DataStructures.ArrayMinHeap`1.Heap">
+            <summary>
+            Arreglo dinámico en el que se guardan los datos del montículo
+            </summary>
+        </member>
+        <member name="F:DataStructures.ArrayMinHeap`1.NumberElements">
+            <summary>
+            Cantidad de elementos que se están guardando en el montículo
+            </summary>
+        </member>
+        <member name="M:DataStructures.ArrayMinHeap`1.#ctor">
+            <summary>
+            Crea un montículo vacío
+            </summary>
+        </member>
+        <member name="M:DataStructures.ArrayMinHeap`1.IsEmpty">
+            <summary>
+            Consulta si el montículo se encuentra vacío
+            </summary>
+            <returns>Verdadero si el montículo está vacío y falso en otro caso</returns>
+        </member>
+        <member name="M:DataStructures.ArrayMinHeap`1.GetNumberOfElements">
+            <summary>
+            Consulta la cantidad de elementos almacenados en el montículo
+            </summary>
+            <returns>La cantidad de elementos que hay en el montículo</returns>
+        </member>
+        <member name="M:DataStructures.ArrayMinHeap`1.Peek">
+            <summary>
+            Consulta el elemento con la prioridad más baja sin sacarlo del montículo
+            </summary>
+            <returns>Retorna el elemento con la prioridad mas baja</returns>
+        </member>
+        <member name="M:DataStructures.ArrayMinHeap`1.ExtractMin">
+            <summary>
+            Obtiene el valor del elemento con la prioridad más baja y lo saca del montículo
+            </summary>
+            <returns>Retorna el elemento con la prioridad más baja</returns>
+        </member>
+        <member name="M:DataStructures.ArrayMinHeap`1.Insert(System.Int32,`0)">
+            <summary>
+            Inserta un nuevo elemento en el montículo y lo organiza según su prioridad
+            </summary>
+            <param name="Priority">Prioridad del elemento</param>
+            <param name="element">Elemento que se va insertar</param>
+        </member>
+        <member name="M:DataStructures.ArrayMinHeap`1.ToString">
+            <summary>
+            Obtiene el string equivalente al montículo, mostrando los elementos que almacena y la prioridad de cada uno
+            </summary>
+            <returns>El string equivalente al montículo</returns>
+        </member>
+        <member name="M:DataStructures.ArrayMinHeap`1.GetMinPriority(System.Int32,System.Int32)">
+            <summary>
+            Compara entre dos elementos y devuelve la posición del que tenga menor prioridad
+            </summary>
+            <param name="indexOne">Posicion del primer elemento</param>
+            <param name="indexTwo">Posicion del segundo elemento</param>
+            <returns>Retorna la posicion del elemento con menor prioridad</returns>
+        </member>
         <member name="T:DataStructures.Iterable`1">
             <summary>
             Propiedad de una estructura de datos de poder iterar sobre todos sus elementos
@@ -39,65 +105,65 @@
             Elimina el elemento actual
             </summary>
         </member>
-        <member name="T:DataStructures.ArrayHeap`1">
+        <member name="T:DataStructures.ArrayMaxHeap`1">
             <summary>
-            Implementa un montículo, que representa una cola de prioridad
+            Implementa una cola de prioridad donde se atienden primero las prioridades más grandes
             </summary>
             <typeparam name="T">Tipo de dato que va a ser guardado en el montículo</typeparam>
         </member>
-        <member name="F:DataStructures.ArrayHeap`1.Heap">
+        <member name="F:DataStructures.ArrayMaxHeap`1.Heap">
             <summary>
             Arreglo dinámico en el que se guardan los datos del montículo
             </summary>
         </member>
-        <member name="F:DataStructures.ArrayHeap`1.NumberElements">
+        <member name="F:DataStructures.ArrayMaxHeap`1.NumberElements">
             <summary>
             Cantidad de elementos que se están guardando en el montículo
             </summary>
         </member>
-        <member name="M:DataStructures.ArrayHeap`1.#ctor">
+        <member name="M:DataStructures.ArrayMaxHeap`1.#ctor">
             <summary>
             Crea un montículo vacío
             </summary>
         </member>
-        <member name="M:DataStructures.ArrayHeap`1.IsEmpty">
+        <member name="M:DataStructures.ArrayMaxHeap`1.IsEmpty">
             <summary>
             Consulta si el montículo se encuentra vacío
             </summary>
             <returns>Verdadero si el montículo está vacío y falso en otro caso</returns>
         </member>
-        <member name="M:DataStructures.ArrayHeap`1.GetNumberOfElements">
+        <member name="M:DataStructures.ArrayMaxHeap`1.GetNumberOfElements">
             <summary>
             Consulta la cantidad de elementos almacenados en el montículo
             </summary>
             <returns>La cantidad de elementos que hay en el montículo</returns>
         </member>
-        <member name="M:DataStructures.ArrayHeap`1.Peek">
+        <member name="M:DataStructures.ArrayMaxHeap`1.Peek">
             <summary>
             Consulta el elemento con la prioridad más alta sin sacarlo del montículo
             </summary>
             <returns>Retorna el elemento con la prioridad mas alta</returns>
         </member>
-        <member name="M:DataStructures.ArrayHeap`1.ExtractMax">
+        <member name="M:DataStructures.ArrayMaxHeap`1.ExtractMax">
             <summary>
             Obtiene el valor del elemento con la prioridad más alta y lo saca del montículo
             </summary>
             <returns>Retorna el elemento con la prioridad mas alta</returns>
         </member>
-        <member name="M:DataStructures.ArrayHeap`1.Insert(System.Int32,`0)">
+        <member name="M:DataStructures.ArrayMaxHeap`1.Insert(System.Int32,`0)">
             <summary>
             Inserta un nuevo elemento en el montículo y lo organiza según su prioridad
             </summary>
             <param name="Priority">Prioridad del elemento</param>
             <param name="element">Elemento que se va insertar</param>
         </member>
-        <member name="M:DataStructures.ArrayHeap`1.ToString">
+        <member name="M:DataStructures.ArrayMaxHeap`1.ToString">
             <summary>
             Obtiene el string equivalente al montículo, mostrando los elementos que almacena y la prioridad de cada uno
             </summary>
             <returns>El string equivalente al montículo</returns>
         </member>
-        <member name="M:DataStructures.ArrayHeap`1.GetMaxPriority(System.Int32,System.Int32)">
+        <member name="M:DataStructures.ArrayMaxHeap`1.GetMaxPriority(System.Int32,System.Int32)">
             <summary>
             Compara entre dos elementos y devuelve la posición del que tenga mas prioridad
             </summary>
