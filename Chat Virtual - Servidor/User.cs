@@ -8,21 +8,24 @@ using System.Drawing;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
 using System.Windows.Forms;
+using System.Net;
 
 namespace Chat_Virtual___Servidor {
     public class User {
         public bool IsActive { get; set; }
         public string Name { get; set; }
-        public TcpClient Client { get; set; }
         public NetworkStream Stream { get; set; }
         public BinaryReader Reader { get; set; }
         public BinaryWriter Writer { get; set; }
+
+        private TcpClient Client;
         private readonly LinkedQueue<Data> WritingQueue;
         private readonly LinkedQueue<Data> ReadingQueue;
         private readonly Semaphore CanWrite;
         private readonly Semaphore CanRead;
 
-        private static Semaphore Regulator;
+        public static Semaphore Regulator;
+        public static ServerConnection Server;
 
         public User() {
             this.Client = new TcpClient();
@@ -30,8 +33,6 @@ namespace Chat_Virtual___Servidor {
             this.WritingQueue = new LinkedQueue<Data>();
             this.CanWrite = new Semaphore(1, 1);
             this.CanRead = new Semaphore(1, 1);
-            if (Regulator == null)
-                Regulator = new Semaphore(6, 6);
         }
         public User(string Name) {
             this.Name = Name;
@@ -40,50 +41,35 @@ namespace Chat_Virtual___Servidor {
             this.WritingQueue = new LinkedQueue<Data>();
             this.CanWrite = new Semaphore(1, 1);
             this.CanRead = new Semaphore(1, 1);
-            if (Regulator == null)
-                Regulator = new Semaphore(6, 6);
         }
 
         public User(TcpClient Client) {
-            RefreshStreams(Client);
+            this.UpdateConnection(Client);
             this.ReadingQueue = new LinkedQueue<Data>();
             this.WritingQueue = new LinkedQueue<Data>();
             this.CanWrite = new Semaphore(1, 1);
             this.CanRead = new Semaphore(1, 1);
-            if (Regulator == null)
-                Regulator = new Semaphore(6, 6);
         }
 
-        public void WritingEnqueue(Data data) {
-            this.CanWrite.WaitOne();
-            this.WritingQueue.Enqueue(data);
-            this.CanWrite.Release();
-        }
-
-        public void RefreshStreams(TcpClient Client) {
-            IsActive = false;
+        public void UpdateConnection(TcpClient Client) {
+            this.IsActive = false;
             this.Client = Client;
             this.Stream = Client.GetStream();
             this.Writer = new BinaryWriter(this.Stream);
             this.Reader = new BinaryReader(this.Stream);
-            IsActive = true;
-            Thread t = new Thread(ExecuteRequest);
+            this.IsActive = true;
+            Thread t = new Thread(this.ExecuteRequest) {
+                IsBackground = true
+            };
             t.Start();
         }
 
         public void ReadingEnqueue(Data data) {
-            IsActive = false;
+            this.IsActive = false;
             this.CanRead.WaitOne();
             this.ReadingQueue.Enqueue(data);
             this.CanRead.Release();
-            IsActive = true;
-        }
-
-        public Data WritingDequeue() {
-            this.CanWrite.WaitOne();
-            Data data = this.WritingQueue.Dequeue();
-            this.CanWrite.Release();
-            return data;
+            this.IsActive = true;
         }
 
         public Data ReadingDequeue() {
@@ -93,25 +79,37 @@ namespace Chat_Virtual___Servidor {
             return data;
         }
 
+        public void WritingEnqueue(Data data) {
+            this.CanWrite.WaitOne();
+            this.WritingQueue.Enqueue(data);
+            this.CanWrite.Release();
+        }
+
+        public Data WritingDequeue() {
+            this.CanWrite.WaitOne();
+            Data data = this.WritingQueue.Dequeue();
+            this.CanWrite.Release();
+            return data;
+        }
+
         public void Disconnect() {
-            Client.Close();
-            ServerConnection.Users.Remove(Name);
-            IsActive = false;
+            this.Client.Close();
+            ServerConnection.Users.Remove(this.Name);
+            this.IsActive = false;
         }
 
         /// <summary>
         /// Método de Hilo. Redirige los mensaje y responde a las peticiones de los usuarios
         /// </summary>
         private void ExecuteRequest() {
-            while (IsActive) {
+            while (this.IsActive) {
                 Regulator.WaitOne();
-                Write();
-                Read();
-
-                Data Readed = ReadingDequeue();
+                this.Write();
+                this.Read();
+                Data Readed = this.ReadingDequeue();
                 if (Readed == null) {
-                    Thread.Sleep(100);
                     Regulator.Release();
+                    Thread.Sleep(100);
                     continue;
                 }
                 DataBaseConnection Oracle = ServerConnection.Oracle;
@@ -125,11 +123,11 @@ namespace Chat_Virtual___Servidor {
                         }
                     }
                     if (exist) {                                                    // Si la información del cliente corresponde con la de la base de datos.
-                        Name = si.user;
-                        WritingEnqueue(new RequestAnswer(true));
+                        this.Name = si.user;
+                        this.WritingEnqueue(new RequestAnswer(true));
                         ServerConnection.Users.AddElement(this.Name, this);
-                        //this.ConsoleAppend("El usuario [" + U.Name + " | " + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] se ha conectado satisfactoriamente.");
-                        //this.InsertTable(U.Name, IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()).ToString());
+                        Server.ConsoleAppend("El usuario [" + this.Name + " | " + IPAddress.Parse(((IPEndPoint)this.Client.Client.RemoteEndPoint).Address.ToString()) + "] se ha conectado satisfactoriamente.");
+                        Server.InsertTable(this.Name, IPAddress.Parse(((IPEndPoint)this.Client.Client.RemoteEndPoint).Address.ToString()).ToString());
 
                         Profile profile = new Profile();
                         ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = '" + this.Name + "'");
@@ -142,8 +140,8 @@ namespace Chat_Virtual___Servidor {
                             profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
                         }
                         profile.Status = status;
-                        profile.Name = Name;
-                        WritingEnqueue(profile);
+                        profile.Name = this.Name;
+                        this.WritingEnqueue(profile);
 
                         TreeActivities tree = new TreeActivities();
                         ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT RUTA_ARBOL FROM USUARIOS WHERE USUARIO = '" + this.Name + "'");
@@ -155,22 +153,22 @@ namespace Chat_Virtual___Servidor {
                                 tree.Node = (TreeNode[])formatter.Deserialize(stream);
                                 stream.Close();
                             }
-                            WritingEnqueue(tree);
+                            this.WritingEnqueue(tree);
                         }
                     } else {                                                                                        // Si la infomación de inicio de sesión es incorrecta.
-                        WritingEnqueue(new RequestAnswer(false));
-                        WritingEnqueue(new RequestError(1));
-                        //this.ConsoleAppend("Se ha intentado conectar el remoto [" + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] con información de inicio de sesión incorrecta.");
-                        Disconnect();
+                        this.WritingEnqueue(new RequestAnswer(false));
+                        this.WritingEnqueue(new RequestError(1));
+                        Server.ConsoleAppend("Se ha intentado conectar el remoto [" + IPAddress.Parse(((IPEndPoint)this.Client.Client.RemoteEndPoint).Address.ToString()) + "] con información de inicio de sesión incorrecta.");
+                        this.Disconnect();
                     }
                 } else if (Readed is SignUp su) {                                                                      // Si el objeto recibido es un nuevo registro
                     if (ServerConnection.Oracle.Oracle.ExecuteSQL("INSERT INTO USUARIOS VALUES('" + su.userName + "', '" + su.name + "', '" + su.password + "', 'Hey there! I am using SADIRI.','F:\\SADIRI\\Usuarios\\default.png', null, default)")) {
                         this.Name = su.userName;
-                        WritingEnqueue(new RequestAnswer(true));
-                        //this.ConsoleAppend("Se ha registrado el usuario [" + U.Name + " | " + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] correctamente.");
-                        ServerConnection.Users.AddElement(Name, this);
-                        //this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
-                        //this.InsertTable(U.Name, IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()).ToString());
+                        this.WritingEnqueue(new RequestAnswer(true));
+                        Server.ConsoleAppend("Se ha registrado el usuario [" + this.Name + " | " + IPAddress.Parse(((IPEndPoint)this.Client.Client.RemoteEndPoint).Address.ToString()) + "] correctamente.");
+                        ServerConnection.Users.AddElement(this.Name, this);
+                        Server.ConsoleAppend("El usuario [" + this.Name + " | " + this.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
+                        Server.InsertTable(this.Name, IPAddress.Parse(((IPEndPoint)this.Client.Client.RemoteEndPoint).Address.ToString()).ToString());
 
                         Profile profile = new Profile();
                         ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = '" + this.Name + "'");
@@ -185,14 +183,14 @@ namespace Chat_Virtual___Servidor {
                         }
                         profile.Status = status;
                         profile.Name = this.Name;
-                        WritingEnqueue(profile);
+                        this.WritingEnqueue(profile);
 
                     } else {
-                        WritingEnqueue(new RequestAnswer(false));
-                        WritingEnqueue(new RequestError(0));
-                        Write();
-                        //this.ConsoleAppend("Se ha intentado registrar el remoto [" + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] con un nombre de usuario ya existente.");
-                        Disconnect();
+                        this.WritingEnqueue(new RequestAnswer(false));
+                        this.WritingEnqueue(new RequestError(0));
+                        this.Write();
+                        Server.ConsoleAppend("Se ha intentado registrar el remoto [" + IPAddress.Parse(((IPEndPoint)this.Client.Client.RemoteEndPoint).Address.ToString()) + "] con un nombre de usuario ya existente.");
+                        this.Disconnect();
                     }
                 } else if (Readed is Chat ch) {                                                             // Si se desea obtener la información de un Chat privado.
                     Oracle.Oracle.ExecuteSQL("SELECT USUARIO, ESTADO, RUTA_FOTO " +
@@ -207,18 +205,15 @@ namespace Chat_Virtual___Servidor {
                             profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
                             stream.Close();
                         }
-                        WritingEnqueue(new Chat(ch.memberOne, profile));
+                        this.WritingEnqueue(new Chat(ch.memberOne, profile));
                     }
                 } else if (Readed is ChatMessage ms) {                                                      // Si se envía un mensaje en privado.
                     ms.date = new ShippingData.Message.Date(DateTime.Now);
                     if (ms.Image == null) {
-                        var a = Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_CHAT VALUES (DEFAULT, '" + ms.Sender + "', '" + ms.Receiver
+                        Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_CHAT VALUES (DEFAULT, '" + ms.Sender + "', '" + ms.Receiver
                         + "', DEFAULT, '" + ms.Content + "', NULL)");
-                        if (!a) {
-                            ;
-                        }
                     } else {
-                        var a = Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_CHAT VALUES (DEFAULT, '" + ms.Sender + "', '" + ms.Receiver
+                        Oracle.Oracle.ExecuteSQL("INSERT INTO MENSAJES_CHAT VALUES (DEFAULT, '" + ms.Sender + "', '" + ms.Receiver
                         + "', DEFAULT, '" + ms.Content + "', 'F:\\SADIRI\\MensajesChat\\')");
                         Image picture = Serializer.DeserializeImage(ms.Image);
 
@@ -232,14 +227,14 @@ namespace Chat_Virtual___Servidor {
                         }
                     }
                     User theOther;
-                    if (Name.Equals(ms.Sender)) {
+                    if (this.Name.Equals(ms.Sender)) {
                         theOther = ServerConnection.Users.Search(ms.Receiver);
                     } else {
                         theOther = ServerConnection.Users.Search(ms.Sender);
                     }
-                    WritingEnqueue(ms);
+                    this.WritingEnqueue(ms);
                     theOther?.WritingEnqueue(ms);
-                    //this.ConsoleAppend("Mensaje  [" + ms.Sender + "] a [" + ms.Receiver + "]: " + ms.Content);
+                    Server.ConsoleAppend("Mensaje  [" + ms.Sender + "] a [" + ms.Receiver + "]: " + ms.Content);
                 } else if (Readed is ChatGroup group) {                                                     // Si se desea obtener la información de un grupo.
 
                 } else if (Readed is GroupMessage groupMessage) {                                           // Si se envía un mensaje en un grupo.
@@ -247,7 +242,7 @@ namespace Chat_Virtual___Servidor {
                 } else if (Readed is Profile profile) {                                                     // Si es un cambio de perfil.
                     if (profile.Status != null) {
                         Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET ESTADO = '" + profile.Status + "' WHERE USUARIO = '" + profile.Name + "'");
-                        WritingEnqueue(new RequestAnswer(true));
+                        this.WritingEnqueue(new RequestAnswer(true));
                     }
                     if (profile.Image != null) {
                         Image foto = Serializer.DeserializeImage(profile.Image);
@@ -257,31 +252,31 @@ namespace Chat_Virtual___Servidor {
                             stream.Close();
                         }
                         Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET RUTA_FOTO = 'F:\\SADIRI\\Usuarios\\" + profile.Name + ".png' WHERE USUARIO = '" + profile.Name + "'");
-                        WritingEnqueue(new RequestAnswer(true)); //TODO: Código respuesta.
+                        this.WritingEnqueue(new RequestAnswer(true)); //TODO: Código respuesta.
                     }
-                    //this.ConsoleAppend("Se ha cambiado satisfactoriamente el perfil del usuario  [" + User.Name + " | " + IPAddress.Parse(((IPEndPoint)User.Client.Client.RemoteEndPoint).Address.ToString()) + "]. ");
+                    Server.ConsoleAppend("Se ha cambiado satisfactoriamente el perfil del usuario  [" + this.Name + " | " + IPAddress.Parse(((IPEndPoint)this.Client.Client.RemoteEndPoint).Address.ToString()) + "]. ");
                 } else if (Readed is ChangePassword changePassword) {                                       // Si es una solicitud de cambio de contraseña.
                     Oracle.Oracle.ExecuteSQL("SELECT CONTRASEÑA FROM USUARIOS WHERE USUARIO = '" + changePassword.UserName + "'");
                     Oracle.Oracle.DataReader.Read();
                     string currentPassword = Oracle.Oracle.DataReader["CONTRASEÑA"].ToString();
                     if (!changePassword.CurrentPassword.Equals(currentPassword)) {
-                        WritingEnqueue(new RequestAnswer(false, 3));
-                        WritingEnqueue(new RequestError(3));
-                        //this.ConsoleAppend("El cambio contraseña del usuario  [" + User.Name + " | " + IPAddress.Parse(((IPEndPoint)User.Client.Client.RemoteEndPoint).Address.ToString()) + "]. no pudo ser realizado.");
+                        this.WritingEnqueue(new RequestAnswer(false, 3));
+                        this.WritingEnqueue(new RequestError(3));
+                        Server.ConsoleAppend("El cambio contraseña del usuario  [" + this.Name + " | " + IPAddress.Parse(((IPEndPoint)this.Client.Client.RemoteEndPoint).Address.ToString()) + "]. no pudo ser realizado.");
                     } else {
                         Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET CONTRASEÑA = '" + changePassword.NewPassword + "' WHERE USUARIO = '" + changePassword.UserName + "'");
-                        //this.ConsoleAppend("Se ha cambiado satisfactoriamente la contraseña del usuario  [" + User.Name + " | " + User.Client.Client.RemoteEndPoint.ToString() + "]. ");
-                        WritingEnqueue(new RequestAnswer(true, 3));
+                        Server.ConsoleAppend("Se ha cambiado satisfactoriamente la contraseña del usuario  [" + this.Name + " | " + this.Client.Client.RemoteEndPoint.ToString() + "]. ");
+                        this.WritingEnqueue(new RequestAnswer(true, 3));
                     }
                 } else if (Readed is TreeActivities tree) {                                                 // Si es una actualización del arbol de tareas.
-                    string path = "F:\\SADIRI\\ArbolesTareas\\" + Name + ".dat";
+                    string path = "F:\\SADIRI\\ArbolesTareas\\" + this.Name + ".dat";
                     IFormatter formatter = new BinaryFormatter();
                     using (FileStream stream = File.Open(path, FileMode.Create, FileAccess.Write)) {
                         formatter.Serialize(stream, tree.Node);
                         stream.Close();
                     }
-                    Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET RUTA_ARBOL = '" + path + "' WHERE USUARIO = '" + Name + "'");
-                    //this.ConsoleAppend("Se ha guardado satisfactoriamente el árbol de tareas del usuario  [" + User.Name + " | " + IPAddress.Parse(((IPEndPoint)User.Client.Client.RemoteEndPoint).Address.ToString()) + "]. ");
+                    Oracle.Oracle.ExecuteSQL("UPDATE USUARIOS SET RUTA_ARBOL = '" + path + "' WHERE USUARIO = '" + this.Name + "'");
+                    Server.ConsoleAppend("Se ha guardado satisfactoriamente el árbol de tareas del usuario  [" + this.Name + " | " + IPAddress.Parse(((IPEndPoint)this.Client.Client.RemoteEndPoint).Address.ToString()) + "]. ");
                 } else if (Readed is Search search) {
                     if (search.ToSearch == ToSearch.Chat) {
                         Oracle.Oracle.ExecuteSQL(
@@ -300,7 +295,7 @@ namespace Chat_Virtual___Servidor {
                             }
                             Results.Add(Profile);
                         }
-                        WritingEnqueue(new ChatsResult(Results.ToArray()));
+                        this.WritingEnqueue(new ChatsResult(Results.ToArray()));
                     } else if (search.ToSearch == ToSearch.Group) {
 
                     } else {
@@ -319,19 +314,19 @@ namespace Chat_Virtual___Servidor {
         /// <param name="user">El ususario del que se van a intentar escribir los datos.</param>
         /// <returns>Verdadero si los datos fueron enviados, falso si almenos uno falló.</returns>
         public bool Write() {
-            Data data = WritingDequeue();
+            Data data = this.WritingDequeue();
             if (data == default) {
                 return false;
             } else {
                 try {
                     byte[] toSend = Serializer.Serialize(data);                                      // Serializa el primer objeto de la cola.
-                    Writer.Write(toSend.Length);                                                // Envía el tamaño del objeto.
-                    Writer.Write(toSend);                                                       // Envía el objeto.     
+                    this.Writer.Write(toSend.Length);                                                // Envía el tamaño del objeto.
+                    this.Writer.Write(toSend);                                                       // Envía el objeto.     
                     return true;
-                } catch (Exception ex) {
+                } catch (Exception) {
                     //this.ConsoleAppend("Se ha perdido la conexión con el usuario [" + user.Name + "] Intentando reconectar.");
                     //this.ConsoleAppend(ex.Message);
-                    WritingEnqueue(data);
+                    this.WritingEnqueue(data);
                     return false;
                 }
             }
@@ -344,12 +339,12 @@ namespace Chat_Virtual___Servidor {
         /// <returns>Verdadero si le leyeron todos los datos, falso si uno de ellos no pudo ser leido</returns>
         public bool Read() {
             try {
-                if (Stream.DataAvailable) {                                            // Verifica si hay datos por leer.
-                    int size = Reader.ReadInt32();                                     // Lee el tamaño del objeto.
+                if (this.Stream.DataAvailable) {                                            // Verifica si hay datos por leer.
+                    int size = this.Reader.ReadInt32();                                     // Lee el tamaño del objeto.
                     byte[] data = new byte[size];                                           // Crea el arreglo de bytes para el objeto.
-                    data = Reader.ReadBytes(size);                                     // Lee el el objeto y lo guarda en el arreglo de bytes.
+                    data = this.Reader.ReadBytes(size);                                     // Lee el el objeto y lo guarda en el arreglo de bytes.
                     object a = Serializer.Deserialize(data);                                // Deserializa el objeto.
-                    ReadingEnqueue((Data)a);                                           // Guarda el objeto en la cola de lectura.
+                    this.ReadingEnqueue((Data)a);                                           // Guarda el objeto en la cola de lectura.
                 }
                 return true;
             } catch (Exception) {

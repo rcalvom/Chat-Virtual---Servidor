@@ -43,9 +43,9 @@ namespace Chat_Virtual___Servidor {
             ServerConfigInterface.InitSettings();
             this.Connected = false;
             this.GraphicInterface = GraphicInterface;
-            ServerConnection.Oracle = new DataBaseConnection(this.GraphicInterface);
+            Oracle = new DataBaseConnection(this.GraphicInterface);
             this.Ip = new IPEndPoint(IPAddress.Any, ServerConfigInterface.Settings.port);
-            ServerConnection.Users = new HashTable<string, User>(1000);
+            Users = new HashTable<string, User>(1000);
         }
 
         /// <summary>
@@ -142,125 +142,24 @@ namespace Chat_Virtual___Servidor {
         /// Esta a la escucha de nuevos clientes y verifica su información de inicio de sesión.
         /// </summary>
         private void ListenConnection() {
-            do {
+            User.Server = this;
+            User.Regulator = new Semaphore(6, 6);
+            while (this.Connected) {
                 try {
                     if (this.Server.Pending()) {                                            // Si hay solicitudes de conexión entrantes.
-                        User U = new User(this.Server.AcceptTcpClient());/*
-                        object obj = null;
-
-                        for (int i = 0; i < 25; i++) {                                      // Intenta 25 veces recibir el objeto inicial.
-                            try {
-                                U.Read();
-                                obj = U.ReadingDequeue();
-                            } catch (Exception) { }
-                            if (obj == null) {
-                                Thread.Sleep(125);
-                            } else {
-                                break;
-                            }
-                        }
-
-                        if (obj is SignIn si) {                                             // Si el objeto recibido es un inicio de sesión.
-                            bool exist = false;
-                            ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT * FROM INFOMRACION_INICIO");
-                            while (ServerConnection.Oracle.Oracle.DataReader.Read()) {
-                                if (ServerConnection.Oracle.Oracle.DataReader["USUARIO"].Equals(si.user) && ServerConnection.Oracle.Oracle.DataReader["CONTRASEÑA"].Equals(si.password)) {
-                                    exist = true;
-                                    break;
-                                }
-                            }
-                            if (exist) {                                                    // Si la información del cliente corresponde con la de la base de datos.
-                                U.Name = si.user;
-                                U.WritingEnqueue(new RequestAnswer(true));
-                                U.Write();
-                                ServerConnection.Users.AddElement(U.Name, U);
-                                this.ConsoleAppend("El usuario [" + U.Name + " | " + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] se ha conectado satisfactoriamente.");
-                                this.InsertTable(U.Name, IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()).ToString());
-
-                                Profile profile = new Profile();
-                                ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = '" + U.Name + "'");
-                                ServerConnection.Oracle.Oracle.DataReader.Read();
-                                string path = ServerConnection.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString();
-                                ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT ESTADO FROM USUARIOS WHERE USUARIO = '" + U.Name + "'");
-                                ServerConnection.Oracle.Oracle.DataReader.Read();
-                                string status = ServerConnection.Oracle.Oracle.DataReader["ESTADO"].ToString();
-                                using (FileStream stream = File.Open(path, FileMode.Open)) {
-                                    profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
-                                }
-                                profile.Status = status;
-                                profile.Name = U.Name;
-                                U.WritingEnqueue(profile);
-
-                                TreeActivities tree = new TreeActivities();
-                                ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT RUTA_ARBOL FROM USUARIOS WHERE USUARIO = '" + U.Name + "'");
-                                ServerConnection.Oracle.Oracle.DataReader.Read();
-                                string treePath = ServerConnection.Oracle.Oracle.DataReader["RUTA_ARBOL"].ToString();
-                                if (treePath != "") {
-                                    IFormatter formatter = new BinaryFormatter();
-                                    using (FileStream stream = File.Open(treePath, FileMode.Open, FileAccess.Read)) {
-                                        tree.Node = (TreeNode[])formatter.Deserialize(stream);
-                                        stream.Close();
-                                    }
-                                    U.WritingEnqueue(tree);
-                                }
-                            } else {                                                                                        // Si la infomación de inicio de sesión es incorrecta.
-                                U.WritingEnqueue(new RequestAnswer(false));
-                                U.WritingEnqueue(new RequestError(1));
-                                U.Write();
-                                this.ConsoleAppend("Se ha intentado conectar el remoto [" + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] con información de inicio de sesión incorrecta.");
-                                U.Client.Close();
-                            }
-                        } else if (obj is SignUp su) {                                                                      // Si el objeto recibido es un nuevo registro
-                            if (ServerConnection.Oracle.Oracle.ExecuteSQL("INSERT INTO USUARIOS VALUES('" + su.userName + "', '" + su.name + "', '" + su.password + "', 'Hey there! I am using SADIRI.','F:\\SADIRI\\Usuarios\\default.png', null, default)")) {
-                                U.Name = su.userName;
-                                U.WritingEnqueue(new RequestAnswer(true));
-                                U.Write();
-                                this.ConsoleAppend("Se ha registrado el usuario [" + U.Name + " | " + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] correctamente.");
-                                ServerConnection.Users.AddElement(U.Name, U);
-                                this.ConsoleAppend("El usuario [" + U.Name + " | " + U.Client.Client.RemoteEndPoint.ToString() + "] se ha conectado satisfactoriamente.");
-                                this.InsertTable(U.Name, IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()).ToString());
-
-                                Profile profile = new Profile();
-                                ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = '" + U.Name + "'");
-                                ServerConnection.Oracle.Oracle.DataReader.Read();
-                                string path = ServerConnection.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString();
-                                ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT ESTADO FROM USUARIOS WHERE USUARIO = '" + U.Name + "'");
-                                ServerConnection.Oracle.Oracle.DataReader.Read();
-                                string status = ServerConnection.Oracle.Oracle.DataReader["ESTADO"].ToString();
-                                using (FileStream stream = File.Open(path, FileMode.Open)) {
-                                    profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
-                                    stream.Close();
-                                }
-                                profile.Status = status;
-                                profile.Name = U.Name;
-                                U.WritingEnqueue(profile);
-
-                            } else {
-                                U.WritingEnqueue(new RequestAnswer(false));
-                                U.WritingEnqueue(new RequestError(0));
-                                U.Write();
-                                this.ConsoleAppend("Se ha intentado registrar el remoto [" + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] con un nombre de usuario ya existente.");
-                                U.Client.Close();
-                            }
-                        } else if (obj is null) {                                                 // Si no llego objeto inicial.
-                            this.ConsoleAppend("No se recibió informmación de ingreso por parte del remoto. [" + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] Se ha desconectado del servidor.");
-                            U.Client.Close();
-                        } else {                                                                  // Si el objeto inicial no es un tipo de dato reconocido.
-                            this.ConsoleAppend("No se reconoce la información de ingreso por parte del remoto. [" + IPAddress.Parse(((IPEndPoint)U.Client.Client.RemoteEndPoint).Address.ToString()) + "] Se ha desconectado del servidor.");
-                            U.Client.Close();
-                        }*/
+                        User U = new User(this.Server.AcceptTcpClient());
                     }
                 } catch (Exception ex) {
                     Console.WriteLine(ex);
                 }
-            } while (this.Connected);
+            }
         }
 
         /// <summary>
         /// Metodo para hilo. Agrega el texto a la interfaz gráfica.
         /// </summary>
         /// <param name="text">Texto a agregar a la consola.</param>
-        private void ConsoleAppend(string text) {
+        public void ConsoleAppend(string text) {
             if (this.GraphicInterface.LogConsole.InvokeRequired) {
                 DLogConsoleAppend d = new DLogConsoleAppend(this.ConsoleAppend);
                 this.GraphicInterface.LogConsole.Invoke(d, new object[] { text });
@@ -273,7 +172,7 @@ namespace Chat_Virtual___Servidor {
         /// Metodo para hilo. Cambia el texto del botón de la interfaz.
         /// </summary>
         /// <param name="text">Texto por el cual se va a cambiar el texto.</param>
-        private void ButtonText(string text) {
+        public void ButtonText(string text) {
             if (this.GraphicInterface.Button.InvokeRequired) {
                 DButtonText d = new DButtonText(this.ButtonText);
                 this.GraphicInterface.Button.Invoke(d, new object[] { text });
@@ -286,7 +185,7 @@ namespace Chat_Virtual___Servidor {
         /// Metodo para hilo. definie si el botón esta habilitado.
         /// </summary>
         /// <param name="flag">Bandera con la cual se habilitará o deshabilitará el botón.</param>
-        private void ButtonEnable(bool flag) {
+        public void ButtonEnable(bool flag) {
             if (this.GraphicInterface.Button.InvokeRequired) {
                 DButtonEnable d = new DButtonEnable(this.ButtonEnable);
                 this.GraphicInterface.Button.Invoke(d, new object[] { flag });
@@ -296,15 +195,21 @@ namespace Chat_Virtual___Servidor {
         }
 
         /// <summary>
-        /// Metodo para hilo. Agrega el un usuario conectado a la tabla de la interfaz.
+        /// Metodo para hilo. Agrega un usuario conectado a la tabla de la interfaz.
         /// </summary>
         /// <param name="name">Nombre del usuario que se va a conectar.</param>
         /// <param name="ip">Ip del usuario que se va a conectar.</param>
-        private void InsertTable(string name, string ip) {
+        public void InsertTable(string name, string ip) {
             if (this.GraphicInterface.UsersTable.InvokeRequired) {
                 DDataGridViewPush d = new DDataGridViewPush(this.InsertTable);
                 this.GraphicInterface.UsersTable.Invoke(d, new object[] { name, ip });
             } else {
+                int size = this.GraphicInterface.UsersTable.Rows.Count;
+                for (int i = 0; i < size; i++) {
+                    if (this.GraphicInterface.UsersTable.Rows?[i].Cells?[0].Value?.Equals(name)?? false) {
+                        return;
+                    }
+                }
                 this.GraphicInterface.UsersTable.Rows.Add(name, ip);
             }
         }
@@ -313,7 +218,7 @@ namespace Chat_Virtual___Servidor {
         /// Metodo para hilo. Agrega el un usuario conectado a la tabla de la interfaz.
         /// </summary>
         /// <param name="name">Nombre del usuario que se va a conectar.</param>
-        private void DeleteTable(string name) {
+        public void DeleteTable(string name) {
             if (this.GraphicInterface.UsersTable.InvokeRequired) {
                 DDataGridViewPop d = new DDataGridViewPop(this.DeleteTable);
                 this.GraphicInterface.UsersTable.Invoke(d, new object[] { name });
@@ -332,7 +237,7 @@ namespace Chat_Virtual___Servidor {
         /// Metodo para hilo. Agrega el un usuario conectado a la tabla de la interfaz.
         /// </summary>
         /// <param name="name">Nombre del usuario que se va a conectar.</param>
-        private void AlterIpTable(string name, string ip) {
+        public void AlterIpTable(string name, string ip) {
             if (this.GraphicInterface.UsersTable.InvokeRequired) {
                 DAlterTable d = new DAlterTable(this.AlterIpTable);
                 this.GraphicInterface.UsersTable.Invoke(d, new object[] { name, ip });
@@ -351,7 +256,7 @@ namespace Chat_Virtual___Servidor {
         /// Metodo para hilo. Habilita o deshabilita el menú.
         /// </summary>
         /// <param name="flag">Verdadero si se quiere habilitar.</param>
-        private void MenuEnable(bool flag) {
+        public void MenuEnable(bool flag) {
             if (this.GraphicInterface.MenuBar.InvokeRequired) {
                 DMenuEnable d = new DMenuEnable(this.MenuEnable);
                 this.GraphicInterface.MenuBar.Invoke(d, new object[] { flag });
@@ -364,7 +269,7 @@ namespace Chat_Virtual___Servidor {
         /// <summary>
         /// Metodo para hilo. Elimina todos los elementos de la tabla.
         /// </summary>
-        private void ClearTable() {
+        public void ClearTable() {
             if (this.GraphicInterface.UsersTable.InvokeRequired) {
                 DClearTable d = new DClearTable(this.ClearTable);
                 this.GraphicInterface.UsersTable.Invoke(d, null);
