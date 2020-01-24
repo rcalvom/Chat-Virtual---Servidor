@@ -129,32 +129,7 @@ namespace Chat_Virtual___Servidor {
                         Server.ConsoleAppend("El usuario [" + this.Name + " | " + IPAddress.Parse(((IPEndPoint)this.Client.Client.RemoteEndPoint).Address.ToString()) + "] se ha conectado satisfactoriamente.");
                         Server.InsertTable(this.Name, IPAddress.Parse(((IPEndPoint)this.Client.Client.RemoteEndPoint).Address.ToString()).ToString());
 
-                        Profile profile = new Profile();
-                        ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = '" + this.Name + "'");
-                        ServerConnection.Oracle.Oracle.DataReader.Read();
-                        string path = ServerConnection.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString();
-                        ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT ESTADO FROM USUARIOS WHERE USUARIO = '" + this.Name + "'");
-                        ServerConnection.Oracle.Oracle.DataReader.Read();
-                        string status = ServerConnection.Oracle.Oracle.DataReader["ESTADO"].ToString();
-                        using (FileStream stream = File.Open(path, FileMode.Open)) {
-                            profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
-                        }
-                        profile.Status = status;
-                        profile.Name = this.Name;
-                        this.WritingEnqueue(profile);
-
-                        TreeActivities tree = new TreeActivities();
-                        ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT RUTA_ARBOL FROM USUARIOS WHERE USUARIO = '" + this.Name + "'");
-                        ServerConnection.Oracle.Oracle.DataReader.Read();
-                        string treePath = ServerConnection.Oracle.Oracle.DataReader["RUTA_ARBOL"].ToString();
-                        if (treePath != "") {
-                            IFormatter formatter = new BinaryFormatter();
-                            using (FileStream stream = File.Open(treePath, FileMode.Open, FileAccess.Read)) {
-                                tree.Node = (TreeNode[])formatter.Deserialize(stream);
-                                stream.Close();
-                            }
-                            this.WritingEnqueue(tree);
-                        }
+                        Initialize();
                     } else {                                                                                        // Si la infomación de inicio de sesión es incorrecta.
                         this.WritingEnqueue(new RequestAnswer(false));
                         this.WritingEnqueue(new RequestError(1));
@@ -235,8 +210,6 @@ namespace Chat_Virtual___Servidor {
                     this.WritingEnqueue(ms);
                     theOther?.WritingEnqueue(ms);
                     Server.ConsoleAppend("Mensaje  [" + ms.Sender + "] a [" + ms.Receiver + "]: " + ms.Content);
-                } else if (Readed is ChatGroup group) {                                                     // Si se desea obtener la información de un grupo.
-
                 } else if (Readed is GroupMessage groupMessage) {                                           // Si se envía un mensaje en un grupo.
                                                                                                             //Carpeta: F:\\SADIRI\\MensajesGrupos\\
                 } else if (Readed is Profile profile) {                                                     // Si es un cambio de perfil.
@@ -295,11 +268,51 @@ namespace Chat_Virtual___Servidor {
                             }
                             Results.Add(Profile);
                         }
-                        this.WritingEnqueue(new ChatsResult(Results.ToArray()));
+                        this.WritingEnqueue(new UserList(SearchRequest.SearchUsers, Results.ToArray()));
                     } else if (search.ToSearch == ToSearch.Group) {
 
+                    } else if (search.ToSearch == ToSearch.NewGroup) {
+                        Oracle.Oracle.ExecuteSQL(
+                            "SELECT USUARIO, ESTADO, RUTA_FOTO " +
+                            "FROM USUARIOS " +
+                            "WHERE LOWER(USUARIO) != '" + search.StringToSearch.ToLower() + "'"); //Despues hay que cambiarlo a una busqueda entre amigos pero mientras no agreguemos amigos pues eso
+                        LinkedList<Profile> Results = new LinkedList<Profile>();
+                        while (Oracle.Oracle.DataReader.Read()) {
+                            Profile Profile = new Profile {
+                                Name = Oracle.Oracle.DataReader["USUARIO"].ToString(),
+                                Status = Oracle.Oracle.DataReader["ESTADO"].ToString()
+                            };
+                            using (FileStream stream = File.Open(Oracle.Oracle.DataReader["RUTA_FOTO"].ToString(), FileMode.Open)) {
+                                Profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
+                                stream.Close();
+                            }
+                            Results.Add(Profile);
+                        }
+                        this.WritingEnqueue(new UserList(SearchRequest.CreateGroup, Results.ToArray()));
+                    }
+                } else if (Readed is CreateGroup createGroup) { 
+                    ChatGroup chatGroup = new ChatGroup();
+                    Oracle.Oracle.ExecuteSQL("SELECT * " +
+                        "FROM GRUPOS " +
+                        "WHERE NOMBRE = '" + createGroup.Name + "' AND PROPIETARIO = '" + this.Name + "'");
+                    if (Oracle.Oracle.DataReader.Read()) {
+                        this.WritingEnqueue(new RequestError(2, "El grupo ya existe"));
+                        continue;
                     } else {
-
+                        chatGroup.Name = createGroup.Name;
+                        chatGroup.Description = createGroup.Description;
+                        chatGroup.Photo = createGroup.Photo;
+                    }
+                    Oracle.Oracle.ExecuteSQL("INSERT INTO GRUPOS VALUES(DEFAULT, " + createGroup.Name + ", " + this.Name + ", " + createGroup.Description + ")");
+                    Oracle.Oracle.ExecuteSQL("SELECT ID_GRUPO " +
+                        "FROM GRUPOS " +
+                        "WHERE NOMBRE = '" + createGroup.Name + "' AND PROPIETARIO = '" + this.Name + "'");
+                    if (Oracle.Oracle.DataReader.Read()) {
+                        chatGroup.IdGroup = int.Parse(Oracle.Oracle.DataReader["ID_GRUPO"].ToString());
+                    }
+                    for (int i = 0; i<createGroup.Members.Length; i++) {
+                        Oracle.Oracle.ExecuteSQL("INSERT INTO INTEGRANTES_GRUPO VALUES (" + chatGroup.IdGroup + ", " + createGroup.Members[i] + ")");
+                        ServerConnection.Users.Search(createGroup.Members[i]).WritingEnqueue(chatGroup);
                     }
                 }
                 Regulator.Release();
@@ -351,6 +364,43 @@ namespace Chat_Virtual___Servidor {
                 //this.ConsoleAppend("Se ha perdido la conexión con el usuario [" + user.Name + "] Intentando reconectar.");
                 return false;
             }
+        }
+
+        private void Initialize() {
+            //Enviar el perfil
+            Profile profile = new Profile();
+            ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT RUTA_FOTO FROM USUARIOS WHERE USUARIO = '" + this.Name + "'");
+            ServerConnection.Oracle.Oracle.DataReader.Read();
+            string path = ServerConnection.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString();
+            ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT ESTADO FROM USUARIOS WHERE USUARIO = '" + this.Name + "'");
+            ServerConnection.Oracle.Oracle.DataReader.Read();
+            string status = ServerConnection.Oracle.Oracle.DataReader["ESTADO"].ToString();
+            using (FileStream stream = File.Open(path, FileMode.Open)) {
+                profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
+            }
+            profile.Status = status;
+            profile.Name = this.Name;
+            this.WritingEnqueue(profile);
+
+            //Enviar el arbol
+            TreeActivities tree = new TreeActivities();
+            ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT RUTA_ARBOL FROM USUARIOS WHERE USUARIO = '" + this.Name + "'");
+            ServerConnection.Oracle.Oracle.DataReader.Read();
+            string treePath = ServerConnection.Oracle.Oracle.DataReader["RUTA_ARBOL"].ToString();
+            if (treePath != "") {
+                IFormatter formatter = new BinaryFormatter();
+                using (FileStream stream = File.Open(treePath, FileMode.Open, FileAccess.Read)) {
+                    tree.Node = (TreeNode[])formatter.Deserialize(stream);
+                    stream.Close();
+                }
+                this.WritingEnqueue(tree);
+            }
+
+            //Enviar los grupos
+            //Enviar los 10 mensajes mas recientes que se vieron y todos los que no se han visto en el grupo
+
+            //Enviar los chats
+            //Enviar los 10 mensajes mas recientes que se vieron y todos los que no se han visto en un chat
         }
     }
 }
