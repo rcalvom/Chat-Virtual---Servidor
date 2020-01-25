@@ -303,7 +303,7 @@ namespace Chat_Virtual___Servidor {
                         chatGroup.Description = createGroup.Description;
                         chatGroup.Photo = createGroup.Photo;
                     }
-                    Oracle.Oracle.ExecuteSQL("INSERT INTO GRUPOS VALUES(DEFAULT, " + createGroup.Name + ", " + this.Name + ", " + createGroup.Description + ")");
+                    Oracle.Oracle.ExecuteSQL("INSERT INTO GRUPOS VALUES(DEFAULT, '" + createGroup.Name + "', '" + this.Name + "', '" + createGroup.Description + "')");
                     Oracle.Oracle.ExecuteSQL("SELECT ID_GRUPO " +
                         "FROM GRUPOS " +
                         "WHERE NOMBRE = '" + createGroup.Name + "' AND PROPIETARIO = '" + this.Name + "'");
@@ -311,8 +311,8 @@ namespace Chat_Virtual___Servidor {
                         chatGroup.IdGroup = int.Parse(Oracle.Oracle.DataReader["ID_GRUPO"].ToString());
                     }
                     for (int i = 0; i<createGroup.Members.Length; i++) {
-                        Oracle.Oracle.ExecuteSQL("INSERT INTO INTEGRANTES_GRUPO VALUES (" + chatGroup.IdGroup + ", " + createGroup.Members[i] + ")");
-                        ServerConnection.Users.Search(createGroup.Members[i]).WritingEnqueue(chatGroup);
+                        Oracle.Oracle.ExecuteSQL("INSERT INTO INTEGRANTES_GRUPO VALUES ('" + chatGroup.IdGroup + "', '" + createGroup.Members[i] + "')");
+                        ServerConnection.Users.Search(createGroup.Members[i])?.WritingEnqueue(chatGroup);
                     }
                 }
                 Regulator.Release();
