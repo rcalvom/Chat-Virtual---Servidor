@@ -211,6 +211,10 @@ namespace Chat_Virtual___Servidor {
                     theOther?.WritingEnqueue(ms);
                     Server.ConsoleAppend("Mensaje  [" + ms.Sender + "] a [" + ms.Receiver + "]: " + ms.Content);
                 } else if (Readed is GroupMessage groupMessage) {                                           // Si se envía un mensaje en un grupo.
+                    Oracle.Oracle.ExecuteSQL("SELECT USUARIO FROM INTEGRANTES_GRUPO WHERE ID_GRUPO = '" + groupMessage.IdGroupReceiver + "'");
+                    while (Oracle.Oracle.DataReader.Read()) {
+                        ServerConnection.Users.Search(Oracle.Oracle.DataReader["USUARIO"].ToString()).WritingEnqueue(groupMessage);
+                    }
                                                                                                             //Carpeta: F:\\SADIRI\\MensajesGrupos\\
                 } else if (Readed is Profile profile) {                                                     // Si es un cambio de perfil.
                     if (profile.Status != null) {
@@ -262,6 +266,8 @@ namespace Chat_Virtual___Servidor {
                                 Name = Oracle.Oracle.DataReader["USUARIO"].ToString(),
                                 Status = Oracle.Oracle.DataReader["ESTADO"].ToString()
                             };
+                            if (Profile.Name.Equals(this.Name))
+                                continue;
                             using (FileStream stream = File.Open(Oracle.Oracle.DataReader["RUTA_FOTO"].ToString(), FileMode.Open)) {
                                 Profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
                                 stream.Close();
