@@ -207,6 +207,12 @@ namespace Chat_Virtual___Servidor {
                     } else {
                         theOther = ServerConnection.Users.Search(ms.Sender);
                     }
+
+                    if(theOther.Name.CompareTo(this.Name) < 0) {
+                        Oracle.Oracle.ExecuteSQL("INSERT INTO CHAT VALUES ('" + theOther.Name + "', '" + this.Name + "')");
+                    } else {
+                        Oracle.Oracle.ExecuteSQL("INSERT INTO CHAT VALUES ('" + this.Name + "', '" + theOther.Name + "')");
+                    }
                     this.WritingEnqueue(ms);
                     theOther?.WritingEnqueue(ms);
                     Server.ConsoleAppend("Mensaje  [" + ms.Sender + "] a [" + ms.Receiver + "]: " + ms.Content);
@@ -327,8 +333,8 @@ namespace Chat_Virtual___Servidor {
 
 
 
-        /// <summary>
-        /// Escribe los datos que esten pendientes en la cola WritingQueue de un ususario.
+        /// <summary>        /// Escribe los datos que esten pendientes en la cola WritingQueue de un ususario.
+
         /// </summary>
         /// <param name="user">El ususario del que se van a intentar escribir los datos.</param>
         /// <returns>Verdadero si los datos fueron enviados, falso si almenos uno falló.</returns>
@@ -387,6 +393,7 @@ namespace Chat_Virtual___Servidor {
             profile.Status = status;
             profile.Name = this.Name;
             this.WritingEnqueue(profile);
+            profile = null;
 
             //Enviar el arbol
             TreeActivities tree = new TreeActivities();
@@ -401,11 +408,35 @@ namespace Chat_Virtual___Servidor {
                 }
                 this.WritingEnqueue(tree);
             }
+            tree = null; treePath = null;
 
             //Enviar los grupos
+            ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT * FROM GRUPOS WHERE ID_GRUPO IN (SELECT ID_GRUPO FROM INTEGRANTES_GRUPO WHERE USUARIO = '" + this.Name + "')");
+            while (ServerConnection.Oracle.Oracle.DataReader.Read()) {
+                ChatGroup group = new ChatGroup();
+                group.IdGroup = int.Parse(ServerConnection.Oracle.Oracle.DataReader["ID_GRUPO"].ToString());
+                group.Name = ServerConnection.Oracle.Oracle.DataReader["NOMBRE"].ToString();
+                ServerConnection.Oracle.Oracle.DataReader["DESCRIPCION"].ToString();
+                this.WritingEnqueue(group);
+            }
             //Enviar los 10 mensajes mas recientes que se vieron y todos los que no se han visto en el grupo
 
             //Enviar los chats
+            ServerConnection.Oracle.Oracle.ExecuteSQL("SELECT USUARIO, ESTADO, RUTA_FOTO " +
+                            "FROM USUARIOS " +
+                            "WHERE USUARIO IN (SELECT USUARIO1 FROM CHAT WHERE USUARIO2 = '" + this.Name + "' UNION SELECT USUARIO2 FROM CHAT WHERE USUARIO1 = '" + this.Name + "')");
+
+            while (ServerConnection.Oracle.Oracle.DataReader.Read()) {
+                Profile Profile = new Profile {
+                    Name = ServerConnection.Oracle.Oracle.DataReader["USUARIO"].ToString(),
+                    Status = ServerConnection.Oracle.Oracle.DataReader["ESTADO"].ToString()
+                };
+                using (FileStream stream = File.Open(ServerConnection.Oracle.Oracle.DataReader["RUTA_FOTO"].ToString(), FileMode.Open)) {
+                    Profile.Image = Serializer.SerializeImage(Image.FromStream(stream));
+                    stream.Close();
+                }
+                this.WritingEnqueue(new Chat(this.Name, Profile));
+            }
             //Enviar los 10 mensajes mas recientes que se vieron y todos los que no se han visto en un chat
         }
     }
